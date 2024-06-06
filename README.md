@@ -45,7 +45,7 @@ Subsequently, the evaluation results are calculated by querying the most recent 
 We present ESOT500, a new dataset for event-based VOT, featuring time-aligned and high-frequency annotations, designed to support STARE’s stringent real-time criteria.
 <!-- The dataset consists of a high-frequency annotated subset **EventSOT-H** and a more challenging subset **EventSOT-C** labeled at normal frequency, both time-aligned. -->
 
-- Download **EventSOT-H** from [[OneDrive]](https://tongjieducn-my.sharepoint.com/:f:/g/personal/2131522_tongji_edu_cn/Eis8Aq1_rSxOgNbeQfzOSaQBKs7R5A1hAPHjLO7pTXzbcg?e=oeMNfE)
+- Download **ESOT500** from [[OneDrive]](https://tongjieducn-my.sharepoint.com/:f:/g/personal/2131522_tongji_edu_cn/Eis8Aq1_rSxOgNbeQfzOSaQBKs7R5A1hAPHjLO7pTXzbcg?e=oeMNfE)
 
 - The aedat4 directory contains the raw event data (event stream and corresponding RGB frames), the [DV](https://inivation.gitlab.io/dv/dv-docs/docs/getting-started.html) and [dv-python](https://gitlab.com/inivation/dv/dv-python) is recommended for visualization and processing in python respectively.
 
