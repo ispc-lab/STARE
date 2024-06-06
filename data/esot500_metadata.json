@@ -1,0 +1,61 @@
+{
+    "@type": "sc:Dataset",
+    "name": "ESOT500",
+    "description": "A new dataset for event-based VOT, featuring time-aligned and high-frequency annotations",
+    "license": "https://opensource.org/licenses/Apache-2.0",
+    "url": "https://tongjieducn-my.sharepoint.com/personal/2131522_tongji_edu_cn/_layouts/15/onedrive.aspx?ga=1&id=%2Fpersonal%2F2131522%5Ftongji%5Fedu%5Fcn%2FDocuments%2FEventSOT%2FEventSOT%2DH",
+    "version": "1.0.0",
+    "authors": [
+        {
+            "name": "Chu Yang",
+            "email": "2131522@tongji.edu.cn"
+        }
+    ],
+    "distribution": [
+        {
+            "@type": "cr:FileObject",
+            "@id": "eventsot_data.csv",
+            "name": "eventsot_data.csv",
+            "contentUrl": "data/eventsot_data.csv",
+            "encodingFormat": "text/csv",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+    ],
+    "recordSet": [
+        {
+            "@type": "cr:RecordSet",
+            "name": "examples",
+            "description": "Records extracted from the example table, with their schema.",
+            "field": [
+                {
+                    "@type": "cr:Field",
+                    "name": "name",
+                    "description": "The first column contains the name.",
+                    "dataType": "sc:Text",
+                    "references": {
+                        "fileObject": {
+                            "@id": "eventsot_data.csv"
+                        },
+                        "extract": {
+                            "column": "name"
+                        }
+                    }
+                },
+                {
+                    "@type": "cr:Field",
+                    "name": "age",
+                    "description": "The second column contains the age.",
+                    "dataType": "sc:Integer",
+                    "references": {
+                        "fileObject": {
+                            "@id": "eventsot_data.csv"
+                        },
+                        "extract": {
+                            "column": "age"
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}
