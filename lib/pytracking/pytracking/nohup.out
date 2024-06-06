@@ -1,0 +1,484 @@
+Running:  JieChuExp  streaming_transfered_current  with Streaming setting 31
+Evaluating    2 trackers on    32 sequences
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: airplane5_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/airplane5.aedat4
+Using /home/test4/.cache/torch_extensions/py38_cu113 as PyTorch extensions root...
+Detected CUDA files, patching ldflags
+Emitting ninja build file /home/test4/.cache/torch_extensions/py38_cu113/_prroi_pooling/build.ninja...
+Building extension module _prroi_pooling...
+Allowing ninja to set a default number of workers... (overridable by setting the environment variable MAX_JOBS=N)
+/usr/local/anaconda3/envs/ebench/lib/python3.8/site-packages/torch/nn/functional.py:3631: UserWarning: Default upsampling behavior when mode=bilinear is changed to align_corners=False since 0.4.0. Please specify align_corners=True if the old behavior is desired. See the documentation of nn.Upsample for details.
+  warnings.warn(
+ninja: no work to do.
+Loading extension module _prroi_pooling...
+Average runtime: 133.4542934390129 ms, FPS: 7.493202161060398
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: airplane5_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/airplane5.aedat4
+using lin_sine as positional encoding
+Average runtime: 51.8102049490901 ms, FPS: 19.301216835228175
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: animal2_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/animal2.aedat4
+Average runtime: 35.46792677919204 ms, FPS: 28.19448698610345
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: animal2_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/animal2.aedat4
+using lin_sine as positional encoding
+Average runtime: 46.035401413821106 ms, FPS: 21.72241295369203
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: bag6_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/bag6.aedat4
+Average runtime: 51.51565174818876 ms, FPS: 19.411576211595907
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: bag6_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/bag6.aedat4
+using lin_sine as positional encoding
+Average runtime: 46.88109717193363 ms, FPS: 21.3305588035314
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: ball15_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/ball15.aedat4
+Average runtime: 35.05738846415314 ms, FPS: 28.52465753467402
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: ball15_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/ball15.aedat4
+using lin_sine as positional encoding
+Average runtime: 46.15912320889559 ms, FPS: 21.66418966570154
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: bike8_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/bike8.aedat4
+Average runtime: 44.462844482135054 ms, FPS: 22.490688835749026
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: bike8_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/bike8.aedat4
+using lin_sine as positional encoding
+Average runtime: 45.93565777677298 ms, FPS: 21.769580504530023
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: book3_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/book3.aedat4
+Average runtime: 38.944331528082124 ms, FPS: 25.677677874093597
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: book3_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/book3.aedat4
+using lin_sine as positional encoding
+Average runtime: 58.88766575559273 ms, FPS: 16.981484784103998
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: book13_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/book13.aedat4
+Average runtime: 37.45080530621775 ms, FPS: 26.701695512912654
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: book13_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/book13.aedat4
+using lin_sine as positional encoding
+Average runtime: 49.15682286856515 ms, FPS: 20.343055991917673
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: box6_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/box6.aedat4
+Average runtime: 32.881606082396075 ms, FPS: 30.412139768786204
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: box6_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/box6.aedat4
+using lin_sine as positional encoding
+Average runtime: 53.48960646848066 ms, FPS: 18.695220735812686
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: cap8_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/cap8.aedat4
+Average runtime: 29.565408983444588 ms, FPS: 33.82331022581013
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: cap8_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/cap8.aedat4
+using lin_sine as positional encoding
+Average runtime: 50.08379255833902 ms, FPS: 19.96653905223275
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: car14_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/car14.aedat4
+Average runtime: 45.20196745775011 ms, FPS: 22.12293084221813
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: car14_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/car14.aedat4
+using lin_sine as positional encoding
+Average runtime: 55.697985812531215 ms, FPS: 17.953970604355586
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: car24_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/car24.aedat4
+Average runtime: 42.45864627378383 ms, FPS: 23.55232886022209
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: car24_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/car24.aedat4
+using lin_sine as positional encoding
+Average runtime: 51.19234440780341 ms, FPS: 19.53417081339152
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: car33_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/car33.aedat4
+Average runtime: 45.87534288701144 ms, FPS: 21.798202194650564
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: car33_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/car33.aedat4
+using lin_sine as positional encoding
+Average runtime: 51.03782693135238 ms, FPS: 19.593310689834702
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: car40_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/car40.aedat4
+Average runtime: 38.47315185256004 ms, FPS: 25.99215171744394
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: car40_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/car40.aedat4
+using lin_sine as positional encoding
+Average runtime: 55.31090396613043 ms, FPS: 18.079617729848508
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: cup10_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/cup10.aedat4
+Average runtime: 45.62859700909783 ms, FPS: 21.916080387056635
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: cup10_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/cup10.aedat4
+using lin_sine as positional encoding
+Average runtime: 47.20127864154318 ms, FPS: 21.18586675573385
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: extra8_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/extra8.aedat4
+Average runtime: 42.12845920304649 ms, FPS: 23.736923184878446
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: extra8_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/extra8.aedat4
+using lin_sine as positional encoding
+Average runtime: 48.832215830701465 ms, FPS: 20.47828432498217
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: extra9_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/extra9.aedat4
+Average runtime: 30.933400868062225 ms, FPS: 32.3275156283404
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: extra9_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/extra9.aedat4
+using lin_sine as positional encoding
+Average runtime: 50.64774512257707 ms, FPS: 19.744215612754562
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: flag3_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/flag3.aedat4
+Average runtime: 38.36004786194384 ms, FPS: 26.068789163114626
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: flag3_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/flag3.aedat4
+using lin_sine as positional encoding
+Average runtime: 44.901715786006534 ms, FPS: 22.27086387446349
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: fruit3_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/fruit3.aedat4
+Average runtime: 30.391490381354256 ms, FPS: 32.9039473698703
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: fruit3_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/fruit3.aedat4
+using lin_sine as positional encoding
+Average runtime: 54.86712222647318 ms, FPS: 18.225851100269733
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: fruit8_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/fruit8.aedat4
+Average runtime: 40.54423927767684 ms, FPS: 24.66441639590924
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: fruit8_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/fruit8.aedat4
+using lin_sine as positional encoding
+Average runtime: 44.53230975551031 ms, FPS: 22.45560595195183
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: glasses5_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/glasses5.aedat4
+Average runtime: 33.91620769348954 ms, FPS: 29.484428478481018
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: glasses5_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/glasses5.aedat4
+using lin_sine as positional encoding
+Average runtime: 45.179070187497395 ms, FPS: 22.134142996965316
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: glow8_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/glow8.aedat4
+Average runtime: 47.8935132408896 ms, FPS: 20.879654306634563
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: glow8_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/glow8.aedat4
+using lin_sine as positional encoding
+Average runtime: 49.96504164500295 ms, FPS: 20.01399312553182
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: hand12_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/hand12.aedat4
+Average runtime: 31.7078903543145 ms, FPS: 31.537891320604047
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: hand12_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/hand12.aedat4
+using lin_sine as positional encoding
+Average runtime: 44.37747962674228 ms, FPS: 22.533952094868198
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: head6_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/head6.aedat4
+Average runtime: 28.159985939062913 ms, FPS: 35.51138136801489
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: head6_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/head6.aedat4
+using lin_sine as positional encoding
+Average runtime: 47.05666791086544 ms, FPS: 21.250973441090135
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: human24_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/human24.aedat4
+Average runtime: 34.58599161316513 ms, FPS: 28.91344019233934
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: human24_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/human24.aedat4
+using lin_sine as positional encoding
+Average runtime: 44.765840395747865 ms, FPS: 22.3384614509546
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: human33_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/human33.aedat4
+Average runtime: 35.0933781923193 ms, FPS: 28.495404304475443
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: human33_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/human33.aedat4
+using lin_sine as positional encoding
+Average runtime: 45.40705128202131 ms, FPS: 22.023011223279873
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: human43_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/human43.aedat4
+Average runtime: 31.07952778897711 ms, FPS: 32.175521030749614
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: human43_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/human43.aedat4
+using lin_sine as positional encoding
+Average runtime: 41.92972079235258 ms, FPS: 23.849431408147762
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: human49_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/human49.aedat4
+Average runtime: 46.472494353301336 ms, FPS: 21.518104717978442
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: human49_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/human49.aedat4
+using lin_sine as positional encoding
+Average runtime: 45.82366799218706 ms, FPS: 21.82278381055179
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: logo14_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/logo14.aedat4
+Average runtime: 33.76662600977777 ms, FPS: 29.61504059394122
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: logo14_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/logo14.aedat4
+using lin_sine as positional encoding
+Average runtime: 62.31459414431514 ms, FPS: 16.047605119341508
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: object3_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/object3.aedat4
+Average runtime: 35.82568841620364 ms, FPS: 27.912931871190754
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: object3_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/object3.aedat4
+using lin_sine as positional encoding
+Average runtime: 52.55166629731606 ms, FPS: 19.02889233506707
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: plant6_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/plant6.aedat4
+Average runtime: 30.10424276056095 ms, FPS: 33.217909115125885
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: plant6_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/plant6.aedat4
+using lin_sine as positional encoding
+Average runtime: 52.594755995614186 ms, FPS: 19.013302392417007
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: scissor2_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/scissor2.aedat4
+Average runtime: 45.46689421707095 ms, FPS: 21.994024822230788
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: scissor2_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/scissor2.aedat4
+using lin_sine as positional encoding
+Average runtime: 49.88670974318186 ms, FPS: 20.045419013361016
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: umbrella3_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/umbrella3.aedat4
+Average runtime: 30.521592268513793 ms, FPS: 32.76369041308518
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: umbrella3_s, Stream setting: 31 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/umbrella3.aedat4
+using lin_sine as positional encoding
+/usr/local/anaconda3/envs/ebench/lib/python3.8/site-packages/torch/nn/functional.py:3631: UserWarning: Default upsampling behavior when mode=bilinear is changed to align_corners=False since 0.4.0. Please specify align_corners=True if the old behavior is desired. See the documentation of nn.Upsample for details.
+  warnings.warn(
+/home/test4/code/EventBenchmark/lib/pytracking/pytracking/../pytracking/features/preprocessing.py:119: UserWarning: __floordiv__ is deprecated, and its behavior will change in a future version of pytorch. It currently rounds toward 0 (like the 'trunc' function NOT 'floor'). This results in incorrect rounding for negative values. To keep the current behavior, use torch.div(a, b, rounding_mode='trunc'), or for actual floor division, use torch.div(a, b, rounding_mode='floor').
+  outside = ((-tl).clamp(0) + (br - im2_sz).clamp(0)) // 2
+/usr/local/anaconda3/envs/ebench/lib/python3.8/site-packages/torch/functional.py:445: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at  /opt/conda/conda-bld/pytorch_1634272068694/work/aten/src/ATen/native/TensorShape.cpp:2157.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+Average runtime: 52.63123548769744 ms, FPS: 19.00012398975035
+Done
+Running:  JieChuExp  streaming_transfered_current  with Streaming setting 15
+Evaluating    2 trackers on    32 sequences
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: airplane5_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/airplane5.aedat4
+Using /home/test4/.cache/torch_extensions/py38_cu113 as PyTorch extensions root...
+Detected CUDA files, patching ldflags
+Emitting ninja build file /home/test4/.cache/torch_extensions/py38_cu113/_prroi_pooling/build.ninja...
+Building extension module _prroi_pooling...
+Allowing ninja to set a default number of workers... (overridable by setting the environment variable MAX_JOBS=N)
+/usr/local/anaconda3/envs/ebench/lib/python3.8/site-packages/torch/nn/functional.py:3631: UserWarning: Default upsampling behavior when mode=bilinear is changed to align_corners=False since 0.4.0. Please specify align_corners=True if the old behavior is desired. See the documentation of nn.Upsample for details.
+  warnings.warn(
+ninja: no work to do.
+Loading extension module _prroi_pooling...
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: airplane5_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/airplane5.aedat4
+using lin_sine as positional encoding
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: animal2_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/animal2.aedat4
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: animal2_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/animal2.aedat4
+using lin_sine as positional encoding
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: bag6_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/bag6.aedat4
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: bag6_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/bag6.aedat4
+using lin_sine as positional encoding
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: ball15_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/ball15.aedat4
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: ball15_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/ball15.aedat4
+using lin_sine as positional encoding
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: bike8_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/bike8.aedat4
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: bike8_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/bike8.aedat4
+using lin_sine as positional encoding
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: book3_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/book3.aedat4
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: book3_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/book3.aedat4
+using lin_sine as positional encoding
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: book13_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/book13.aedat4
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: book13_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/book13.aedat4
+using lin_sine as positional encoding
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: box6_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/box6.aedat4
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: box6_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/box6.aedat4
+using lin_sine as positional encoding
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: cap8_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/cap8.aedat4
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: cap8_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/cap8.aedat4
+using lin_sine as positional encoding
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: car14_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/car14.aedat4
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: car14_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/car14.aedat4
+using lin_sine as positional encoding
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: car24_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/car24.aedat4
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: car24_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/car24.aedat4
+using lin_sine as positional encoding
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: car33_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/car33.aedat4
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: car33_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/car33.aedat4
+using lin_sine as positional encoding
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: car40_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/car40.aedat4
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: car40_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/car40.aedat4
+using lin_sine as positional encoding
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: cup10_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/cup10.aedat4
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: cup10_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/cup10.aedat4
+using lin_sine as positional encoding
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: extra8_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/extra8.aedat4
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: extra8_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/extra8.aedat4
+using lin_sine as positional encoding
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: extra9_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/extra9.aedat4
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: extra9_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/extra9.aedat4
+using lin_sine as positional encoding
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: flag3_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/flag3.aedat4
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: flag3_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/flag3.aedat4
+using lin_sine as positional encoding
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: fruit3_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/fruit3.aedat4
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: fruit3_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/fruit3.aedat4
+using lin_sine as positional encoding
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: fruit8_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/fruit8.aedat4
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: fruit8_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/fruit8.aedat4
+using lin_sine as positional encoding
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: glasses5_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/glasses5.aedat4
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: glasses5_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/glasses5.aedat4
+using lin_sine as positional encoding
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: glow8_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/glow8.aedat4
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: glow8_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/glow8.aedat4
+using lin_sine as positional encoding
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: hand12_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/hand12.aedat4
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: hand12_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/hand12.aedat4
+using lin_sine as positional encoding
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: head6_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/head6.aedat4
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: head6_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/head6.aedat4
+using lin_sine as positional encoding
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: human24_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/human24.aedat4
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: human24_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/human24.aedat4
+using lin_sine as positional encoding
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: human33_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/human33.aedat4
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: human33_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/human33.aedat4
+using lin_sine as positional encoding
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: human43_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/human43.aedat4
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: human43_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/human43.aedat4
+using lin_sine as positional encoding
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: human49_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/human49.aedat4
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: human49_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/human49.aedat4
+using lin_sine as positional encoding
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: logo14_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/logo14.aedat4
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: logo14_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/logo14.aedat4
+using lin_sine as positional encoding
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: object3_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/object3.aedat4
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: object3_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/object3.aedat4
+using lin_sine as positional encoding
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: plant6_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/plant6.aedat4
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: plant6_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/plant6.aedat4
+using lin_sine as positional encoding
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: scissor2_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/scissor2.aedat4
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: scissor2_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/scissor2.aedat4
+using lin_sine as positional encoding
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: dimp JieChu_dimp50_esot500 None ,  Sequence: umbrella3_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/umbrella3.aedat4
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Tracker: tomp JieChu_tomp50_esot500 None ,  Sequence: umbrella3_s, Stream setting: 15 
+Processing: /home/test4/code/EventBenchmark/data/EventSOT500/aedat4/umbrella3.aedat4
+using lin_sine as positional encoding
+/usr/local/anaconda3/envs/ebench/lib/python3.8/site-packages/torch/nn/functional.py:3631: UserWarning: Default upsampling behavior when mode=bilinear is changed to align_corners=False since 0.4.0. Please specify align_corners=True if the old behavior is desired. See the documentation of nn.Upsample for details.
+  warnings.warn(
+/home/test4/code/EventBenchmark/lib/pytracking/pytracking/../pytracking/features/preprocessing.py:119: UserWarning: __floordiv__ is deprecated, and its behavior will change in a future version of pytorch. It currently rounds toward 0 (like the 'trunc' function NOT 'floor'). This results in incorrect rounding for negative values. To keep the current behavior, use torch.div(a, b, rounding_mode='trunc'), or for actual floor division, use torch.div(a, b, rounding_mode='floor').
+  outside = ((-tl).clamp(0) + (br - im2_sz).clamp(0)) // 2
+/usr/local/anaconda3/envs/ebench/lib/python3.8/site-packages/torch/functional.py:445: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at  /opt/conda/conda-bld/pytorch_1634272068694/work/aten/src/ATen/native/TensorShape.cpp:2157.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+Average runtime: 33.0 ms, FPS: 30.303030303030305
+Done

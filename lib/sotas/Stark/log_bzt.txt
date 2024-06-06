@@ -1,0 +1,15 @@
+#items added by bzt
+lib/test/evaluation add some U and M local.py
+download checkpoints
+
+lib/train/admin   data   dataset
+
+python EventBenchmark/lib/sotas/Stark/tracking/test.py stark_s baseline --dataset esot_500_20
+若toechvision >= 0.4 , 则需要将from torchvision.models.utils import load_state_dict_from_url 改成 from torch.hub import load_state_dict_from_url 即可。
+pip install yacs
+
+esot500Streamdataset.py line 34 anno_path = '{}500/{}/groundtruth.txt'.format(self.base_path, sequence_name) ; 
+line38 frames_path = '{}500/{}/{}'.format(self.base_path, sequence_name,'VoxelGridComplex')
+
+##mixformer  pip install einops
+experiment  ... baseline.yaml 需要更改不同数据集的各种属性，如ONLINE_SIZE
