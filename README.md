@@ -47,9 +47,11 @@ We present ESOT500, a new dataset for event-based VOT, featuring time-aligned an
 
 - Download **ESOT500** from [[OneDrive]](https://tongjieducn-my.sharepoint.com/:f:/g/personal/2131522_tongji_edu_cn/Eis8Aq1_rSxOgNbeQfzOSaQBKs7R5A1hAPHjLO7pTXzbcg?e=oeMNfE)
 
-- Download the challange sequence of ESOT500 from [[Google Drive]](https://drive.google.com/drive/folders/1MnbPJGrhZL8kopisFEta9AWhFnA-Lbav?usp=sharing) for testing our tracker enhancement
+- Download the **challange sequence** of ESOT500 from [[Google Drive]](https://drive.google.com/drive/folders/1MnbPJGrhZL8kopisFEta9AWhFnA-Lbav?usp=sharing) for testing our tracker enhancement
 
 - The aedat4 directory contains the raw event data (event stream and corresponding RGB frames), the [DV](https://inivation.gitlab.io/dv/dv-docs/docs/getting-started.html) and [dv-python](https://gitlab.com/inivation/dv/dv-python) is recommended for visualization and processing in python respectively.
+
+- You can find the metadata file at 'data/esot500_metadata.json'
 
 <!-- <img src="img/esot2_examples.png" width=65%> -->
 
