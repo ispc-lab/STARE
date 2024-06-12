@@ -45,13 +45,13 @@ Subsequently, the evaluation results are calculated by querying the most recent 
 We present ESOT500, a new dataset for event-based VOT, featuring time-aligned and high-frequency annotations, designed to support STARE’s stringent real-time criteria.
 <!-- The dataset consists of a high-frequency annotated subset **EventSOT-H** and a more challenging subset **EventSOT-C** labeled at normal frequency, both time-aligned. -->
 
-- Download **ESOT500** from [[OneDrive]](https://tongjieducn-my.sharepoint.com/personal/2131522_tongji_edu_cn/_layouts/15/onedrive.aspx?ga=1&id=%2Fpersonal%2F2131522%5Ftongji%5Fedu%5Fcn%2FDocuments%2FEventSOT%2FEventSOT%2DH)
+- Download **ESOT500** from [[OneDrive]](https://tongjieducn-my.sharepoint.com/personal/2131522_tongji_edu_cn/_layouts/15/onedrive.aspx?ga=1&id=%2Fpersonal%2F2131522%5Ftongji%5Fedu%5Fcn%2FDocuments%2FEventSOT%2FEventSOT%2DH).
 
-- Download the **challange sequence** of ESOT500 from [[Google Drive]](https://drive.google.com/drive/folders/1MnbPJGrhZL8kopisFEta9AWhFnA-Lbav?usp=sharing) for testing our tracker enhancement
+- Download the **challange sequence** of ESOT500 from [[Google Drive]](https://drive.google.com/drive/folders/1MnbPJGrhZL8kopisFEta9AWhFnA-Lbav?usp=sharing) for testing our tracker enhancement.
 
 - The aedat4 directory contains the raw event data (event stream and corresponding RGB frames), the [DV](https://inivation.gitlab.io/dv/dv-docs/docs/getting-started.html) and [dv-python](https://gitlab.com/inivation/dv/dv-python) is recommended for visualization and processing in python respectively.
 
-- You can find the metadata file at 'data/esot500_metadata.json'
+- You can find the metadata file at `data/esot500_metadata.json`, or download it from our dataset page in [Hugging face](https://huggingface.co/datasets/NoRealBlank/ESOT500).
 
 <!-- <img src="img/esot2_examples.png" width=65%> -->
 
