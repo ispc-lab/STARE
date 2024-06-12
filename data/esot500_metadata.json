@@ -1,61 +1,111 @@
 {
+    "@context": {
+        "@language": "en",
+        "@vocab": "https://schema.org/",
+        "citeAs": "cr:citeAs",
+        "column": "cr:column",
+        "conformsTo": "dct:conformsTo",
+        "cr": "http://mlcommons.org/croissant/",
+        "data": {
+            "@id": "cr:data",
+            "@type": "@json"
+        },
+        "dataBiases": "cr:dataBiases",
+        "dataCollection": "cr:dataCollection",
+        "dataType": {
+            "@id": "cr:dataType",
+            "@type": "@vocab"
+        },
+        "dct": "http://purl.org/dc/terms/",
+        "extract": "cr:extract",
+        "field": "cr:field",
+        "fileProperty": "cr:fileProperty",
+        "fileObject": "cr:fileObject",
+        "fileSet": "cr:fileSet",
+        "format": "cr:format",
+        "includes": "cr:includes",
+        "isLiveDataset": "cr:isLiveDataset",
+        "jsonPath": "cr:jsonPath",
+        "key": "cr:key",
+        "md5": "cr:md5",
+        "parentField": "cr:parentField",
+        "path": "cr:path",
+        "personalSensitiveInformation": "cr:personalSensitiveInformation",
+        "recordSet": "cr:recordSet",
+        "references": "cr:references",
+        "regex": "cr:regex",
+        "repeated": "cr:repeated",
+        "replace": "cr:replace",
+        "sc": "https://schema.org/",
+        "separator": "cr:separator",
+        "source": "cr:source",
+        "subField": "cr:subField",
+        "transform": "cr:transform"
+    },
     "@type": "sc:Dataset",
-    "name": "ESOT500",
-    "description": "A new dataset for event-based VOT, featuring time-aligned and high-frequency annotations",
-    "license": "https://opensource.org/licenses/Apache-2.0",
-    "url": "https://tongjieducn-my.sharepoint.com/personal/2131522_tongji_edu_cn/_layouts/15/onedrive.aspx?ga=1&id=%2Fpersonal%2F2131522%5Ftongji%5Fedu%5Fcn%2FDocuments%2FEventSOT%2FEventSOT%2DH",
-    "version": "1.0.0",
-    "authors": [
-        {
-            "name": "Chu Yang",
-            "email": "2131522@tongji.edu.cn"
-        }
-    ],
     "distribution": [
         {
             "@type": "cr:FileObject",
-            "@id": "eventsot_data.csv",
-            "name": "eventsot_data.csv",
-            "contentUrl": "data/eventsot_data.csv",
-            "encodingFormat": "text/csv",
-            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            "@id": "repo",
+            "name": "repo",
+            "description": "The Hugging Face git repository.",
+            "contentUrl": "https://huggingface.co/datasets/NoRealBlank/ESOT500/tree/refs%2Fconvert%2Fparquet",
+            "encodingFormat": "git+https",
+            "sha256": "https://github.com/mlcommons/croissant/issues/80"
+        },
+        {
+            "@type": "cr:FileSet",
+            "@id": "parquet-files-for-config-default",
+            "name": "parquet-files-for-config-default",
+            "description": "The underlying Parquet files as converted by Hugging Face (see: https://huggingface.co/docs/datasets-server/parquet).",
+            "containedIn": {
+                "@id": "repo"
+            },
+            "encodingFormat": "application/x-parquet",
+            "includes": "default/*/*.parquet"
         }
     ],
     "recordSet": [
         {
             "@type": "cr:RecordSet",
-            "name": "examples",
-            "description": "Records extracted from the example table, with their schema.",
+            "@id": "default",
+            "name": "default",
+            "description": "NoRealBlank/ESOT500 - 'default' subset\n\nAdditional information:\n- 3 splits: train, test, challenge_sparse\n- 1 skipped column: bbox",
             "field": [
                 {
                     "@type": "cr:Field",
-                    "name": "name",
-                    "description": "The first column contains the name.",
+                    "@id": "default/seq_id",
+                    "name": "default/seq_id",
+                    "description": "Column 'seq_id' from the Hugging Face parquet file.",
                     "dataType": "sc:Text",
-                    "references": {
-                        "fileObject": {
-                            "@id": "eventsot_data.csv"
+                    "source": {
+                        "fileSet": {
+                            "@id": "parquet-files-for-config-default"
                         },
                         "extract": {
-                            "column": "name"
-                        }
-                    }
-                },
-                {
-                    "@type": "cr:Field",
-                    "name": "age",
-                    "description": "The second column contains the age.",
-                    "dataType": "sc:Integer",
-                    "references": {
-                        "fileObject": {
-                            "@id": "eventsot_data.csv"
-                        },
-                        "extract": {
-                            "column": "age"
+                            "column": "seq_id"
                         }
                     }
                 }
             ]
         }
-    ]
+    ],
+    "conformsTo": "http://mlcommons.org/croissant/1.0",
+    "name": "ESOT500",
+    "description": "NoRealBlank/ESOT500 dataset hosted on Hugging Face and contributed by the HF Datasets community",
+    "alternateName": [
+        "NoRealBlank/ESOT500"
+    ],
+    "creator": {
+        "@type": "Person",
+        "name": "Runze Zhang",
+        "url": "https://huggingface.co/NoRealBlank"
+    },
+    "keywords": [
+        "cc-by-4.0",
+        "Croissant",
+        "🇺🇸 Region: US"
+    ],
+    "license": "https://choosealicense.com/licenses/cc-by-4.0/",
+    "url": "https://huggingface.co/datasets/NoRealBlank/ESOT500"
 }
