@@ -51,7 +51,7 @@ We present ESOT500, a new dataset for event-based VOT, featuring time-aligned an
 
 - The aedat4 directory contains the raw event data (event stream and corresponding RGB frames), the [DV](https://inivation.gitlab.io/dv/dv-docs/docs/getting-started.html) and [dv-python](https://gitlab.com/inivation/dv/dv-python) is recommended for visualization and processing in python respectively.
 
-- You can find the metadata file at `data/esot500_metadata.json`, or download it from our dataset page in [Hugging face](https://huggingface.co/datasets/NoRealBlank/ESOT500).
+- You can find the metadata file at `data/esot500_metadata.json`, or download it from our dataset page in [[Hugging face]](https://huggingface.co/datasets/NoRealBlank/ESOT500).
 
 <!-- <img src="img/esot2_examples.png" width=65%> -->
 
@@ -112,7 +112,7 @@ pytracking/analysis/stream_eval.ipynb
 <!-- ## Citation -->
 
 ## License
-  The released code and dataset are under [Apache 2.0 license](https://www.apache.org/licenses/LIC).
+  The released code is under [GPL-3.0 license](https://www.gnu.org/licenses/gpl-3.0.en.html) following the PyTracking, and dataset is under [CC-BY 4.0 license](https://creativecommons.org/licenses/by/4.0/).
 
 ## Acknowledgments
 - The benchmark is built on top of the great [PyTracking](https://github.com/visionml/pytracking) library 
