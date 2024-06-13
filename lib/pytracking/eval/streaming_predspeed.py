@@ -18,11 +18,11 @@ import os
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--raw_root', default='/home/test4/code/EventBenchmark/lib/pytracking/pytracking/output/tracking_results_rt_raw',type=str,
+    parser.add_argument('--raw_root', default='output/test/tracking_results_rt',type=str,
         help='raw result root')
-    parser.add_argument('--target_root', default='/home/test4/code/EventBenchmark/lib/pytracking/pytracking/output/tracking_results_rt_final',type=str,
+    parser.add_argument('--target_root', default='output/test/tracking_results_rt_final',type=str,
         help='target result root')
-    parser.add_argument('--gt_root',default='/home/test4/code/EventBenchmark/data/EventSOT500/anno_t/', type=str)
+    parser.add_argument('--gt_root',default='../../../data/EventSOT500/anno_t/', type=str)
     # parser.add_argument('--fps', type=float, default=30)
     # parser.add_argument('--eta', type=float, default=0, help='eta >= -1')
     parser.add_argument('--overwrite', action='store_true', default=False)
@@ -54,9 +54,13 @@ def find_last_pred(gt_t, pred_raw, t0):
 def main():
     args = parse_args()
     # trackers = os.listdir(args.raw_root)
+
+    #######################################################
     trackers = ['ostrack']
-    params = ['pred_esot500mix_bs4','pred_esot500_bs4']
+    params = ['pred_esot500_4step']
     id = 14
+    #######################################################
+    
     gt_path = args.gt_root
     raw_result_path = args.raw_root
     save_path = args.target_root
