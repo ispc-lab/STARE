@@ -33,7 +33,7 @@ class Tracker:
         display_name: Name to be displayed in the result plots.
     """
 
-    def __init__(self, name: str, parameter_name: str, dataset_name: str, run_id: int = None, display_name: str = None,
+    def __init__(self, name: str, parameter_name: str, dataset_name: str, run_id: int = None, use_aas: bool = False, display_name: str = None,
                  result_only=False):
         assert run_id is None or isinstance(run_id, int)
 
@@ -41,7 +41,9 @@ class Tracker:
         self.parameter_name = parameter_name
         self.dataset_name = dataset_name
         self.run_id = run_id
+        self.use_aas = use_aas
         self.display_name = display_name
+
 
         env = env_settings()
         if self.run_id is None:
@@ -198,9 +200,9 @@ class Tracker:
 
         aeFile = seq.events
         with AedatFile(aeFile) as f:
-            print('Processing:',aeFile)
+            print('Processing:', aeFile)
             events = np.hstack([packet for packet in f['events'].numpy()])
-            events['timestamp'] = events['timestamp'] -events['timestamp'][0]
+            events['timestamp'] = events['timestamp'] - events['timestamp'][0]
 
         timestamps = events['timestamp']
         #TODO: adjust timestamps to seconds
@@ -212,7 +214,31 @@ class Tracker:
         in_timestamps = []
         runtime = []
         out_timestamps = []
-        t_stream_total = timestamps[-1] 
+        t_stream_total = timestamps[-1]
+
+#########################################################################################
+        active_state = {
+            'out': None,
+            'bbox': [],
+            'density': 0.,
+            'is_last_activated': False,
+            'idx_start_last': 0,
+            'idx_start_next': 0,
+            'length': 0,
+        }
+
+        cnt = 0
+
+        def generate_density(bbox, img):
+            res = 0
+            l, t, w, h = int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3])
+            # print(l, t, w, h)
+            for i in range(h):
+                for j in range(w):
+                    res += int(img[t + i][l + j][0] > 0 | img[t + i][l + j][1] > 0 | img[t + i][l + j][2] > 0)
+
+            return res
+#########################################################################################
 
         if not stream_setting.convert_time:
             # Initialize
@@ -238,19 +264,22 @@ class Tracker:
                     # t_template = stream_setting.window_size_template # TODO: use first timestamp
                     # idx_end = interpolation_search(timestamps,t_template)
                 template_events = events[idx_start:idx_end]
+
             elif stream_setting.template_ == 'seperate':
                     t_template = stream_setting.window_size_template
                     idx_end = interpolation_search(timestamps,t_template)
                     template_events = events[idx_start:idx_end]
+
             elif stream_setting.template_ == 'egt':
                     from pytracking.utils.sampling import sampling_template_egt, sampling_search_egt
-                    t_template = init_info.get('init_timestamp')*1e6
+                    t_template = init_info.get('init_timestamp') * 1e6
                     idx_end = interpolation_search(timestamps,t_template)
                     template_events_raw = events[idx_start:idx_end]
                     template_events = sampling_template_egt(events, init_info)
             else:
                 raise NotImplementedError
-            event_rep = convert_event_img_aedat(template_events,stream_setting.representation)
+
+            event_rep = convert_event_img_aedat(template_events, stream_setting.representation)
             # event_img_pil = transform(event_rep)
             # event_img_array = np.array(event_img_pil)
             # event_img = cv2.cvtColor(event_img_array,cv2.COLOR_RGB2BGR)
@@ -261,8 +290,10 @@ class Tracker:
                 elif stream_setting.representation in ['Raw']:
                     event_img = convert_event_img_aedat(template_events_raw,'VoxelGridComplex')
                     self.visualize(event_img, init_info.get('init_bbox'))
+
             torch.cuda.synchronize()
-            t1 = t_start = perf_counter()*1e6
+
+            t1 = t_start = perf_counter() * 1e6
             out = tracker.initialize(event_rep, init_info)
             if out is None:
                 out = {}
@@ -270,8 +301,8 @@ class Tracker:
             pred_bbox = init_info.get('init_bbox')
             pred_bboxes.append(pred_bbox)
             torch.cuda.synchronize()
-            t2 = perf_counter()*1e6
-            t_algo_init=t2-t1
+            t2 = perf_counter() * 1e6
+            t_algo_init = t2 - t1
             t_algo_init = out.get('time') * 1e6 if out.get('time') else t_algo_init
             # t_algo = out.get('time',t_algo)
             if stream_setting.sim:
@@ -285,51 +316,109 @@ class Tracker:
             # print(t_algo/1e6)
             runtime.append(t_algo_init)
             in_timestamps.append(t_template)
-            out_timestamps.append(t_algo_init+t_template)
-            
+            out_timestamps.append(t_algo_init + t_template)
+
+            ##############################################################################################
+            active_state['out'] = prev_output
+            active_state['bbox'] = pred_bbox
+            active_state['density'] = generate_density(active_state['bbox'], event_rep)
+            active_state['is_last_activated'] = True
+            active_state['idx_start_last'] = idx_start
+            ###############################################################################################
+
             # =================== Tracking =====================
             while 1:
                 t_algo_total = sum(runtime) + t_template
-                if t_algo_total>t_stream_total:
+                if t_algo_total > t_stream_total:
                     break
+
                 t_right = out_timestamps[-1] # Current world-time
-                idx_end = interpolation_search(timestamps,t_right)
+                idx_end = interpolation_search(timestamps, t_right)
+
                 if stream_setting.slicing == 'FxTime':
                     t_left = t_right - stream_setting.window_size
                     t_left = t_left if t_left >= timestamps[0] else timestamps[0]
-                    idx_start = interpolation_search(timestamps,t_left)
+                    idx_start = interpolation_search(timestamps, t_left)
                 elif stream_setting.slicing == 'FxNum':
                     idx_start = idx_end - stream_setting.num_events
                     idx_start = max(idx_start, 0)
                 elif stream_setting.slicing in ['Last','egt']:
                     t_left = in_timestamps[-1]
-                    idx_start = interpolation_search(timestamps,t_left)
+                    idx_start = interpolation_search(timestamps, t_left)
                 elif stream_setting.slicing == 'Adaptive':
                     idx_start, t_left = stream_sampler.sample(events[:idx_end], pred_bboxes, stream_setting)
                     # sampling = load_sampling_func(stream_setting.adaptive_)
                     # idx_start, t_left  = sampling(events[:idx_end], pred_bboxes, stream_setting)
-                events_search = events[idx_start:idx_end]
+
+                ###################################################################################################
+                if active_state['is_last_activated']:
+                    active_state['idx_start_next'] = idx_start
+                    events_search = events[idx_start:idx_end]
+                else:
+                    events_search = events[active_state['idx_start_next']:idx_end]
+
+                # events_search = events[idx_start:idx_end]
+                ###################################################################################################
+
+
                 slicing_ = stream_setting.get('slicing_', None)
                 if slicing_ and slicing_ in ['egt']:
                     # convert format for egt
                     event_rep = sampling_search_egt(events_search)
                 else:
-                    event_rep = convert_event_img_aedat(events_search,stream_setting.representation)
+                    event_rep = convert_event_img_aedat(events_search, stream_setting.representation)
                 info = {} # changed
-                info['previous_output'] = prev_output
+
+
+                ##################################################################################################
+
+                if active_state['is_last_activated']:
+                    info['previous_output'] = prev_output
+                else:
+                    info['previous_output'] = active_state['out']
+
+                density_tmp = generate_density(active_state['bbox'], event_rep)
+                # if active_state['density'] == 0:
+                #     active_state['is_last_activated'] = False
+                #     ####
+                #     # events_search = events[active_state['idx_start_last']:idx_end]
+                #     # event_rep = convert_event_img_aedat(events_search, stream_setting.representation)
+                #     ####
+                #     print("Zero!", cnt)
+                if density_tmp < active_state['density'] * 0.5 and active_state['length'] <= 50 * 1e3:
+                    active_state['is_last_activated'] = False
+                    ####
+                    # events_search = events[active_state['idx_start_last']:idx_end]
+                    # event_rep = convert_event_img_aedat(events_search, stream_setting.representation)
+                    ####
+                    # print("Deactivated!", cnt)
+                elif density_tmp < active_state['density'] * 0.05 and active_state['length'] > 50 * 1e3:
+                    active_state['is_last_activated'] = False
+                    ####
+                    # events_search = events[active_state['idx_start_last']:idx_end]
+                    # event_rep = convert_event_img_aedat(events_search, stream_setting.representation)
+                    ####
+                    # print("A long deactivated!", cnt)
+                else:
+                    active_state['is_last_activated'] = True
+                    ####
+                    # active_state['idx_start_last'] = idx_start
+                    ####
+                    # print("A good slice!")
+                ##################################################################################################
 
                 # event_img_pil = transform(event_rep)
                 # event_img_array = np.array(event_img_pil)
                 # event_img = cv2.cvtColor(event_img_array,cv2.COLOR_RGB2BGR)
                 # cv2.imwrite('debug/test2.jpg',event_img)
                 # event_img.save('debug/test.jpg')
-                t1 = perf_counter()*1e6
+                t1 = perf_counter() * 1e6
                 out = tracker.track(event_rep, info)
 
                 prev_output = OrderedDict(out)
                 torch.cuda.synchronize()
-                t2 = perf_counter()*1e6
-                t_algo=t2-t1
+                t2 = perf_counter() * 1e6
+                t_algo = t2 - t1
                 # t_algo = out.get('time',t_algo)
                 t_algo = out.get('time') * 1e6 if out.get('time') else t_algo
                 if stream_setting.sim:
@@ -339,10 +428,31 @@ class Tracker:
                 runtime.append(t_algo)
                 # print(t_algo/1e6)
                 in_timestamps.append(out_timestamps[-1])
-                out_timestamps.append(out_timestamps[-1]+t_algo)
-                pred_bbox = out['target_bbox']
+                out_timestamps.append(out_timestamps[-1] + t_algo)
+
+                ################################################################################
+                if not self.use_aas:
+                    active_state['is_last_activated'] = True
+                    # print("enable!")
+
+                # pred_bbox = out['target_bbox']
+                # active_state['bbox'] = out['target_bbox']
+                # active_state['density'] = generate_density(out['target_bbox'], event_rep)
+
+                if active_state['is_last_activated']:
+                    pred_bbox = out['target_bbox']
+                    active_state['out'] = prev_output
+                    active_state['bbox'] = out['target_bbox']
+                    active_state['density'] = generate_density(out['target_bbox'], event_rep)
+                    active_state['length'] = 0
+                else:
+                    pred_bbox = active_state['bbox']
+                    active_state['length'] += t_algo
+                    cnt = cnt + 1
                 # print('target_bbox:', pred_bbox)
-                pred_bboxes.append(pred_bbox) # box [x1, y1, w, h]
+
+                pred_bboxes.append(pred_bbox)  # box [x1, y1, w, h]
+                ################################################################################
 
                 bboxes = [out['target_bbox']]
                 if 'clf_target_bbox' in out:
@@ -352,10 +462,12 @@ class Tracker:
                 if 'segm_search_area' in out:
                     bboxes.append(out['segm_search_area'])
                 segmentation = None
+
                 if stream_setting.representation in ['VoxelGridComplex']:
                     event_img = event_rep
                 elif stream_setting.representation =='Raw':
                     event_img = convert_event_img_aedat(events_search, 'VoxelGridComplex')
+
                 if self.visdom is not None:
                     tracker.visdom_draw_tracking(event_img, bboxes, segmentation)
                 elif tracker.params.visualization:
@@ -368,6 +480,7 @@ class Tracker:
                         'runtime': runtime,
                         'stream_setting':stream_setting.id,
                     }
+
         else:
             # TODO: under-construction
             # Absolute wall time, including conversion time
@@ -444,6 +557,7 @@ class Tracker:
                         'in_timestamps': in_timestamps,
                         'runtime': runtime,
                     }
+
         return output
 
     def run_video(self, videofilepath, optional_box=None, debug=None, visdom_info=None, save_results=False):
