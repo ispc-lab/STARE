@@ -76,7 +76,7 @@ def run_tracker_stream(tracker_name, tracker_param, stream_setting, run_id=None,
     if sequence is not None:
         dataset = [dataset[sequence]]
 
-    trackers = [Tracker(tracker_name, tracker_param, dataset_name, run_id)]
+    trackers = [Tracker(tracker_name, tracker_param, dataset_name, run_id, use_aas)]
     stream_setting = load_stream_setting(stream_setting)  # dict
 
     run_dataset_stream(dataset, trackers, stream_setting, debug, threads, visdom_info=visdom_info)
