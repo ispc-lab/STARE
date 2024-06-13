@@ -410,5 +410,11 @@ def streaming_sotas_ostrack_std():
     dataset = get_dataset('esot500s')
     stream_setting = load_stream_setting('s14')
     return trackers, dataset, stream_setting
+
+def streaming_sotas_ostrack_pred():
+    trackers = trackerlist('ostrack', 'pred_esot500_4step')
+    dataset = get_dataset('esot500s')
+    stream_setting = load_stream_setting('s14')
+    return trackers, dataset, stream_setting
     
 # python streaming_eval_v3.py  exp_streaming streaming_sotas_s14
