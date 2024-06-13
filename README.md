@@ -59,9 +59,9 @@ We present ESOT500, a new dataset for event-based VOT, featuring time-aligned an
 
 ## Benchmark
 The key advantages of the proposed stream-based evaluation are three-fold:
-1. A unified evaluation regardless of the adopted event representations;
-2. Dynamic process depending on time rather than frame-sequential;
-3. Comprehensive evaluation of trackers in terms of latency and accuracy;
+- A unified evaluation regardless of the adopted event representations;
+- Dynamic process depending on time rather than frame-sequential;
+- Comprehensive evaluation of trackers in terms of latency and accuracy;
 
 Different from frame sequence, event streams are asynchronous data flows. 
 As shown below, the major difference between stream-based evaluation and frame-based streaming perception is that there is **input at any time** instead of at certain moments.
@@ -144,7 +144,7 @@ The code is based on the [**PyTracking**](https://github.com/visionml/pytracking
   ---
 
   **10.** To evaluate the results, use `pytracking/analysis/stream_eval.ipynb`. 
-  You can also refer to it to write your own style of test scripts.
+  You can also refer to it to write the analysis scripts of your own style.
 
   ---
 
@@ -199,7 +199,9 @@ The code is based on the [**PyTracking**](https://github.com/visionml/pytracking
   ```
   python tracking/test.py ostrack baseline --dataset_name esot_500_2
   ```
-  (**pred_OSTrack** is not available)
+  **Note:** 
+  - This doesn't work for **pred_OSTrack**.
+  - The available `dataset_name` can refer to the experiment results listed in our paper.
 
   ---
 
@@ -216,24 +218,30 @@ The code is based on the [**PyTracking**](https://github.com/visionml/pytracking
 
   **8.** Run stream-based evaluation **with predictive module**.
   ```
-  python tracking/test_streaming.py ostrack pred_esot500_4step s14 --dataset_name esot500s --use_aas --pred_next 1
-  python ../../pytracking/eval/streaming_eval_v3.py --experiment_module exp_streaming --experiment_name streaming_sotas_ostrack_std
+  python tracking/test_streaming.py ostrack pred_esot500_4step s14 --dataset_name esot500s --pred_next 1 [--use_aas]
+  python ../../pytracking/eval/streaming_predspeed.py 
   ```
   **Note:**
-  - `--use_aas` option is currently only available to **OSTrack** and **pred_OSTrack**.
-  - You can refer to `streaming_sotas_ostrack_std` to add test module of your own style at `../../pytracking/pytracking/experiments/exp_streaming.py`.
+  - `--pred_next 1` option is currently only available to **pred_OSTrack**.
+  - You can change the relevant parameters in `streaming_predspeed.py` to make it fit your own style.
 
   ---
 
   **9.** The results are by default in the folders `pytracking/output/tracking_results` and `pytracking/output/tracking_results_rt_final`. 
-  You can change the paths by modifying the `local.py` files.
+  You can change the paths by modifying `local.py` and `streaming_predspeed.py` separately.
 
   ---
 
-  **10.** To evaluate the results, use `pytracking/analysis/stream_eval.ipynb`. 
-  You can also refer to it to write your own style of test scripts.
+  **10.** Evaluate the results.
+  ```
+  python tracking/analysis_results_pred.py 
+  ``` 
+  You can also refer to it to write the analysis scripts of your own style.
 
   ---
+
+
+## Support
 
 **If you encounter any issues while using our code or dataset, please feel free to contact us.**
 
@@ -241,8 +249,9 @@ The code is based on the [**PyTracking**](https://github.com/visionml/pytracking
 <!-- ## Citation -->
 
 ## License
-  The released code is under [GPL-3.0 license](https://www.gnu.org/licenses/gpl-3.0.en.html) following the PyTracking, and dataset is under [CC-BY 4.0 license](https://creativecommons.org/licenses/by/4.0/).
+- The released code is under [GPL-3.0 license](https://www.gnu.org/licenses/gpl-3.0.en.html) following the PyTracking.
+- The released dataset is under [CC-BY 4.0 license](https://creativecommons.org/licenses/by/4.0/).
 
 ## Acknowledgments
-- The benchmark is built on top of the great [PyTracking](https://github.com/visionml/pytracking) library 
-- Thanks for the great works including [Stark](https://github.com/researchmm/Stark), [MixFormer](https://github.com/MCG-NJU/MixFormer), [OSTrack](https://github.com/botaoye/OSTrack) and [Event-tracking](https://github.com/ZHU-Zhiyu/Event-tracking)
+- The benchmark is built on top of the great [PyTracking](https://github.com/visionml/pytracking) library.
+- Thanks for the great works including [Stark](https://github.com/researchmm/Stark), [MixFormer](https://github.com/MCG-NJU/MixFormer), [OSTrack](https://github.com/botaoye/OSTrack) and [Event-tracking](https://github.com/ZHU-Zhiyu/Event-tracking).
