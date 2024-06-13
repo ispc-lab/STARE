@@ -41,7 +41,13 @@ def parameters():
         'ostrack_trial9_ostrack256':8.5*1e3,
         'ostrack_baseline':8.5*1e3,
         'ostrack_aug':8.5*1e3,
-        'stark_s_baseline':16*1e3,
+        'ostrack_esot500mix': 8.5 * 1e3,
+        'ostrack_esot500_baseline_10000': 8.5 * 1e3,
+        'ostrack_esot500_baseline': 8.5 * 1e3,
+        'ostrack_pred_esot500_4step': 9.5 * 1e3,
+        'mixformer_convmae_online_baseline': 15 * 1e3,
+        'mixformer_convmae_pred_esot500': 16 * 1e3,
+        'stark_s_baseline':16 * 1e3,
                           }
     
     params.sim_runtime_init = {
@@ -75,7 +81,13 @@ def parameters():
         'ostrack_trial9_ostrack256':1*1e3,
         'ostrack_baseline':1*1e3,
         'ostrack_aug':1*1e3,
-        'stark_s_baseline':25*1e3,
+        'ostrack_esot500mix':1 * 1e3,
+        'ostrack_esot500_baseline_10000': 1 * 1e3,
+        'ostrack_esot500_baseline': 1 * 1e3,
+        'ostrack_pred_esot500_4step': 1 * 1e3,
+        'mixformer_convmae_online_baseline': 26 * 1e3,
+        'mixformer_convmae_pred_esot500': 26 * 1e3,
+        'stark_s_baseline': 25 * 1e3,
                           }
     params.sim_disturb = 0.0 # disturbance around runtime
 
@@ -88,8 +100,8 @@ def parameters():
     '''User-define Part'''
     # Slicing
     params.slicing = 'FxTime' # FxTime, FxNum, Adaptive, Last
-    params.window_size = 20*1e3 # unit:us
-    params.window_size_template = 20*1e3 # unit:us
+    params.window_size = 20 * 1e3 # unit:us
+    params.window_size_template = 20 * 1e3 # unit:us
     params.num_events = 5000
     params.adaptive_ = '' # Adaptive method, e.g. sampling
 
