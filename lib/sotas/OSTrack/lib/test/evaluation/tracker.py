@@ -356,10 +356,7 @@ class Tracker:
                     events_search = events[idx_start:idx_end]
                 else:
                     events_search = events[active_state['idx_start_next']:idx_end]
-
-                # events_search = events[idx_start:idx_end]
                 ###################################################################################################
-
 
                 slicing_ = stream_setting.get('slicing_', None)
                 if slicing_ and slicing_ in ['egt']:
@@ -369,42 +366,19 @@ class Tracker:
                     event_rep = convert_event_img_aedat(events_search, stream_setting.representation)
                 info = {} # changed
 
-
                 ##################################################################################################
-
                 if active_state['is_last_activated']:
                     info['previous_output'] = prev_output
                 else:
                     info['previous_output'] = active_state['out']
 
                 density_tmp = generate_density(active_state['bbox'], event_rep)
-                # if active_state['density'] == 0:
-                #     active_state['is_last_activated'] = False
-                #     ####
-                #     # events_search = events[active_state['idx_start_last']:idx_end]
-                #     # event_rep = convert_event_img_aedat(events_search, stream_setting.representation)
-                #     ####
-                #     print("Zero!", cnt)
                 if density_tmp < active_state['density'] * 0.5 and active_state['length'] <= 50 * 1e3:
                     active_state['is_last_activated'] = False
-                    ####
-                    # events_search = events[active_state['idx_start_last']:idx_end]
-                    # event_rep = convert_event_img_aedat(events_search, stream_setting.representation)
-                    ####
-                    # print("Deactivated!", cnt)
                 elif density_tmp < active_state['density'] * 0.05 and active_state['length'] > 50 * 1e3:
                     active_state['is_last_activated'] = False
-                    ####
-                    # events_search = events[active_state['idx_start_last']:idx_end]
-                    # event_rep = convert_event_img_aedat(events_search, stream_setting.representation)
-                    ####
-                    # print("A long deactivated!", cnt)
                 else:
                     active_state['is_last_activated'] = True
-                    ####
-                    # active_state['idx_start_last'] = idx_start
-                    ####
-                    # print("A good slice!")
                 ##################################################################################################
 
                 # event_img_pil = transform(event_rep)
@@ -433,7 +407,6 @@ class Tracker:
                 ################################################################################
                 if not self.use_aas:
                     active_state['is_last_activated'] = True
-                    # print("enable!")
 
                 # pred_bbox = out['target_bbox']
                 # active_state['bbox'] = out['target_bbox']
