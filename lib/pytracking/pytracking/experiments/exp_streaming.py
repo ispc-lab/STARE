@@ -245,7 +245,7 @@ def streaming_33():
 
 def streaming_34():
     trackers =  trackers_single
-    dataset = get_dataset('esot500s','esot2s')
+    dataset = get_dataset('esot500s')
     stream_setting = load_stream_setting('s34')
     return trackers, dataset, stream_setting
 
