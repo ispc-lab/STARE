@@ -71,42 +71,171 @@ As shown below, the major difference between stream-based evaluation and frame-b
 <!-- <img src="img/algorithm.png" width=65%> -->
 
 ## Usage
-The code is based on the [**PyTracking**](https://github.com/visionml/pytracking) and other frameworks.
+The code is based on the [**PyTracking**](https://github.com/visionml/pytracking) and other similar frameworks.
 
-For detailed installation and configuration please refer to [lib/pytracking/INSTALL.md](lib/pytracking/INSTALL.md) 
+- **Trackers under PyTracking:**
 
-```
-# first go to pytracking
-cd lib/pytracking
+  ---
 
-# preprare dataset
-ln -s /PATH/TO/EventSOT-H ./data/EventSOT500
+  **1.** Go to the working directory of pytracking.
+  ```
+  cd lib/pytracking
+  ```
 
-# Environment settings for pytracking. Saved at pytracking/evaluation/local.py
-python -c "from pytracking.evaluation.environment import create_default_local_file; create_default_local_file()"
-python -c "from ltr.admin.environment import create_default_local_file; create_default_local_file()"
+  ---
 
-# modify the dataset path in 
-lib/pytracking/ltr/admin/local.py # paths about training
-pytracking/evaluation/local.py  # paths about testing
+  **2.** Create a virtual environment.
+  ```
+  conda creat -n STARE
+  conda activate STARE
+  ```
+  ---
 
-bash install.sh conda_install_path STARE
-conda activate STARE
+  **3.** Install required libraries following PyTracking. 
+  (Please refer to [lib/pytracking/INSTALL.md](lib/pytracking/INSTALL.md) for detailed installation and configuration.)
+  ```
+  pip/conda install ...
+  ```
 
-# for frame-based evaluation
-python pytracking/run_experiment.py myexperiments esot500_offline
+  ---
 
-# for stream-based evaluation, stream settings are in folder pytracking/stream_settings
-python pytracking/run_experiment_streaming.py exp_streaming streaming_34
-python eval/streaming_eval_v3.py exp_streaming streaming_34
+  **4.** Preprare the dataset.
+  ```
+  ln -s /PATH/TO/ESOT500 ../data/EventSOT500
+  ```
 
-# The results are in the folders './pytracking/output/tracking_results' and './pytracking/output/tracking_results_rt_final', then evaluate the results.
-pytracking/analysis/stream_eval.ipynb
+  ---
 
-# For trackers not integrated into pytracking, see 'lib/sotas/[tracker]' for details. Their usage is similar.
+  **5.** Set environment for pytracking.
+  ```
+  python -c "from pytracking.evaluation.environment import create_default_local_file; create_default_local_file()"
+  python -c "from ltr.admin.environment import create_default_local_file; create_default_local_file()"
+  ```
 
-# For tracker enhancement, see 'lib/sotas/pred_OSTrack' for details.
-```
+  ---
+
+  **6.** Modify the dataset path in generated environment setting files.
+  - for training: `ltr/admin/local.py`
+  - for testing: `pytracking/evaluation/local.py`
+
+  ---
+
+  **7.** Run frame-based evaluation. 
+  (Experiment settings are in folder `pytracking/experiments` and `pytracking/stream_settings`)
+  ```
+  python pytracking/run_experiment.py myexperiments esot500_offline
+  ```
+
+  ---
+
+  **8.** Run stream-based evaluation. (Experiment settings are in folder `pytracking/experiments` and `pytracking/stream_settings`.)
+  ```
+  python pytracking/run_experiment_streaming.py exp_streaming streaming_34
+  python eval/streaming_eval_v3.py exp_streaming streaming_34
+  ```
+  The instructions given are for real-time testing on your own hardware. 
+  If you want to reproduce the results in our paper, please refer to `pytracking/stream_settings/s14`.
+
+  ---
+
+  **9.** The results are by default in the folders `pytracking/output/tracking_results` and `pytracking/output/tracking_results_rt_final`. 
+  You can change the paths by modifying the `local.py` files.
+
+  ---
+
+  **10.** To evaluate the results, use `pytracking/analysis/stream_eval.ipynb`. 
+  You can also refer to it to write your own style of test scripts.
+
+  ---
+
+  **Note:** For tracker enhancement, please see the follow-up section.
+
+  ---
+
+- **Trackers under other frameworks:**
+
+  These trackers use a similar framework to PyTracking, but are not fully integrated into it. 
+  Here we take **OSTrack** and **pred_OSTrack** as examples to illustrate the usage, including that of the enhancement.
+
+  ---
+
+  **1.** Go to the working directory.
+  ```
+  cd lib/sotas/[OSTrack or pred_OSTrack]
+  ```
+
+  ---
+
+  **2.** Activate the virtual environment.
+  ```
+  conda activate STARE
+  ```
+
+  ---
+
+  **3.** Install the missing libraries.
+  ```
+  pip/conda install ...
+  ```
+  In fact, if you have PyTracking installed, you can directly find and install the missing packages according to the error by running the subsequent scripts. 
+
+  ---
+
+  **4.** Set environment for the tracker.
+  ```
+  python -c "from lib.test.evaluation.environment import create_default_local_file; create_default_local_file()"
+  python -c "from lib.train.admin.environment import create_default_local_file; create_default_local_file()"
+  ```
+
+  ---
+
+  **5.** Modify the dataset path in generated environment setting files.
+  - for training: `lib/train/admin/local.py`
+  - for testing: `lib/test/evaluation/local.py`
+
+  ---
+
+  **6.** Run frame-based evaluation. 
+  ```
+  python tracking/test.py ostrack baseline --dataset_name esot_500_2
+  ```
+  (**pred_OSTrack** is not available)
+
+  ---
+
+  **7.** Run stream-based evaluation **without predictive module**.
+  ```
+  python tracking/test_streaming.py ostrack esot500_baseline s14 --dataset_name esot500s [--use_aas]
+  python ../../pytracking/eval/streaming_eval_v3.py --experiment_module exp_streaming --experiment_name streaming_sotas_ostrack_std
+  ```
+  **Note:**
+  - `--use_aas` option is currently only available to **OSTrack** and **pred_OSTrack**.
+  - You can refer to `streaming_sotas_ostrack_std` to add test module of your own style at `../../pytracking/pytracking/experiments/exp_streaming.py`.
+
+  ---
+
+  **8.** Run stream-based evaluation **with predictive module**.
+  ```
+  python tracking/test_streaming.py ostrack pred_esot500_4step s14 --dataset_name esot500s --use_aas --pred_next 1
+  python ../../pytracking/eval/streaming_eval_v3.py --experiment_module exp_streaming --experiment_name streaming_sotas_ostrack_std
+  ```
+  **Note:**
+  - `--use_aas` option is currently only available to **OSTrack** and **pred_OSTrack**.
+  - You can refer to `streaming_sotas_ostrack_std` to add test module of your own style at `../../pytracking/pytracking/experiments/exp_streaming.py`.
+
+  ---
+
+  **9.** The results are by default in the folders `pytracking/output/tracking_results` and `pytracking/output/tracking_results_rt_final`. 
+  You can change the paths by modifying the `local.py` files.
+
+  ---
+
+  **10.** To evaluate the results, use `pytracking/analysis/stream_eval.ipynb`. 
+  You can also refer to it to write your own style of test scripts.
+
+  ---
+
+**If you encounter any issues while using our code or dataset, please feel free to contact us.**
 
 
 <!-- ## Citation -->
