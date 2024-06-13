@@ -10,7 +10,7 @@ from pathlib import Path
 import numpy as np
 
 
-def trackerlist(name: str, parameter_name: str, dataset_name: str, run_ids = None, display_name: str = None,
+def trackerlist(name: str, parameter_name: str, dataset_name: str, run_ids = None, pred_next: int = 0, display_name: str = None,
                 result_only=False):
     """Generate list of trackers.
     args:
@@ -21,7 +21,7 @@ def trackerlist(name: str, parameter_name: str, dataset_name: str, run_ids = Non
     """
     if run_ids is None or isinstance(run_ids, int):
         run_ids = [run_ids]
-    return [Tracker(name, parameter_name, dataset_name, run_id, display_name, result_only) for run_id in run_ids]
+    return [Tracker(name, parameter_name, dataset_name, run_id, pred_next, display_name, result_only) for run_id in run_ids]
 
 
 class Tracker:
@@ -33,7 +33,7 @@ class Tracker:
         display_name: Name to be displayed in the result plots.
     """
 
-    def __init__(self, name: str, parameter_name: str, dataset_name: str, run_id: int = None, pred_next: int = 0,display_name: str = None,
+    def __init__(self, name: str, parameter_name: str, dataset_name: str, run_id: int = None, pred_next: int = 0, use_aas: bool = False, display_name: str = None,
                  result_only=False):
         assert run_id is None or isinstance(run_id, int)
 
@@ -41,10 +41,12 @@ class Tracker:
         self.parameter_name = parameter_name
         self.dataset_name = dataset_name
         self.run_id = run_id
+        self.use_aas = use_aas
         self.display_name = display_name
 
         self.env = env_settings()
         self.env.pred_next = pred_next
+        print(self.env.pred_next)
         if self.run_id is None:
             self.results_dir = '{}/{}/{}'.format(self.env.results_path, self.name, self.parameter_name)
             self.results_dir_rt = '{}/{}/{}'.format(self.env.results_path_rt, self.name, self.parameter_name)
@@ -164,6 +166,7 @@ class Tracker:
             prev_output = OrderedDict(out)
             _store_outputs(out, {'time': time.time() - start_time})
 
+        print(out.keys())
         for key in ['target_bbox', 'all_boxes', 'all_scores']:
             if key in output and len(output[key]) <= 1:
                 output.pop(key)
@@ -214,13 +217,39 @@ class Tracker:
         in_timestamps = []
         runtime = []
         out_timestamps = []
-        t_stream_total = timestamps[-1] 
+        t_stream_total = timestamps[-1]
+
+        #########################################################################################
+        active_state = {
+            'out': None,
+            'bbox': [],
+            'density': 0.,
+            'is_last_activated': False,
+            'idx_start_last': 0,
+            'idx_start_next': 0,
+            'length': 0,
+        }
+
+        cnt = 0
+
+        def generate_density(bbox, img):
+            res = 0
+            l, t, w, h = int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3])
+            # print(l, t, w, h)
+            for i in range(h):
+                for j in range(w):
+                    res += int(img[t + i][l + j][0] > 0 | img[t + i][l + j][1] > 0 | img[t + i][l + j][2] > 0)
+
+            return res
+        #########################################################################################
+
 
         # Initialize
         # t_start = perf_counter()*1e6
         t_left = 0
         idx_start = 0
-        t0 = perf_counter()*1e6
+        t0 = perf_counter() * 1e6
+
         # ============== Initialization ====================
         if stream_setting.template_ == 'default':
             if stream_setting.slicing == 'FxTime':
@@ -280,7 +309,7 @@ class Tracker:
         pred_bboxes.append(pred_bbox)
         torch.cuda.synchronize()
         t2 = perf_counter()*1e6
-        t_algo_init=t2-t1
+        t_algo_init = t2 - t1
         t_algo_init = out.get('time') * 1e6 if out.get('time') else t_algo_init
         # t_algo = out.get('time',t_algo)
         if stream_setting.sim:
@@ -297,13 +326,21 @@ class Tracker:
         runtime.append(t_algo_init)
         in_timestamps.append(t_template)
         out_timestamps.append(t_algo_init+t_template)
-        
+
+        ##############################################################################################
+        active_state['out'] = prev_output
+        active_state['bbox'] = pred_bbox
+        active_state['density'] = generate_density(active_state['bbox'], event_rep)
+        active_state['is_last_activated'] = True
+        active_state['idx_start_last'] = idx_start
+        ###############################################################################################
+
         # =================== Tracking =====================
         while 1:
             t_algo_total = sum(runtime) + t_template
             if t_algo_total>t_stream_total:
                 break
-            t0 = perf_counter()*1e6
+            t0 = perf_counter() * 1e6
             t_right = out_timestamps[-1] # Current world-time
             idx_end = interpolation_search(timestamps,t_right)
             if stream_setting.slicing == 'FxTime':
@@ -320,7 +357,16 @@ class Tracker:
                 idx_start, t_left = stream_sampler.sample(events[:idx_end], pred_bboxes, stream_setting)
                 # sampling = load_sampling_func(stream_setting.adaptive_)
                 # idx_start, t_left  = sampling(events[:idx_end], pred_bboxes, stream_setting)
-            events_search = events[idx_start:idx_end]
+            # events_search = events[idx_start:idx_end]
+
+            ###################################################################################################
+            if active_state['is_last_activated']:
+                active_state['idx_start_next'] = idx_start
+                events_search = events[idx_start:idx_end]
+            else:
+                events_search = events[active_state['idx_start_next']:idx_end]
+            ###################################################################################################
+
             slicing_ = stream_setting.get('slicing_', None)
             if slicing_ and slicing_ in ['egt']:
                 # convert format for egt
@@ -328,21 +374,39 @@ class Tracker:
             else:
                 event_rep = convert_event_img_aedat(events_search,stream_setting.representation)
             info = {} # changed
-            info['previous_output'] = prev_output
+
+            # info['previous_output'] = prev_output
+            ##################################################################################################
+            if active_state['is_last_activated']:
+                info['previous_output'] = prev_output
+            else:
+                info['previous_output'] = active_state['out']
+
+            density_tmp = generate_density(active_state['bbox'], event_rep)
+            if density_tmp < active_state['density'] * 0.3 and active_state['length'] <= 50 * 1e3:
+                active_state['is_last_activated'] = False
+                # print("Deactivated!", cnt)
+            elif density_tmp < active_state['density'] * 0.05 and active_state['length'] > 50 * 1e3:
+                active_state['is_last_activated'] = False
+                # print("A long deactivated!", cnt)
+            else:
+                active_state['is_last_activated'] = True
+                # print("A good slice!")
+            ##################################################################################################
 
             # event_img_pil = transform(event_rep)
             # event_img_array = np.array(event_img_pil)
             # event_img = cv2.cvtColor(event_img_array,cv2.COLOR_RGB2BGR)
             # cv2.imwrite('debug/test2.jpg',event_img)
             # event_img.save('debug/test.jpg')
-            t1 = perf_counter()*1e6
-            t_convert = t1-t0
+            t1 = perf_counter() * 1e6
+            t_convert = t1 - t0
             out = tracker.track(event_rep, info)
 
             prev_output = OrderedDict(out)
             torch.cuda.synchronize()
-            t2 = perf_counter()*1e6
-            t_algo=t2-t1
+            t2 = perf_counter() * 1e6
+            t_algo = t2 - t1
             # t_algo = out.get('time',t_algo)
             t_algo = out.get('time') * 1e6 if out.get('time') else t_algo
             if stream_setting.sim:
@@ -355,12 +419,33 @@ class Tracker:
             runtime.append(t_algo)
             in_timestamps.append(out_timestamps[-1])
             out_timestamps.append(out_timestamps[-1]+t_algo)
-            pred_bbox = out['target_bbox']
+            # pred_bbox = out['target_bbox']
             # print('target_bbox:', pred_bbox)
-            pred_bboxes.append(pred_bbox) # box [x1, y1, w, h]
-            if pred_next:
-                bbox_speed.append(out['bbox_speed'])
+            # pred_bboxes.append(pred_bbox) # box [x1, y1, w, h]
 
+            ################################################################################
+            if not self.use_aas:
+                active_state['is_last_activated'] = True
+
+            pred_bbox = out['target_bbox']
+            pred_speed = out['bbox_speed']
+
+            if active_state['is_last_activated']:
+                active_state['out'] = prev_output
+                active_state['bbox'] = out['target_bbox']
+                active_state['density'] = generate_density(out['target_bbox'], event_rep)
+                active_state['length'] = 0
+            else:
+                pred_bbox = active_state['bbox']
+                ### pred_speed = active_state['out']['bbox_speed']
+                active_state['length'] += t_algo
+                cnt = cnt + 1
+
+            pred_bboxes.append(pred_bbox)  # box [x1, y1, w, h]
+
+            if pred_next:
+                bbox_speed.append(pred_speed)
+            ################################################################################
 
             bboxes = [out['target_bbox']]
             if 'clf_target_bbox' in out:
@@ -374,6 +459,7 @@ class Tracker:
                 event_img = event_rep
             elif stream_setting.representation =='Raw':
                 event_img = convert_event_img_aedat(events_search, 'VoxelGridComplex')
+
             if self.visdom is not None:
                 tracker.visdom_draw_tracking(event_img, bboxes, segmentation)
             elif tracker.params.visualization:
@@ -384,10 +470,13 @@ class Tracker:
                     'out_timestamps': out_timestamps,
                     'in_timestamps': in_timestamps,
                     'runtime': runtime,
-                    'stream_setting':stream_setting.id,
+                    'stream_setting': stream_setting.id,
                 }
+
         if pred_next:
-            output['bbox_speed']=bbox_speed
+            output['bbox_speed'] = bbox_speed
+
+
         return output
 
     def run_video(self, videofilepath, optional_box=None, debug=None, visdom_info=None, save_results=False):
