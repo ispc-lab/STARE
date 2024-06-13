@@ -102,8 +102,7 @@ def main():
         seq_name = args.sequence
 
     run_tracker_stream(args.tracker_name, args.tracker_param, args.stream_setting, args.runid, args.dataset_name,
-                       seq_name, args.debug, args.use_aas,
-                       args.threads)
+                       seq_name, args.debug, args.threads, args.use_aas)
 
 
 if __name__ == '__main__':
