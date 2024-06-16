@@ -1,14 +1,4 @@
 # From Frame to Stream: Rethinking Visual Object Tracking Based on Event Streams
-<!-- We revisit the frame-based evaluation on event streams and analyze its sensitivity to preprocessing and consistency issues.
-We then propose the **stream-based evaluation** framework with a unified protocol that allows direct evaluation on raw event streams. The evaluation progress is time-dependent rather than frame-sequential, and the performance metrics are calculated in a latency-aware manner, taking runtime latency into account. -->
-
-<p align="center">
-  <img src="img/STARE.jpg" width="90%">
-</p>
-
-## Abstraction
-Visual Object Tracking (VOT) in event-based vision is attracting increasing interest. Existing research typically pre-slices continuous event streams into discrete frames for tracking and evaluation, focusing primarily on offline accuracy in fixed-rate frame sequences. However, this approach often overlooks the critical impact of inference latency on tracker performance, especially in real-world scenarios where downstream applications will ceaselessly request the tracker for current object position without waiting any latency. To address these limitations, we introduce a paradigm shift in evaluation methodology with our novel STream-based lAtency-awaRe Evaluation (STARE) framework. STARE not only precisely reveals a tracker's realistic performance by simulating consecutive downstream requests, but also leverages the tracker's real-time capabilities by scheduling it to automatically sample events as inputs. We complement STARE with ESOT500, a new tracking dataset featuring time-aligned, high-frequency annotations, serving as a comprehensive platform for evaluating trackers, emphasizing the importance of both accuracy and latency. Subsequent experiments reveal a notable performance decline under STARE's stringent real-time criteria, highlighting the necessity to optimize trackers' robustness. In response, we further propose two simple yet effective tracker enhancement methods: Predictive Tracking and Adaptive Sampling Strategy, both distinguished by their utilization of the event stream modality's characteristics.
-
 
 <!-- TABLE OF CONTENTS -->
 <!-- <details open="open" style='padding: 10px; border-radius:5px 30px 30px 5px; border-style: solid; border-width: 1px;'> -->
@@ -32,22 +22,68 @@ Visual Object Tracking (VOT) in event-based vision is attracting increasing inte
   </ol>
 <!-- </details> -->
 
-<!-- ## Introduction
-We propose a novel evaluation framework for EVOT, named stream-based evaluation, which reformulates object tracking on event streams as a dynamic process both in spatial and temporal dimensions, highlighting the importance of latency. 
-Technically, we start by analyzing the limitation of existing frame-based evaluation regarding the sensitivity to event preprocess and consistency issues. 
-Drawing on the analysis, we introduce latency awareness into the evaluation and propose a unified framework for benchmarking on event streams.
+## Introduction
+In this work, we have 3 contributions:
+1. STream-based lAtency-awaRe Evaluation (STARE): A new tracker performance evaluation framework. STARE can reveal tracker's realistic performance by simulating real-world scenarios where downstream applications will ceaselessly request the tracker for current object position without waiting for any inference latency.
+2. ESOT500: A new dataset for event-based VOT, featuring time-aligned and
+high-frequency (500Hz) annotations. ESOT500 is designed to support STARE’s stringent real-time criteria.
+3. Two straightforward yet effective tracker performace enhancement methods: Predictive Tracking & Adaptive Sampling Strategy.
 
-The stream-based evaluation framework operates on raw event streams in a **streaming manner** in which the evaluation time and the data time are aligned. 
-The tracker is viewed as a program running in a loop, whose runtime is accumulated as the elapsed time of both evaluation and event data. 
-At each iteration, the tracker samples and process the currently received events and produces a prediction with a corresponding timestamp. 
-This iterative process persists until the completion of the event stream. 
-Subsequently, the evaluation results are calculated by querying the most recent prediction for each timestamped ground truth, enabling comprehensive assessment of the tracker's performance in a latency-aware manner. -->
+<br><br>
 
-<!-- <img src="img/concept1.png" width=65%> -->
+## STARE
+
+Please refer to the paper for more details.
+
+<p align="center">
+  <img src="img/STARE.jpg" width="100%">
+</p>
+
+
+<br><br>
 
 ## Dataset
 We present ESOT500, a new dataset for event-based VOT, featuring time-aligned and high-frequency annotations, designed to support STARE’s stringent real-time criteria.
-<!-- The dataset consists of a high-frequency annotated subset **EventSOT-H** and a more challenging subset **EventSOT-C** labeled at normal frequency, both time-aligned. -->
+
+
+<p align="center">
+  <img src="img/ESOT500_visualization.png" width="100%">
+</p>
+
+| Dataset   | #Videos (train/val) | #Annotations | Modality      | Frequency | Time-aligned Annotation | Non-rigid & Outdoor |
+|---|---|---|---|---|---|---|
+| EED | 5     | 199   | Gray, Event   | 23    | ✓      | ✗   |
+| EV-IMO| 3/3    | 76.8K    | Gray, Event   | 200   | ✓       | ✗   |
+| FE24ohz| 71/25  | 1132K   | Gray, Event   | 240  | ✗     | ✗   |
+| VisEvent| 377/172  | 371K   | RGB, Event    | ~25  | ✗    | ✗   |
+| COESOT| 827/527  | 478K | RGB, Event  | ~25  | ✗   | ✓   |
+| ESOT500| 146/56    | 1219K  | RGB, Event  | 500   | ✓     | ✓     |
+
+<br>
+
+#### ESOT500 Structure
+```
+|-- ESOT500    
+    |-- aedat4
+    |   |-- sequence_name1.aedat4
+    |   |-- sequence_name2.aedat4
+    |   :   :
+    |
+    |-- annot
+    |   |-- sequence_name1.txt
+    |   |-- sequence_name2.txt
+    |   :   :
+    |
+    |-- test.txt
+    |-- train.txt
+    |-- test_additional.txt
+    |-- train_additional.txt
+    |-- test_challenging.txt
+```
+
+<br>
+
+#### Download
 
 - Download **ESOT500** from [[OneDrive]](https://tongjieducn-my.sharepoint.com/personal/2131522_tongji_edu_cn/_layouts/15/onedrive.aspx?ga=1&id=%2Fpersonal%2F2131522%5Ftongji%5Fedu%5Fcn%2FDocuments%2FEventSOT%2FEventSOT%2DH).
 
@@ -57,12 +93,35 @@ We present ESOT500, a new dataset for event-based VOT, featuring time-aligned an
 
 - You can find the metadata file at `data/esot500_metadata.json`, or download it from our dataset page in [[Hugging face]](https://huggingface.co/datasets/NoRealBlank/ESOT500).
 
-<!-- <img src="img/esot2_examples.png" width=65%> -->
+<br>
 
-<!-- <img src="img/comparison.png" width=65%> -->
+#### Pre-Slice
 
-## Benchmark
-The key advantages of the proposed stream-based evaluation are three-fold:
+The pre-slicing process is only for the traditional frame-based latency-free evaluation.
+ 
+```
+python PATH_TO\STARE\lib\event_utils\event_stream_pre_slice.py DIR_PATH_TO_AEDAT4_FILES DIR_PATH_WHERE_TO_SAVE_THE_RESULTS FPS MS
+```
+the arguments `FPS` and `MS` should follow the chart bellow, as shown in the Table. 2 of the paper:
+
+<center>
+
+#### Pre-Slicing Settings (fps/ms)
+| 500/2 | 250/2 | 20/2 | 500/50 | 250/50 | 20/50 | 500/100 | 250/100 | 20/100 | 500/150 | 250/150 | 20/150 |
+|----|----|---|---|---|--|---|---|---|----|---|--|
+
+</center>
+
+<br><br>
+
+## Tracker Enhancement
+
+Please refer to the paper for more details.
+
+<br><br>
+
+## Experiments
+The key advantages of the proposed stream-based latency-aware evaluation are three-fold:
 - A unified evaluation regardless of the adopted event representations;
 - Dynamic process depending on time rather than frame-sequential;
 - Comprehensive evaluation of trackers in terms of latency and accuracy;
@@ -70,9 +129,21 @@ The key advantages of the proposed stream-based evaluation are three-fold:
 Different from frame sequence, event streams are asynchronous data flows. 
 As shown below, the major difference between stream-based evaluation and frame-based streaming perception is that there is **input at any time** instead of at certain moments.
 
-<!-- <img src="img/evaluations.png" width=65%> -->
+<p align="center">
+  <img src="img/Inference_speed_impact.png" width="50%">
+  <br> <!-- Break line to ensure caption appears directly below the image -->
+  <em>Tracker performance in STARE across varying output speeds. The x1 denotes the tracker’s actual output speed on our hardware, while other multipliers on the row axis represent the forced multiplication of tracker output speed in our simulated runs. As the output speed decreases, there is a corresponding decline in tracker performance.</em>
+</p>
 
-<!-- <img src="img/algorithm.png" width=65%> -->
+<p align="center">
+  <img src="img/F-S_comparison.png" width="50%">
+  <br> <!-- Break line to ensure caption appears directly below the image -->
+  <em>: Comparison of the frame-based offline evaluation results (-F) and STARE results (-S) for
+six representative trackers. A general tracker performance decline from offline to online and a unimodal distribution pattern of tracker performance
+across the temporal axis can be observed.</em>
+</p>
+
+<br><br>
 
 ## Usage
 The code is based on the [**PyTracking**](https://github.com/visionml/pytracking) and other similar frameworks.
