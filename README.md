@@ -118,7 +118,7 @@ Please refer to the paper for more details.
 
 <br>
 
-## Experiments
+## Benchmark
 The key advantages of the proposed stream-based latency-aware evaluation are three-fold:
 - A unified evaluation regardless of the adopted event representations;
 - Dynamic process depending on time rather than frame-sequential;
