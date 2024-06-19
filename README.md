@@ -29,7 +29,7 @@ In this work, we have 3 contributions:
 high-frequency (500Hz) annotations. ESOT500 is designed to support STARE’s stringent real-time criteria.
 3. Two straightforward yet effective tracker performace enhancement methods: Predictive Tracking & Adaptive Sampling Strategy.
 
-<br><br>
+<br>
 
 ## STARE
 
@@ -40,7 +40,7 @@ Please refer to the paper for more details.
 </p>
 
 
-<br><br>
+<br>
 
 ## Dataset
 We present ESOT500, a new dataset for event-based VOT, featuring time-aligned and high-frequency annotations, designed to support STARE’s stringent real-time criteria.
@@ -69,7 +69,7 @@ We present ESOT500, a new dataset for event-based VOT, featuring time-aligned an
     |   |-- sequence_name2.aedat4
     |   :   :
     |
-    |-- annot
+    |-- anno_t
     |   |-- sequence_name1.txt
     |   |-- sequence_name2.txt
     |   :   :
@@ -85,9 +85,7 @@ We present ESOT500, a new dataset for event-based VOT, featuring time-aligned an
 
 #### Download
 
-- Download **ESOT500** from [[OneDrive]](https://tongjieducn-my.sharepoint.com/personal/2131522_tongji_edu_cn/_layouts/15/onedrive.aspx?ga=1&id=%2Fpersonal%2F2131522%5Ftongji%5Fedu%5Fcn%2FDocuments%2FEventSOT%2FEventSOT%2DH).
-
-- Download the **challange sequence** of ESOT500 from [[Google Drive]](https://drive.google.com/drive/folders/1MnbPJGrhZL8kopisFEta9AWhFnA-Lbav?usp=sharing) for testing our tracker enhancement.
+- Download **ESOT500** from our [[Hugging Face]](https://huggingface.co/datasets/NoRealBlank/ESOT500/tree/main) datasets repository.
 
 - The aedat4 directory contains the raw event data (event stream and corresponding RGB frames), the [DV](https://inivation.gitlab.io/dv/dv-docs/docs/getting-started.html) and [dv-python](https://gitlab.com/inivation/dv/dv-python) is recommended for visualization and processing in python respectively.
 
@@ -112,13 +110,13 @@ the arguments `FPS` and `MS` should follow the chart bellow, as shown in the Tab
 
 </center>
 
-<br><br>
+<br>
 
 ## Tracker Enhancement
 
 Please refer to the paper for more details.
 
-<br><br>
+<br>
 
 ## Experiments
 The key advantages of the proposed stream-based latency-aware evaluation are three-fold:
@@ -143,7 +141,7 @@ six representative trackers. A general tracker performance decline from offline 
 across the temporal axis can be observed.</em>
 </p>
 
-<br><br>
+<br>
 
 ## Usage
 The code is based on the [**PyTracking**](https://github.com/visionml/pytracking) and other similar frameworks.
@@ -315,10 +313,13 @@ The code is based on the [**PyTracking**](https://github.com/visionml/pytracking
 
   ---
 
+  <br>
 
 ## Support
 
 **If you encounter any issues while using our code or dataset, please feel free to contact us.**
+
+<br>
 
 
 <!-- ## Citation -->
@@ -327,6 +328,10 @@ The code is based on the [**PyTracking**](https://github.com/visionml/pytracking
 - The released code is under [GPL-3.0 license](https://www.gnu.org/licenses/gpl-3.0.en.html) following the PyTracking.
 - The released dataset is under [CC-BY 4.0 license](https://creativecommons.org/licenses/by/4.0/).
 
+<br>
+
 ## Acknowledgments
 - The benchmark is built on top of the great [PyTracking](https://github.com/visionml/pytracking) library.
 - Thanks for the great works including [Stark](https://github.com/researchmm/Stark), [MixFormer](https://github.com/MCG-NJU/MixFormer), [OSTrack](https://github.com/botaoye/OSTrack) and [Event-tracking](https://github.com/ZHU-Zhiyu/Event-tracking).
+
+<br>
