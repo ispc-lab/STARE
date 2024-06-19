@@ -136,7 +136,7 @@ As shown below, the major difference between stream-based evaluation and frame-b
 <p align="center">
   <img src="img/F-S_comparison.png" width="50%">
   <br> <!-- Break line to ensure caption appears directly below the image -->
-  <em>: Comparison of the frame-based offline evaluation results (-F) and STARE results (-S) for
+  <em>Comparison of the frame-based offline evaluation results (-F) and STARE results (-S) for
 six representative trackers. A general tracker performance decline from offline to online and a unimodal distribution pattern of tracker performance
 across the temporal axis can be observed.</em>
 </p>
