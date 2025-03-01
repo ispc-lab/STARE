@@ -27,7 +27,7 @@ In this work, we have 3 contributions:
 1. STream-based lAtency-awaRe Evaluation (STARE): A new tracker performance evaluation framework. STARE can reveal tracker's realistic performance by simulating real-world scenarios where downstream applications will ceaselessly request the tracker for current object position without waiting for any inference latency.
 2. ESOT500: A new dataset for event-based VOT, featuring time-aligned and
 high-frequency (500Hz) annotations. ESOT500 is designed to support STARE’s stringent real-time criteria.
-3. Two straightforward yet effective tracker performace enhancement methods: Predictive Tracking & Adaptive Sampling Strategy.
+3. Two straightforward yet effective tracker performace enhancement methods: Predictive Motion Extrapolation & Context-Aware Sampling.
 
 <br>
 
