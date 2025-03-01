@@ -1,4 +1,4 @@
-# From Frame to Stream: Rethinking Visual Object Tracking Based on Event Streams
+# Bridging the Latency Gap with a Continuous Stream Evaluation Framework in Event-Driven Perception
 
 <!-- TABLE OF CONTENTS -->
 <!-- <details open="open" style='padding: 10px; border-radius:5px 30px 30px 5px; border-style: solid; border-width: 1px;'> -->
