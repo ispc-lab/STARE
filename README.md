@@ -46,15 +46,6 @@ We present ESOT500, a new dataset for event-based VOT, featuring time-aligned an
   <img src="img/ESOT500_visualization.png" width="100%">
 </p>
 
-| Dataset   | #Videos (train/val) | #Annotations | Modality      | Frequency | Time-aligned Annotation | Non-rigid & Outdoor |
-|---|---|---|---|---|---|---|
-| EED | 5     | 199   | Gray, Event   | 23    | ✓      | ✗   |
-| EV-IMO| 3/3    | 76.8K    | Gray, Event   | 200   | ✓       | ✗   |
-| FE240hz| 71/25  | 1132K   | Gray, Event   | 240  | ✗     | ✗   |
-| VisEvent| 377/172  | 371K   | RGB, Event    | ~25  | ✗    | ✗   |
-| COESOT| 827/527  | 478K | RGB, Event  | ~25  | ✗   | ✓   |
-| ESOT500| 146/56    | 1219K  | RGB, Event  | 500   | ✓     | ✓     |
-
 <br>
 
 #### ESOT500 Structure
