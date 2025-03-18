@@ -143,6 +143,8 @@ The code is based on the [**PyTracking**](https://github.com/visionml/pytracking
   - Python 3.8
   - CUDA 11.3
   - PyTorch 1.10.0
+ 
+  For more detailed information about Python dependencies, their versions, and other details, please refer to the [lib/stare_conda_env.yml](lib/stare_conda_env.yml) file.
 
   ---
 
