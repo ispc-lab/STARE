@@ -133,6 +133,19 @@ across the temporal axis can be observed.</em>
 ## Usage
 The code is based on the [**PyTracking**](https://github.com/visionml/pytracking) and other similar frameworks.
 
+- **System Requirements**
+
+  ---
+  **1.** Hardware requirements
+
+
+  ---
+  **2.** Software requirements
+
+
+  ---
+
+
 - **Trackers under PyTracking:**
 
   ---
