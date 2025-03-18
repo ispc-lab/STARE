@@ -136,12 +136,13 @@ The code is based on the [**PyTracking**](https://github.com/visionml/pytracking
 - **System Requirements**
 
   ---
-  **1.** Hardware requirements
 
-
-  ---
-  **2.** Software requirements
-
+  The code is compatible with *Linux* systems equipped with *NVIDIA* GPUs.
+  The software versions of the base experimental environment used for testing are:
+  - Ubuntu 20.04
+  - Python 3.8
+  - CUDA 11.3
+  - PyTorch 1.10.0
 
   ---
 
