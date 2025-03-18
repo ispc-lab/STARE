@@ -144,7 +144,7 @@ The code is based on the [**PyTracking**](https://github.com/visionml/pytracking
   - CUDA 11.3
   - PyTorch 1.10.0
  
-  For more detailed information about Python dependencies, their versions, and other details, please refer to the [lib/stare_conda_env.yml](lib/stare_conda_env.yml) file.
+  For more detailed information about Python dependencies, their versions, and other details, please refer to the exported requirement file [lib/stare_conda_env.yml](lib/stare_conda_env.yml).
 
   ---
 
@@ -160,29 +160,31 @@ The code is based on the [**PyTracking**](https://github.com/visionml/pytracking
 
   ---
 
-  **2.** Create a virtual environment.
+  **2.** Create a virtual environment and install required libraries.
   ```
-  conda creat -n STARE python=3.8
+  conda create -n STARE python=3.8
   conda activate STARE
-  ```
-  ---
-
-  **3.** Install required libraries following PyTracking. 
-  (Please refer to [lib/pytracking/INSTALL.md](lib/pytracking/INSTALL.md) for detailed installation and configuration.)
-  ```
   pip/conda install ...
   ```
-
+  Our code is mainly built based on PyTracking, and you can refer to [lib/pytracking/INSTALL.md](lib/pytracking/INSTALL.md) for detailed installation and configuration.
+  
+  You can also use the requirement file [lib/stare_conda_env.yml](lib/stare_conda_env.yml) we exported to build the environment.
+  ```
+  conda env create -f ../stare_conda_env.yml --verbose
+  conda activate STARE
+  ```
+  The entire installation process takes about 0.5h to 1h, depending on the network environment.
+  
   ---
 
-  **4.** Preprare the dataset.
+  **3.** Preprare the dataset.
   ```
   ln -s /PATH/TO/ESOT500 ../data/EventSOT500
   ```
 
   ---
 
-  **5.** Set environment for pytracking.
+  **4.** Set environment for pytracking.
   ```
   python -c "from pytracking.evaluation.environment import create_default_local_file; create_default_local_file()"
   python -c "from ltr.admin.environment import create_default_local_file; create_default_local_file()"
@@ -190,13 +192,13 @@ The code is based on the [**PyTracking**](https://github.com/visionml/pytracking
 
   ---
 
-  **6.** Modify the dataset path in generated environment setting files.
+  **5.** Modify the dataset path in generated environment setting files.
   - for training: `ltr/admin/local.py`
   - for testing: `pytracking/evaluation/local.py`
 
   ---
 
-  **7.** Run frame-based evaluation. 
+  **6.** Run frame-based evaluation. 
   (Experiment settings are in folder `pytracking/experiments` and `pytracking/stream_settings`)
   ```
   python pytracking/run_experiment.py myexperiments esot500_offline
@@ -204,7 +206,7 @@ The code is based on the [**PyTracking**](https://github.com/visionml/pytracking
 
   ---
 
-  **8.** Run stream-based evaluation. (Experiment settings are in folder `pytracking/experiments` and `pytracking/stream_settings`.)
+  **7.** Run stream-based evaluation. (Experiment settings are in folder `pytracking/experiments` and `pytracking/stream_settings`.)
   ```
   python pytracking/run_experiment_streaming.py exp_streaming streaming_34
   python eval/streaming_eval_v3.py exp_streaming streaming_34
@@ -214,12 +216,12 @@ The code is based on the [**PyTracking**](https://github.com/visionml/pytracking
 
   ---
 
-  **9.** The results are by default in the folders `pytracking/output/tracking_results` and `pytracking/output/tracking_results_rt_final`. 
+  **8.** The results are by default in the folders `pytracking/output/tracking_results` and `pytracking/output/tracking_results_rt_final`. 
   You can change the paths by modifying the `local.py` files.
 
   ---
 
-  **10.** To evaluate the results, use `pytracking/analysis/stream_eval.ipynb`. 
+  **9.** To evaluate the results, use `pytracking/analysis/stream_eval.ipynb`. 
   You can also refer to it to write the analysis scripts of your own style.
 
   ---
@@ -253,7 +255,8 @@ The code is based on the [**PyTracking**](https://github.com/visionml/pytracking
   ```
   pip/conda install ...
   ```
-  In fact, if you have PyTracking installed, you can directly find and install the missing packages according to the error by running the subsequent scripts. 
+  In fact, if you have PyTracking installed, you can directly find and install the missing packages according to the error by running the subsequent scripts.
+  Only a few dependencies are different, and it takes a few minutes to install.
 
   ---
 
