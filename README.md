@@ -160,7 +160,7 @@ The code is based on the [**PyTracking**](https://github.com/visionml/pytracking
 
   **2.** Create a virtual environment.
   ```
-  conda creat -n STARE
+  conda creat -n STARE python=3.8
   conda activate STARE
   ```
   ---
