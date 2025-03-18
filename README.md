@@ -115,17 +115,13 @@ Different from frame sequence, event streams are asynchronous data flows.
 As shown below, the major difference between stream-based evaluation and frame-based streaming perception is that there is **input at any time** instead of at certain moments.
 
 <p align="center">
-  <img src="img/Inference_speed_impact.png" width="50%">
+  <img src="img/STARE_N_Fig3.png" width="100%">
   <br> <!-- Break line to ensure caption appears directly below the image -->
-  <em>Tracker performance in STARE across varying output speeds. The x1 denotes the tracker’s actual output speed on our hardware, while other multipliers on the row axis represent the forced multiplication of tracker output speed in our simulated runs. As the output speed decreases, there is a corresponding decline in tracker performance.</em>
-</p>
-
-<p align="center">
-  <img src="img/F-S_comparison.png" width="50%">
-  <br> <!-- Break line to ensure caption appears directly below the image -->
-  <em>Comparison of the frame-based offline evaluation results (-F) and STARE results (-S) for
-six representative trackers. A general tracker performance decline from offline to online and a unimodal distribution pattern of tracker performance
-across the temporal axis can be observed.</em>
+  <em> Experimental results: 
+  (a) Comparison of the frame-based latency-free evaluation results (-F) and STARE results (-S). 
+  (b) The performance of the perception model in STARE decreases as inference speed reduces, as demonstrated by our hardware simulator. The horizontal axis represents the multiple by which the perception model's inference speed is set relative to its normal speed. 
+  (c) STARE results (AUC) on ESOT500 with HDETrack. "Auto" means that the perception algorithm is scheduled to automatically sample events as input during online perception, leveraging the continuity of the event stream. "Pre" means that the event stream is pre-sliced into fixed-rate frame sequences (20 fps, as commonly used in traditional evaluations) for latency-free perception. The evaluation stage, however, remains latency-aware, consistent with the original STARE setup.
+  (d) STARE results (AUC) on ESOT500, implemented using an RTX3090 with a Ryzen 3960X CPU (left), an RTX3080Ti with an Intel Xeon Silver 4214R CPU (middle), and also an RTX3080Ti with an Intel Xeon Silver 4214R CPU but with each tracking task running in parallel with a DiMP18 task on the same GPU (right). Perception models automatically sample events with various window sizes (ms). "*" indicates finetuned on ESOT500. </em>
 </p>
 
 <br>
