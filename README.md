@@ -78,6 +78,8 @@ We present ESOT500, a new dataset for event-based VOT, featuring time-aligned an
 
 - You can find the metadata file at `data/esot500_metadata.json`, or download it from our dataset page in [[Hugging face]](https://huggingface.co/datasets/NoRealBlank/ESOT500).
 
+- We also provide some checkpoint files of trackers in [[Hugging face]](https://huggingface.co/datasets/NoRealBlank/ESOT500) to download.
+
 <br>
 
 #### Pre-Slice
@@ -192,6 +194,8 @@ The code is based on the [**PyTracking**](https://github.com/visionml/pytracking
   - for training: `ltr/admin/local.py`
   - for testing: `pytracking/evaluation/local.py`
 
+  Note: If you want to use the pre-trained tracker checkpoints, please place them in the corresponding `settings.network_path` folder.
+  
   ---
 
   **6.** Run frame-based evaluation. 
@@ -268,6 +272,8 @@ The code is based on the [**PyTracking**](https://github.com/visionml/pytracking
   - for training: `lib/train/admin/local.py`
   - for testing: `lib/test/evaluation/local.py`
 
+  Note: If you want to use the pre-trained tracker checkpoints, please place them in the corresponding `settings.network_path` folder.
+  
   ---
 
   **6.** Run frame-based evaluation. 
