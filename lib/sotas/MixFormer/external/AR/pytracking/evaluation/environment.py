@@ -4,15 +4,9 @@ import os
 
 class EnvSettings:
     def __init__(self):
-        test_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-        lib_path = os.path.abspath(os.path.join(test_path, '..'))
-
-        self.prj_dir = os.path.abspath(os.path.join(lib_path, '..'))
-        self.save_dir = '{}/output/'.format(self.prj_dir)
-        self.results_path = '{}/tracking_results/'.format(test_path)
-        self.results_path_rt = '{}/tracking_results_rt_raw/'.format(test_path)
-        self.results_path_rt_final = '{}/tracking_results_rt_final/'.format(test_path)
+        pytracking_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
         
+        self.results_path = '{}/tracking_results/'.format(pytracking_path)
         self.segmentation_path = '{}/segmentation_results/'.format(pytracking_path)
         self.network_path = '{}/networks/'.format(pytracking_path)
         self.result_plot_path = '{}/result_plots/'.format(pytracking_path)
