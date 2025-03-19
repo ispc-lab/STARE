@@ -1,8 +1,3 @@
-﻿'''
-PKL Conversion and Visualization Tool
-Converts tracking results from PKL format to TXT format and visualizes them.
-'''
-
 import argparse
 import pickle
 import os
@@ -159,10 +154,10 @@ def visualize_bboxes(gt_file, output_file, images_folder, output_folder):
 
 def main():
     parser = argparse.ArgumentParser(description='Convert PKL file to TXT file and visualize.')
-    parser.add_argument('--sequence_name', type=str, default="bag6", help='Environment setting')
+    parser.add_argument('--sequence_name', type=str, default="airplane5", help='Environment setting')
     parser.add_argument('--tracker_name', type=str, default="dimp", help='Environment setting')
-    parser.add_argument('--parameter_name', type=str, default="dimp50_finetuned", help='Environment setting')
-    parser.add_argument('--run_id', type=int, default=14, help='Environment setting')
+    parser.add_argument('--parameter_name', type=str, default="dimp18", help='Environment setting')
+    parser.add_argument('--setting_id', type=int, default=14, help='Environment setting')
     parser.add_argument('--images-folder', type=str, default="/root/autodl-tmp/ESOT500/500/airplane5/VoxelGridComplex", help='Path to the original image folder')
     parser.add_argument('--save-dir', type=str, default="/root/autodl-tmp/ESOT500/test_jiechu", help='Directory to save visualization results')
     
@@ -170,11 +165,11 @@ def main():
     env_variables = env_settings()
 
     # Generate temporary TXT file path
-    txt_path = os.path.join(env_variables.results_path_rt_final, f"{args.tracker_name}/{args.parameter_name}/{args.run_id}/{args.sequence_name}_s.txt")
-    pkl_path = os.path.join(env_variables.results_path_rt, f"{args.tracker_name}/{args.parameter_name}/{args.run_id}/{args.sequence_name}_s.pkl")
+    txt_path = os.path.join(env_variables.results_path_rt_final, f"{args.tracker_name}/{args.parameter_name}/{args.setting_id}/{args.sequence_name}_s.txt")
+    pkl_path = os.path.join(env_variables.results_path_rt, f"{args.tracker_name}/{args.parameter_name}/{args.setting_id}/{args.sequence_name}_s.pkl")
     gt_path = os.path.join(env_variables.esot500_dir, f"anno_t/{args.sequence_name}.txt")
     images_folder = os.path.join(env_variables.esot500_dir, f"500/{args.sequence_name}/VoxelGridComplex")
-    save_dir = os.path.join(args.save_dir, f"{args.tracker_name}/{args.parameter_name}/{args.run_id}/{args.sequence_name}")
+    save_dir = os.path.join(args.save_dir, f"{args.tracker_name}/{args.parameter_name}/{args.setting_id}/{args.sequence_name}")
 
     # Step 1: Convert PKL to TXT
     convert_pkl_to_txt(pkl_path, txt_path, gt_path)
