@@ -37,6 +37,16 @@ def default_online():
     dataset = get_dataset('esot500s')
     return trackers, dataset
 
+def default_offline():
+    trackers =  trackerlist('atom', 'default', range(1)) + \
+                trackerlist('dimp', 'dimp18', range(1)) + \
+                trackerlist('kys', 'default', range(1)) + \
+                trackerlist('rts', 'rts50', range(1)) + \
+                trackerlist('keep_track','default',range(1)) +\
+                trackerlist('dimp', 'prdimp18', range(1))
+    dataset = get_dataset('esot500')
+    return trackers, dataset
+
 def esot500_offline():
     trackers =  trackerlist('atom', 'esot500', range(1)) + \
                 trackerlist('dimp', 'dimp18_esot500', range(1)) + \
@@ -53,6 +63,7 @@ def esotVH_offline():
                 trackerlist('dimp', 'prdimp18', 99)
     dataset = get_dataset('esoth')
     return trackers, dataset
+    
 def esotVM_offline():
     trackers =  trackerlist('atom', 'default', 66) + \
                 trackerlist('dimp', 'dimp18', 66) + \
