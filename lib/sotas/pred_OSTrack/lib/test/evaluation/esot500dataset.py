@@ -47,7 +47,7 @@ class ESOT500Dataset(BaseDataset):
     def _get_sequence_list(self, split):
         # training / testing split
         seq_list = []
-        with open ('/home/test4/code/OSTrack/data/EventSOT/EventSOT500/EventSOT500/{}.txt'.format(split),'r') as f:
+        with open (self.env_settings.esot500_dir + '/{}.txt'.format(split),'r') as f:
             for line in f:
                     seq_list.append(line.strip())
         return seq_list
