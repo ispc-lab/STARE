@@ -39,12 +39,6 @@
 ## Abstract
 Neuromorphic vision systems, inspired by biological sensory processing, offer transformative potential for real-time applications by leveraging event-driven data streams. However, current evaluation paradigms remain limited by frame-based methodologies that segment continuous event streams and neglect computational latency, which is a critical factor in dynamic, real-world environments. This discrepancy creates a substantial gap between laboratory benchmarks and practical performance, especially in scenarios requiring instantaneous responses. We introduce a novel latency-aware evaluation framework that eliminates the pre-slicing of event stream segmentation and employs continuous, adaptive sampling to preserve temporal continuity while quantifying computational delay. To validate our approach, we create a high-frequency dataset with 500 Hz temporal resolution, capturing scenarios from static to high-speed motion without aliasing. Experiments demonstrate that conventional metrics overestimate real-time performance by up to 40%, underscoring the necessity of latency-aware assessment. We further propose two bio-inspired strategies, predictive motion extrapolation and context-aware sampling, which could leverage the temporal dynamics and motion sensitivity of event streams to reduce latency-induced errors by 59% while boosting inference speed by 12\%. These advances bridge offline evaluation and real-world deployment, offering tools for designing neuromorphic systems in robotics and autonomous applications where sub-millisecond responsiveness is paramount. Our work establishes a foundation for continuous, latency-aware perception, combining methodological innovation with practical impact for next-generation vision technologies.
 
-Overall, we have three contributions:
-
-1. A new model performance evaluation framework
-2. A new dataset
-3. Two strategies for improving model performance
-
 <br><br>
 
 ## STARE
