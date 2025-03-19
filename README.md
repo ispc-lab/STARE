@@ -177,7 +177,7 @@ The code is based on the [**PyTracking**](https://github.com/visionml/pytracking
 
   **3.** Preprare the dataset.
   ```
-  ln -s /PATH/TO/ESOT500 ../data/EventSOT500
+  ln -s /PATH/TO/ESOT500 ../data/ESOT500
   ```
 
   ---
