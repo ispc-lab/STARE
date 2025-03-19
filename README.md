@@ -84,10 +84,10 @@ We present ESOT500, a new dataset for event-based VOT, featuring time-aligned an
 
 #### Pre-Slice
 
-The pre-slicing process is only for the traditional frame-based latency-free evaluation.
+The pre-slicing process is mainly for the traditional frame-based latency-free evaluation.
  
 ```
-python PATH_TO\STARE\lib\event_utils\event_stream_pre_slice.py DIR_PATH_TO_AEDAT4_FILES DIR_PATH_WHERE_TO_SAVE_THE_RESULTS FPS MS
+python [/PATH/TO/STARE]/lib/event_utils/esot500_preprocess.py --path_to_data [/PATH/TO/ESOT500] --fps [FPS] --window [MS]
 ```
 the arguments `FPS` and `MS` should follow the chart bellow, as shown in the Table. 2 of the paper:
 
@@ -98,6 +98,14 @@ the arguments `FPS` and `MS` should follow the chart bellow, as shown in the Tab
 |----|----|---|---|---|--|---|---|---|----|---|--|
 
 </center>
+
+<br>
+
+To prepare data for streaming experiments, you need to do the following:
+```
+python [/PATH/TO/STARE]/lib/event_utils/esot500_preprocess.py --path_to_data [/PATH/TO/ESOT500] --fps 500 --window 2
+ln -s [/PATH/TO/ESOT500]/500_w2ms [/PATH/TO/ESOT500]/500
+```
 
 <br>
 
@@ -177,7 +185,7 @@ The code is based on the [**PyTracking**](https://github.com/visionml/pytracking
 
   **3.** Preprare the dataset.
   ```
-  ln -s /PATH/TO/ESOT500 ../data/ESOT500
+  ln -s [/PATH/TO/ESOT500] ../data/ESOT500
   ```
 
   ---
