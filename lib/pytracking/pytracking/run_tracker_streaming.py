@@ -49,7 +49,7 @@ def main():
     parser.add_argument('--tracker_name', type=str, default="dimp", help='Name of tracking method.')
     parser.add_argument('--tracker_param', type=str, default="dimp18", help='Name of parameter file.')
     parser.add_argument('--stream_setting', type=str, default="s14", help='Name of stream_setting file.')
-    parser.add_argument('--runid', type=int, default=15, help='The run id.')
+    parser.add_argument('--runid', type=int, default=None, help='The run id.')
     parser.add_argument('--dataset_name', type=str, default='esot500s', help='Name of dataset (otb, nfs, uav, tpl, vot, tn, gott, gotv, lasot).')
     parser.add_argument('--sequence', type=str, default="airplane5_s", help='Sequence number or name.')
     parser.add_argument('--debug', type=int, default=0, help='Debug level.')
