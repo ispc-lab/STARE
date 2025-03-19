@@ -188,7 +188,7 @@ The code is based on the [**PyTracking**](https://github.com/visionml/pytracking
 
   ---
 
-  **5.** Modify the dataset path in generated environment setting files.
+  **5.** Modify the dataset path `settings.esot500_dir` in generated environment setting files.
   - for training: `ltr/admin/local.py`
   - for testing: `pytracking/evaluation/local.py`
 
@@ -264,7 +264,7 @@ The code is based on the [**PyTracking**](https://github.com/visionml/pytracking
 
   ---
 
-  **5.** Modify the dataset path in generated environment setting files.
+  **5.** Modify the dataset path `settings.esot500_dir` in generated environment setting files.
   - for training: `lib/train/admin/local.py`
   - for testing: `lib/test/evaluation/local.py`
 
