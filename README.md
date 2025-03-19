@@ -311,6 +311,9 @@ You can also refer to it to write the analysis scripts of your own style.
 <br><br>
 
 ## Demo
+
+**Note**: The entire download and running process takes about 10 minutes.
+
 **1.** Preparation of Tracker Checkpoints and Sample Data
 
 -  Download the [`dimp18`](https://drive.google.com/file/d/11MFQzqnZbbZ92e9zjvb8TBxLSU7WVhZk/view?usp=sharing) tracker checkpoints and place them in the `settings.network_path` directory (as detailed in [Usage/trackers-under-pytracking](#trackers-under-pytracking)).
