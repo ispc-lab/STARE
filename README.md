@@ -278,7 +278,7 @@ The code is based on the [**PyTracking**](https://github.com/visionml/pytracking
 
   **6.** Run frame-based evaluation. 
   ```
-  python tracking/test.py ostrack baseline --dataset_name esot_500_2
+  python tracking/test.py ostrack baseline --dataset_name esot_500_20
   ```
   **Note:** 
   - This doesn't work for **pred_OSTrack**.
