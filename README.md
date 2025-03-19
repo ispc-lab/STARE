@@ -312,7 +312,7 @@ You can also refer to it to write the analysis scripts of your own style.
 
 ## Demo
 
-**Note**: The entire download and running process takes about 10 minutes.
+**Note**: The entire process of downloading and running takes approximately 10 minutes.
 
 **1.** Preparation of Tracker Checkpoints and Sample Data
 
