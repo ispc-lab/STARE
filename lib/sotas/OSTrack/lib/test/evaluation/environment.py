@@ -5,8 +5,14 @@ import os
 class EnvSettings:
     def __init__(self):
         test_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+        lib_path = os.path.abspath(os.path.join(test_path, '..'))
 
+        self.prj_dir = os.path.abspath(os.path.join(lib_path, '..'))
+        self.save_dir = '{}/output/'.format(self.prj_dir)
         self.results_path = '{}/tracking_results/'.format(test_path)
+        self.results_path_rt = '{}/tracking_results_rt_raw/'.format(test_path)
+        self.results_path_rt_final = '{}/tracking_results_rt_final/'.format(test_path)
+        
         self.segmentation_path = '{}/segmentation_results/'.format(test_path)
         self.network_path = '{}/networks/'.format(test_path)
         self.result_plot_path = '{}/result_plots/'.format(test_path)
@@ -37,7 +43,7 @@ def create_default_local_file():
     with open(path, 'w') as f:
         settings = EnvSettings()
 
-        f.write('from test.evaluation.environment import EnvSettings\n\n')
+        f.write('from lib.test.evaluation.environment import EnvSettings\n\n')
         f.write('def local_env_settings():\n')
         f.write('    settings = EnvSettings()\n\n')
         f.write('    # Set your local paths here.\n\n')
