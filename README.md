@@ -216,7 +216,7 @@ python -c "from ltr.admin.environment import create_default_local_file; create_d
 **6.** Run frame-based evaluation. 
 (Experiment settings are in folder `pytracking/experiments` and `pytracking/stream_settings`)
 ```
-python pytracking/run_experiment.py myexperiments esot500_offline
+python pytracking/run_experiment.py myexperiments default_online
 ```
 
 **7.** Run stream-based evaluation. (Experiment settings are in folder `pytracking/experiments` and `pytracking/stream_settings`.)
