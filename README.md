@@ -217,7 +217,7 @@ The code is based on the [**PyTracking**](https://github.com/visionml/pytracking
 
   ---
 
-  **9.** To evaluate the results, use `pytracking/analysis/stream_eval.ipynb`. 
+  **9.** To evaluate the results, use `pytracking/analysis/analysis_results.ipynb`. 
   You can also refer to it to write the analysis scripts of your own style.
 
   ---
@@ -309,7 +309,10 @@ The code is based on the [**PyTracking**](https://github.com/visionml/pytracking
 
   **10.** Evaluate the results.
   ```
-  python tracking/analysis_results_pred.py 
+  # For pred_OSTrack
+  python tracking/analysis_results_pred.py
+
+  # For OSTrack, use 'tracking/analysis_results.ipynb'
   ``` 
   You can also refer to it to write the analysis scripts of your own style.
 
