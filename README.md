@@ -163,6 +163,7 @@ the arguments `FPS` and `MS` should follow the chart bellow, as shown in the Tab
 </center>
 
 **3.** Preparation for STARE
+
 To prepare data for STARE experiments, you need to do the following:
 ```
 python [/PATH/TO/STARE]/lib/event_utils/esot500_preprocess.py --path_to_data [/PATH/TO/ESOT500] --fps 500 --window 2
