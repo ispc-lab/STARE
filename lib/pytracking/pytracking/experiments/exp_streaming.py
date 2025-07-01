@@ -1,5 +1,15 @@
 from pytracking.evaluation import Tracker, get_dataset, trackerlist, load_stream_setting
 
+trackers_fast_test =  trackerlist('atom', 'default') + \
+            trackerlist('dimp', 'dimp18') + \
+            trackerlist('kys', 'default')
+
+def fast_test_streaming():
+    trackers =  trackers_fast_test
+    dataset = get_dataset('esot500s')
+    stream_setting = load_stream_setting('s0')
+    return trackers, dataset, stream_setting
+
 def esot2_streaming_1():
     trackers =  trackerlist('atom', 'default') + \
                 trackerlist('dimp', 'dimp18') + \
