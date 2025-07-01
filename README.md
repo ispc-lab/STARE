@@ -217,7 +217,7 @@ python -c "from ltr.admin.environment import create_default_local_file; create_d
 - for testing: `pytracking/evaluation/local.py`
 - please place the pre-trained tracker checkpoints in: `settings.network_path`
 
-**6.** Run frame-based evaluation. 
+**6.** Run frame-based evaluation demo. 
 (Experiment settings are in folder `pytracking/experiments` and `pytracking/stream_settings`)
 ```
 # pre-slice the '20_w50ms'(fps=20 & windows=50ms) subset
@@ -227,7 +227,7 @@ python [/PATH/TO/STARE]/lib/event_utils_new/esot500_preprocess.py --path_to_data
 python pytracking/run_experiment.py myexperiments fast_test_offline
 ```
 
-**7.** Run stream-based evaluation. (Experiment settings are in folder `pytracking/experiments` and `pytracking/stream_settings`.)
+**7.** Run stream-based evaluation demo. (Experiment settings are in folder `pytracking/experiments` and `pytracking/stream_settings`.)
 ```
 # prepare data for STARE experiments (If you have done this before, you can skip this step.)
 python [/PATH/TO/STARE]/lib/event_utils_new/esot500_preprocess.py --path_to_data [/PATH/TO/ESOT500] --fps 500 --window 2
