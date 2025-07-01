@@ -169,7 +169,7 @@ the arguments `FPS` and `MS` should follow the chart bellow, as shown in the Tab
 
 To prepare data for STARE experiments, you need to do the following:
 ```
-python [/PATH/TO/STARE]/lib/event_utils/esot500_preprocess.py --path_to_data [/PATH/TO/ESOT500] --fps 500 --window 2
+python [/PATH/TO/STARE]/lib/event_utils_new/esot500_preprocess.py --path_to_data [/PATH/TO/ESOT500] --fps 500 --window 2
 ln -s [/PATH/TO/ESOT500]/500_w2ms [/PATH/TO/ESOT500]/500
 ```
 
@@ -220,7 +220,11 @@ python -c "from ltr.admin.environment import create_default_local_file; create_d
 **6.** Run frame-based evaluation. 
 (Experiment settings are in folder `pytracking/experiments` and `pytracking/stream_settings`)
 ```
-python pytracking/run_experiment.py myexperiments default_offline
+# pre-slice the '20_w50ms'(fps=20 & windows=50) subset
+python [/PATH/TO/STARE]/lib/event_utils_new/esot500_preprocess.py --path_to_data [/PATH/TO/ESOT500] --fps 20 --window 50
+
+# run three trackers(atom, dimp18 and kys) for fps=20 & windows=50 settings
+python pytracking/run_experiment.py myexperiments fast_test_offline
 ```
 
 **7.** Run stream-based evaluation. (Experiment settings are in folder `pytracking/experiments` and `pytracking/stream_settings`.)
