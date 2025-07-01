@@ -132,6 +132,9 @@ The software versions of the base experimental environment used for testing are:
         |   |-- sequence_name2.txt
         |   :   :
         |
+        |-- [{FPS}_w{window}ms] # For frame-based latency-free evaluation, need a pre-slice preprocessing.
+        :   :
+        |
         |-- test.txt
         |-- train.txt
         |-- test_additional.txt
