@@ -47,6 +47,13 @@ def default_offline():
     dataset = get_dataset('esot500')
     return trackers, dataset
 
+def fast_test_offline():
+    trackers =  trackerlist('atom', 'default', range(1)) + \
+                trackerlist('dimp', 'dimp18', range(1)) + \
+                trackerlist('kys', 'default', range(1))
+    dataset = get_dataset('esot_20_50')
+    return trackers, dataset
+
 def esot500_offline():
     trackers =  trackerlist('atom', 'esot500', range(1)) + \
                 trackerlist('dimp', 'dimp18_esot500', range(1)) + \
