@@ -191,10 +191,10 @@ pip/conda install ...
 ```
 Our code is mainly built based on PyTracking, and you can refer to [lib/pytracking/INSTALL.md](lib/pytracking/INSTALL.md) for detailed installation and configuration.
 
-You can also use the requirement file [lib/stare_conda_env.yml](lib/stare_conda_env.yml) we exported to build the environment.
+You can also use the requirement file [lib/stare_conda_env.yml](lib/stare_conda_env.yml) we exported to build the environment. It may take about 30 minutes to complete the entire virtual environment creation.
 ```
-conda env create -f ../stare_conda_env.yml --verbose
-conda activate STARE
+conda env create -f ../stare_conda_env.yml --verbose --debug
+conda activate stare
 ```
 The entire installation process takes about 0.5h to 1h, depending on the network environment.
 
