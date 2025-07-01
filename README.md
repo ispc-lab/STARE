@@ -150,7 +150,7 @@ The software versions of the base experimental environment used for testing are:
 For frame-based latency-free evaluation, you need to perform a pre-slice preprocessing, as described in the original paper. Just run the following python command:
 
 ```
-python [/PATH/TO/STARE]/lib/event_utils/esot500_preprocess.py --path_to_data [/PATH/TO/ESOT500] --fps [FPS] --window [MS]
+python [/PATH/TO/STARE]/lib/event_utils_new/esot500_preprocess.py --path_to_data [/PATH/TO/ESOT500] --fps [FPS] --window [MS]
 ```
 the arguments `FPS` and `MS` should follow the chart bellow, as shown in the Table. 2 of the paper:
 
