@@ -223,7 +223,7 @@ python -c "from ltr.admin.environment import create_default_local_file; create_d
 # pre-slice the '20_w50ms'(fps=20 & windows=50) subset
 python [/PATH/TO/STARE]/lib/event_utils_new/esot500_preprocess.py --path_to_data [/PATH/TO/ESOT500] --fps 20 --window 50
 
-# run three trackers(atom, dimp18 and kys) for fps=20 & windows=50 settings
+# run three trackers(atom, dimp18 and kys) for 'fps=20 & windows=50' settings
 python pytracking/run_experiment.py myexperiments fast_test_offline
 ```
 
