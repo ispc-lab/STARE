@@ -227,7 +227,21 @@ python [/PATH/TO/STARE]/lib/event_utils_new/esot500_preprocess.py --path_to_data
 python pytracking/run_experiment.py myexperiments fast_test_offline
 ```
 
-**7.** Run stream-based evaluation demo. (Experiment settings are in folder `pytracking/experiments` and `pytracking/stream_settings`.)
+**Note:** 
+
+The details of `fast_test_offline` setting are as follows:
+```
+def fast_test_offline():
+    trackers =  trackerlist('atom', 'default', range(1)) + \
+                trackerlist('dimp', 'dimp18', range(1)) + \
+                trackerlist('kys', 'default', range(1))
+    dataset = get_dataset('esot_20_50')
+    return trackers, dataset
+```
+- `range(1)` means `run_id=0`, and the tracking results will be saved in `pytracking/output/tracking_results/{tracker_name}/{tracker_params}_{run_id}/`, e.g. `pytracking/output/tracking_results/atom/default_000/`
+- if you set `run_id=None`, the tracking results will be saved in `pytracking/output/tracking_results/{tracker_name}/{tracker_params}/`, e.g. `pytracking/output/tracking_results/atom/default/`
+
+**7.** Run stream-based latency-aware evaluation demo. (Experiment settings are in folder `pytracking/experiments` and `pytracking/stream_settings`.)
 ```
 # prepare data for STARE experiments (If you have done this before, you can skip this step.)
 python [/PATH/TO/STARE]/lib/event_utils_new/esot500_preprocess.py --path_to_data [/PATH/TO/ESOT500] --fps 500 --window 2
@@ -242,10 +256,25 @@ python eval/streaming_eval_v3.py exp_streaming fast_test_streaming
 The instructions given are for real-time testing on your own hardware. 
 If you want to reproduce the results in our paper, please refer to `pytracking/stream_settings/s14`.
 
-**8.** The results are by default in the folders `pytracking/output/tracking_results` and `pytracking/output/tracking_results_rt_final`. 
-You can change the paths by modifying the `local.py` files.
+**Note:** 
 
-**9.** To evaluate the results, use `pytracking/analysis/analysis_results.ipynb`. 
+The details of `fast_test_streaming` setting are as follows:
+```
+trackers_fast_test =  trackerlist('atom', 'default') + \
+            trackerlist('dimp', 'dimp18') + \
+            trackerlist('kys', 'default')
+
+def fast_test_streaming():
+    trackers = trackers_fast_test
+    dataset = get_dataset('esot500s')
+    stream_setting_id = 0  # Default streaming setting, for real-time testing on your own hardware. 
+    stream_setting = load_stream_setting(f's{stream_setting_id}')
+    return trackers, dataset, stream_setting
+```
+- currently, default `run_id` is `None` and `stream_setting_id=0`, the tracking results will eventually be saved in `pytracking/output/tracking_results_rt_final/{tracker_name}/{tracker_params}/{stream_setting_id}/`, e.g. `pytracking/output/tracking_results_rt_final/atom/default/0/`
+- if you set `run_id=0`, the tracking results will be saved in `pytracking/output/tracking_results_rt_final/{tracker_name}/{tracker_params}_{run_id}/{stream_setting_id}/`, e.g. `pytracking/output/tracking_results_rt_final/atom/default_000/0/`
+
+**8.** To evaluate the results, use `pytracking/analysis/analysis_results.ipynb`. 
 You can also refer to it to write the analysis scripts of your own style.
 
 **Note:** For tracker enhancement, please see the follow-up section.
