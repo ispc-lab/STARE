@@ -224,7 +224,7 @@ python -c "from ltr.admin.environment import create_default_local_file; create_d
 python [/PATH/TO/STARE]/lib/event_utils_new/esot500_preprocess.py --path_to_data [/PATH/TO/ESOT500] --fps 20 --window 50
 
 # run three trackers(atom, dimp18 and kys) for 'fps=20 & windows=50ms' settings
-python pytracking/run_experiment.py myexperiments fast_test_offline
+python pytracking/run_experiment.py exp_frame fast_test_offline
 ```
 
 **Note:** 
@@ -248,10 +248,10 @@ python [/PATH/TO/STARE]/lib/event_utils_new/esot500_preprocess.py --path_to_data
 ln -s [/PATH/TO/ESOT500]/500_w2ms [/PATH/TO/ESOT500]/500
 
 # run three trackers(atom, dimp18 and kys) for 'real streaming & windows=20ms' settings
-python pytracking/run_experiment_streaming.py exp_streaming fast_test_streaming
+python pytracking/run_experiment_streaming.py exp_stare fast_test_streaming
 
 # align the prediction with GT timestamp
-python eval/streaming_eval_v3.py exp_streaming fast_test_streaming
+python eval/streaming_eval_v3.py exp_stare fast_test_streaming
 ```
 The instructions given are for real-time testing on your own hardware. 
 If you want to reproduce the results in our paper, please refer to `pytracking/stream_settings/s14`.
@@ -274,7 +274,7 @@ def fast_test_streaming():
 - currently, default `run_id` is `None` and `stream_setting_id=0`, the tracking results will eventually be saved in `pytracking/output/tracking_results_rt_final/{tracker_name}/{tracker_params}/{stream_setting_id}/`, e.g. `pytracking/output/tracking_results_rt_final/atom/default/0/`
 - if you set `run_id=0`, the tracking results will be saved in `pytracking/output/tracking_results_rt_final/{tracker_name}/{tracker_params}_{run_id}/{stream_setting_id}/`, e.g. `pytracking/output/tracking_results_rt_final/atom/default_000/0/`
 
-**8.** To evaluate the results, use `pytracking/analysis/analysis_results.ipynb`. 
+**8.** To evaluate the results, use `pytracking/analysis/analysis_results_demo.ipynb`. 
 You can also refer to it to write the analysis scripts of your own style.
 
 **Note:** For tracker enhancement, please see the follow-up section.
