@@ -218,6 +218,7 @@ python -c "from ltr.admin.environment import create_default_local_file; create_d
 - please place the pre-trained tracker checkpoints in: `settings.network_path`
 
 **6.** Run frame-based evaluation demo. 
+
 (Experiment settings are in folder `pytracking/experiments` and `pytracking/stream_settings`)
 ```
 # pre-slice the '20_w50ms'(fps=20 & windows=50ms) subset
@@ -241,7 +242,9 @@ def fast_test_offline():
 - `range(1)` means `run_id=0`, and the tracking results will be saved in `pytracking/output/tracking_results/{tracker_name}/{tracker_params}_{run_id}/`, e.g. `pytracking/output/tracking_results/atom/default_000/`
 - if you set `run_id=None`, the tracking results will be saved in `pytracking/output/tracking_results/{tracker_name}/{tracker_params}/`, e.g. `pytracking/output/tracking_results/atom/default/`
 
-**7.** Run stream-based latency-aware evaluation demo. (Experiment settings are in folder `pytracking/experiments` and `pytracking/stream_settings`.)
+**7.** Run stream-based latency-aware evaluation demo. 
+
+(Experiment settings are in folder `pytracking/experiments` and `pytracking/stream_settings`.)
 ```
 # prepare data for STARE experiments (If you have done this before, you can skip this step.)
 python [/PATH/TO/STARE]/lib/event_utils_new/esot500_preprocess.py --path_to_data [/PATH/TO/ESOT500] --fps 500 --window 2
@@ -275,6 +278,7 @@ def fast_test_streaming():
 - if you set `run_id=0`, the tracking results will be saved in `pytracking/output/tracking_results_rt_final/{tracker_name}/{tracker_params}_{run_id}/{stream_setting_id}/`, e.g. `pytracking/output/tracking_results_rt_final/atom/default_000/0/`
 
 **8.** To evaluate the results, use `pytracking/analysis/analysis_results_demo.ipynb`. 
+
 You can also refer to it to write the analysis scripts of your own style.
 
 **Note:** For tracker enhancement, please see the follow-up section.
