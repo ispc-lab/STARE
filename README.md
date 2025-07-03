@@ -215,7 +215,7 @@ python -c "from ltr.admin.environment import create_default_local_file; create_d
 **5.** Modify the dataset path `settings.esot500_dir` in generated environment setting files.
 - for training: `ltr/admin/local.py`
 - for testing: `pytracking/evaluation/local.py`
-- please place the pre-trained tracker checkpoints in: `settings.network_path`
+- please directly place the pre-trained tracker checkpoints files in: `settings.network_path`
 
 **6.** Run frame-based evaluation demo. 
 
