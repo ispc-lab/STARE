@@ -297,7 +297,7 @@ cd lib/sotas/[OSTrack or pred_OSTrack]
 
 **2.** Activate the virtual environment.
 ```
-conda activate STARE
+conda activate stare
 ```
 
 **3.** Install the missing libraries.
@@ -378,7 +378,7 @@ cd lib/pytracking
 
 **4.** Visualization
 
-- Then run `python pytracking/visualize_stare_results.py` to visualize the tracking results.
+- Then run `python pytracking/visualize_stare_result.py` to visualize the tracking results.
 
 <br><br>
 
