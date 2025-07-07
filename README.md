@@ -320,7 +320,7 @@ python -c "from lib.train.admin.environment import create_default_local_file; cr
 
 **6.** Run frame-based evaluation. 
 ```
-python tracking/test.py ostrack baseline --dataset_name esot_500_2
+python tracking/test.py ostrack esot500_baseline --dataset_name esot_20_50
 ```
 **Note:** 
 - This doesn't work for **pred_OSTrack**.
