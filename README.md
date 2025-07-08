@@ -333,11 +333,11 @@ python tracking/streaming_eval_v4.py ostrack esot500_baseline s14 --dataset_name
 ```
 **Note:**
 - `--use_aas` option is currently only available to **OSTrack** and **pred_OSTrack**.
-- You can refer to `streaming_sotas_ostrack_std` to add test module of your own style at `../../pytracking/pytracking/experiments/exp_streaming.py`.
+- You can change the relevant parameters in `streaming_eval_v4.py` to make it fit your own style.
 
 **8.** Run stream-based evaluation **with predictive module**.
 ```
-python tracking/test_streaming.py ostrack pred_esot500_4step s14 --dataset_name esot500s --pred_next 1 [--use_aas]
+python tracking/test_streaming.py ostrack pred_esot500_4step s14 --dataset_name esot500s --pred_next 1 [--runid 66 --use_aas]
 python ../../pytracking/eval/streaming_predspeed.py 
 ```
 **Note:**
