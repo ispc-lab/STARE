@@ -320,7 +320,7 @@ python -c "from lib.train.admin.environment import create_default_local_file; cr
 
 **6.** Run frame-based evaluation. 
 ```
-python tracking/test.py ostrack esot500_baseline --dataset_name esot_20_50
+python tracking/test.py ostrack esot500mix --dataset_name esot_20_50
 ```
 **Note:** 
 - This doesn't work for **pred_OSTrack**.
@@ -329,7 +329,7 @@ python tracking/test.py ostrack esot500_baseline --dataset_name esot_20_50
 **7.** Run stream-based evaluation **without predictive module**.
 ```
 python tracking/test_streaming.py ostrack esot500_baseline s14 --dataset_name esot500s [--use_aas]
-python ../../pytracking/eval/streaming_eval_v3.py --experiment_module exp_streaming --experiment_name streaming_sotas_ostrack_std
+python ../../pytracking/eval/streaming_eval_v3.py exp_stare streaming_sotas_ostrack_std
 ```
 **Note:**
 - `--use_aas` option is currently only available to **OSTrack** and **pred_OSTrack**.
@@ -352,7 +352,7 @@ You can change the paths by modifying `local.py` and `streaming_predspeed.py` se
 # For pred_OSTrack
 python tracking/analysis_results_pred.py
 
-# For OSTrack, use 'tracking/analysis_results.ipynb'
+# For OSTrack, use 'tracking/analysis_results_demo.ipynb'
 ``` 
 You can also refer to it to write the analysis scripts of your own style.
 
