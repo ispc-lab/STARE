@@ -328,8 +328,8 @@ python tracking/test.py ostrack esot500mix --dataset_name esot_20_50
 
 **7.** Run stream-based evaluation **without predictive module**.
 ```
-python tracking/test_streaming.py ostrack esot500_baseline s14 --dataset_name esot500s [--use_aas]
-python ../../pytracking/eval/streaming_eval_v3.py exp_stare streaming_sotas_ostrack_std
+python tracking/test_streaming.py ostrack esot500_baseline s14 --dataset_name esot500s [--runid 66 --use_aas]
+python tracking/streaming_eval_v4.py ostrack esot500_baseline s14 --dataset_name esot500s [--runid 66]
 ```
 **Note:**
 - `--use_aas` option is currently only available to **OSTrack** and **pred_OSTrack**.
