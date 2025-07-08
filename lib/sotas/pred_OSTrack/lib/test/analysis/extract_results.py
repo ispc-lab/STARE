@@ -100,7 +100,7 @@ def calc_seq_err_robust(pred_bb, anno_bb, dataset, target_visible=None):
 
 
 def extract_results(trackers, dataset, report_name, skip_missing_seq=False, plot_bin_gap=0.05,
-                    exclude_invalid_frames=False):
+                    exclude_invalid_frames=False, stream_id=None):
     settings = env_settings()
     eps = 1e-16
 
@@ -130,6 +130,9 @@ def extract_results(trackers, dataset, report_name, skip_missing_seq=False, plot
         for trk_id, trk in enumerate(trackers):
             # Load results
             base_results_path = '{}/{}'.format(trk.results_dir, seq.name)
+            if seq.dataset in ['esot500s', 'esot2s']:
+                base_results_path = os.path.join(trk.results_dir_rt_final , str(stream_id), seq.name)
+                
             results_path = '{}.txt'.format(base_results_path)
 
             if os.path.isfile(results_path):
