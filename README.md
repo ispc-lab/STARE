@@ -320,7 +320,7 @@ python -c "from lib.train.admin.environment import create_default_local_file; cr
 - for testing: `lib/test/evaluation/local.py`
 - please place the pre-trained tracker checkpoints in: `settings.network_path`
 
-**6.** Run frame-based evaluation. 
+**6.** Run frame-based evaluation demo. 
 ```
 python tracking/test.py ostrack esot500mix --dataset_name esot_20_50
 ```
@@ -330,7 +330,7 @@ Similar as `Trackers under PyTracking`, the results are by default in the folder
 - This doesn't work for **pred_OSTrack**.
 - The available `dataset_name` can refer to the experiment results listed in our paper.
 
-**7.** Run stream-based evaluation **without predictive module**.
+**7.** Run stream-based latency-aware evaluation demo **without predictive module**.
 ```
 python tracking/test_streaming.py ostrack esot500_baseline s14 --dataset_name esot500s [--runid 66 --use_aas]
 python tracking/streaming_eval_v4.py ostrack esot500_baseline s14 --dataset_name esot500s [--runid 66]
@@ -341,7 +341,7 @@ Similar as `Trackers under PyTracking`, the results are by default in the folder
 - `--use_aas` option is currently only available to **OSTrack** and **pred_OSTrack**.
 - you can change the relevant parameters in `streaming_eval_v4.py` to make it fit your own style
 
-**8.** Run stream-based evaluation **with predictive module**.
+**8.** Run stream-based latency-aware evaluation demo **with predictive module**.
 ```
 python tracking/test_streaming.py ostrack pred_esot500_4step s14 --dataset_name esot500s --pred_next 1 [--runid 66 --use_aas]
 python tracking/streaming_predspeed.py ostrack pred_esot500_4step s14 [--runid 66]
