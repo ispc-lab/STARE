@@ -55,7 +55,7 @@ class Tracker:
         else:
             self.results_dir = '{}/{}/{}_{:03d}'.format(self.env.results_path, self.name, self.parameter_name, self.run_id)
             self.results_dir_rt = '{}/{}/{}_{:03d}'.format(self.env.results_path_rt, self.name, self.parameter_name,self.run_id)
-            self.results_dir_rt_final = '{}/{}/{}'.format(self.env.results_path_rt_final, self.name, self.parameter_name)
+            self.results_dir_rt_final = '{}/{}/{}_{:03d}'.format(self.env.results_path_rt_final, self.name, self.parameter_name, self.run_id)
             self.segmentation_dir = '{}/{}/{}_{:03d}'.format(self.env.segmentation_path, self.name, self.parameter_name, self.run_id)
         if result_only:
             self.results_dir = '{}/{}'.format(self.env.results_path, self.name)
