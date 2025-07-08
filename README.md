@@ -338,7 +338,7 @@ python tracking/streaming_eval_v4.py ostrack esot500_baseline s14 --dataset_name
 **8.** Run stream-based evaluation **with predictive module**.
 ```
 python tracking/test_streaming.py ostrack pred_esot500_4step s14 --dataset_name esot500s --pred_next 1 [--runid 66 --use_aas]
-python ../../pytracking/eval/streaming_predspeed.py 
+python tracking/streaming_predspeed.py ostrack pred_esot500_4step s14 [--runid 66]
 ```
 **Note:**
 - `--pred_next 1` option is currently only available to **pred_OSTrack**.
