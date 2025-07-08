@@ -241,6 +241,7 @@ def fast_test_offline():
 ```
 - `range(1)` means `run_id=0`, and the tracking results will be saved in `pytracking/output/tracking_results/{tracker_name}/{tracker_params}_{run_id}/`, e.g. `pytracking/output/tracking_results/atom/default_000/`
 - if you set `run_id=None`, the tracking results will be saved in `pytracking/output/tracking_results/{tracker_name}/{tracker_params}/`, e.g. `pytracking/output/tracking_results/atom/default/`
+- you can change the paths by modifying the relevant variables in `local.py`
 
 **7.** Run stream-based latency-aware evaluation demo. 
 
@@ -276,6 +277,7 @@ def fast_test_streaming():
 ```
 - currently, default `run_id` is `None` and `stream_setting_id=0`, the tracking results will eventually be saved in `pytracking/output/tracking_results_rt_final/{tracker_name}/{tracker_params}/{stream_setting_id}/`, e.g. `pytracking/output/tracking_results_rt_final/atom/default/0/`
 - if you set `run_id=0`, the tracking results will be saved in `pytracking/output/tracking_results_rt_final/{tracker_name}/{tracker_params}_{run_id}/{stream_setting_id}/`, e.g. `pytracking/output/tracking_results_rt_final/atom/default_000/0/`
+- you can change the paths by modifying the relevant variables in `local.py`
 
 **8.** To evaluate the results, use `pytracking/analysis/analysis_results_demo.ipynb`. 
 
@@ -322,6 +324,8 @@ python -c "from lib.train.admin.environment import create_default_local_file; cr
 ```
 python tracking/test.py ostrack esot500mix --dataset_name esot_20_50
 ```
+Similar as `Trackers under PyTracking`, the results are by default in the folders `lib/test/tracking_results`.
+
 **Note:** 
 - This doesn't work for **pred_OSTrack**.
 - The available `dataset_name` can refer to the experiment results listed in our paper.
@@ -331,29 +335,25 @@ python tracking/test.py ostrack esot500mix --dataset_name esot_20_50
 python tracking/test_streaming.py ostrack esot500_baseline s14 --dataset_name esot500s [--runid 66 --use_aas]
 python tracking/streaming_eval_v4.py ostrack esot500_baseline s14 --dataset_name esot500s [--runid 66]
 ```
+Similar as `Trackers under PyTracking`, the results are by default in the folders `lib/test/tracking_results_rt_final`.
+
 **Note:**
 - `--use_aas` option is currently only available to **OSTrack** and **pred_OSTrack**.
-- You can change the relevant parameters in `streaming_eval_v4.py` to make it fit your own style.
+- you can change the relevant parameters in `streaming_eval_v4.py` to make it fit your own style
 
 **8.** Run stream-based evaluation **with predictive module**.
 ```
 python tracking/test_streaming.py ostrack pred_esot500_4step s14 --dataset_name esot500s --pred_next 1 [--runid 66 --use_aas]
 python tracking/streaming_predspeed.py ostrack pred_esot500_4step s14 [--runid 66]
 ```
+Similar as `Trackers under PyTracking`, the results are by default in the folders `lib/test/tracking_results_rt_final`.
+
 **Note:**
 - `--pred_next 1` option is currently only available to **pred_OSTrack**.
-- You can change the relevant parameters in `streaming_predspeed.py` to make it fit your own style.
+- you can change the relevant parameters in `streaming_predspeed.py` to make it fit your own style
 
-**9.** The results are by default in the folders `pytracking/output/tracking_results` and `pytracking/output/tracking_results_rt_final`. 
-You can change the paths by modifying `local.py` and `streaming_predspeed.py` separately.
+**9.** To evaluate the results, use `lib/test/analysis/analysis_results_demo.ipynb`. 
 
-**10.** Evaluate the results.
-```
-# For pred_OSTrack
-python tracking/analysis_results_pred.py
-
-# For OSTrack, use 'tracking/analysis_results_demo.ipynb'
-``` 
 You can also refer to it to write the analysis scripts of your own style.
 
 <br><br>
