@@ -49,7 +49,7 @@ class ESOT500Dataset(BaseDataset):
         seq_list = []
         with open(self.env_settings.esot500_dir + '/{}.txt'.format(split), 'r') as f:
             for line in f:
-                    seq_list.append(line.strip())
+                seq_list.append(line.strip())
         return seq_list
 
 if __name__ == '__main__':
