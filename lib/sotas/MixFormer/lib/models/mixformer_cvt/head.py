@@ -240,7 +240,8 @@ def build_box_head(cfg):
     elif "CORNER" in cfg.MODEL.HEAD_TYPE:
         channel = getattr(cfg.MODEL, "HEAD_DIM", 384)
         freeze_bn = getattr(cfg.MODEL, "HEAD_FREEZE_BN", False)
-        print("head channel: %d" % channel)
+        # print("head channel: %d" % channel)
+             
         if cfg.MODEL.HEAD_TYPE == "CORNER":
             stride = 16
             feat_sz = int(cfg.DATA.SEARCH.SIZE / stride)
