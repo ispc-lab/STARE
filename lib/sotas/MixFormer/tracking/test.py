@@ -6,13 +6,12 @@ prj_path = os.path.join(os.path.dirname(__file__), '..')
 if prj_path not in sys.path:
     sys.path.append(prj_path)
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 from lib.test.evaluation import get_dataset
 from lib.test.evaluation.running import run_dataset
 from lib.test.evaluation.tracker import Tracker
 
 
-def run_tracker(tracker_name, tracker_param, run_id=None, dataset_name='otb', sequence=None, debug=0, threads=0,
+def run_tracker(tracker_name, tracker_param, run_id=None, dataset_name='esot_20_50', sequence=None, debug=0, threads=0,
                 num_gpus=8, tracker_params=None):
     """Run tracker on sequence or dataset.
     args:
@@ -37,21 +36,31 @@ def run_tracker(tracker_name, tracker_param, run_id=None, dataset_name='otb', se
 
 def main():
     parser = argparse.ArgumentParser(description='Run tracker on sequence or dataset.')
-    parser.add_argument('tracker_name', type=str, help='Name of tracking method.')
-    parser.add_argument('tracker_param', type=str, help='Name of config file.')
-    parser.add_argument('--runid', type=int, default=None, help='The run id.')
-    parser.add_argument('--dataset_name', type=str, default='esot_500_2', help='Name of dataset, e.g. esot_500_2')
-    parser.add_argument('--sequence', type=str, default=None, help='Sequence number or name.')
-    parser.add_argument('--debug', type=int, default=0, help='Debug level.')
-    parser.add_argument('--threads', type=int, default=0, help='Number of threads.')
+    parser.add_argument('tracker_name', type=str,
+                        help='Name of tracking method.')
+    parser.add_argument('tracker_param', type=str,
+                        help='Name of config file.')
+    parser.add_argument('--runid', type=int, default=None,
+                        help='The run id.')
+    parser.add_argument('--dataset_name', type=str, default='esot_20_50',
+                        help='Name of dataset (otb, nfs, uav, tpl, vot, tn, gott, gotv, lasot).')
+    parser.add_argument('--sequence', type=str, default=None,
+                        help='Sequence number or name.')
+    parser.add_argument('--debug', type=int, default=0,
+                        help='Debug level.')
+    parser.add_argument('--threads', type=int, default=0,
+                        help='Number of threads.')
     parser.add_argument('--num_gpus', type=int, default=1)
 
-    parser.add_argument('--params__model', type=str, default=None, help="Tracking model path.")
-    parser.add_argument('--params__update_interval', type=int, default=None, help="Update interval of online tracking.")
+    parser.add_argument('--params__model', type=str, default="mixformer_convmae_base_online.pth.tar",
+                        help="Tracking model path.")
+    parser.add_argument('--params__update_interval', type=int, default=None,
+                        help="Update interval of online tracking.")
     parser.add_argument('--params__online_sizes', type=int, default=None)
     parser.add_argument('--params__search_area_scale', type=float, default=None)
     parser.add_argument('--params__max_score_decay', type=float, default=1.0)
-    parser.add_argument('--params__vis_attn', type=int, choices=[0, 1], default=0, help="Whether visualize the attention maps.")
+    parser.add_argument('--params__vis_attn', type=int, choices=[0, 1], default=0,
+                        help="Whether visualize the attention maps.")
 
     args = parser.parse_args()
 
