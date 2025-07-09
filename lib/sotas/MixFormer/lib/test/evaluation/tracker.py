@@ -282,7 +282,8 @@ class Tracker:
             runtime.append(t_algo)
             in_timestamps.append(t_template)
             out_timestamps.append(t_algo+t_template)
-            print('t_algo: ', t_algo)
+            # print('t_algo: ', t_algo)
+          
             # =================== Tracking =====================
             while 1:
                 t_algo_total = sum(runtime) + t_template
