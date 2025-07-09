@@ -7,12 +7,13 @@ from lib.config.mixformer_vit_online.config import cfg, update_config_from_file
 def parameters(yaml_name: str, model=None, search_area_scale=None):
     params = TrackerParams()
     prj_dir = env_settings().prj_dir
-    save_dir = env_settings().save_dir
+    network_path = env_settings().network_path
+
     # update default config from yaml file
     yaml_file = os.path.join(prj_dir, 'experiments/mixformer_convmae_online/%s.yaml' % yaml_name)
     update_config_from_file(yaml_file)
     params.cfg = cfg
-    print("test config: ", cfg)
+    # print("test config: ", cfg)
 
     # template and search region
     params.template_factor = cfg.TEST.TEMPLATE_FACTOR
@@ -21,14 +22,14 @@ def parameters(yaml_name: str, model=None, search_area_scale=None):
         params.search_factor = search_area_scale
     else:
         params.search_factor = cfg.TEST.SEARCH_FACTOR
-    print("search_area_scale: {}".format(params.search_factor))
+    # print("search_area_scale: {}".format(params.search_factor))
     params.search_size = cfg.TEST.SEARCH_SIZE
 
     # Network checkpoint path
     if model is None:
         raise NotImplementedError("Please set proper model to test.")
     else:
-        params.checkpoint = os.path.join("/home/test4/code/EventBenchmark/lib/sotas/MixFormer", "checkpoints/%s" % model)
+        params.checkpoint = os.path.join(network_path, f"MixFormer/mixformer_convmae_online/{yaml_name}/{model}")
 
     # whether to save boxes from all queries
     params.save_all_boxes = False
