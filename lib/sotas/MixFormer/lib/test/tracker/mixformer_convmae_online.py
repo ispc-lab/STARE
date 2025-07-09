@@ -53,10 +53,11 @@ class MixFormerOnline(BaseTracker):
             self.max_score_decay = 1.0
         if not hasattr(params, 'vis_attn'):
             self.params.vis_attn = 0
-        print("Search scale is: ", self.params.search_factor)
-        print("Online size is: ", self.online_size)
-        print("Update interval is: ", self.update_interval)
-        print("Max score decay is ", self.max_score_decay)
+            
+        # print("Search scale is: ", self.params.search_factor)
+        # print("Online size is: ", self.online_size)
+        # print("Update interval is: ", self.update_interval)
+        # print("Max score decay is ", self.max_score_decay)
 
 
     def initialize(self, image, info: dict):
