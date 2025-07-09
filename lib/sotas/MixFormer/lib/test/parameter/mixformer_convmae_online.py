@@ -29,7 +29,7 @@ def parameters(yaml_name: str, model=None, search_area_scale=None):
     if model is None:
         raise NotImplementedError("Please set proper model to test.")
     else:
-        params.checkpoint = os.path.join(network_path, f"MixFormer/mixformer_convmae_online/{yaml_name}/{model}")
+        params.checkpoint = os.path.join(network_path, f"mixformer_convmae_online/{yaml_name}/{model}")
 
     # whether to save boxes from all queries
     params.save_all_boxes = False
