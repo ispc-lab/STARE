@@ -20,7 +20,7 @@ def parameters():
     params.sta_image_sample_size = (30 * 16, 52 * 16)
     params.sta_search_area_scale = 4.0
 
-    params.sta_net = NetWithBackbone(net_path='sta.pth.tar',
+    params.sta_net = NetWithBackbone(net_path='rts/rts50/sta.pth.tar',
                                      use_gpu=params.use_gpu,
                                      image_format='bgr255',
                                      mean=[102.9801, 115.9465, 122.7717],
@@ -53,7 +53,7 @@ def parameters():
     params.net_opt_update_iter = 3
 
     # Main network
-    params.net = NetWithBackbone(net_path='rts50.pth',
+    params.net = NetWithBackbone(net_path='rts/rts50/rts50.pth',
                                  use_gpu=params.use_gpu,
                                  image_format='bgr255',
                                  mean=[102.9801, 115.9465, 122.7717],
