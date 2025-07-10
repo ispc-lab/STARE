@@ -181,29 +181,31 @@ As mentioned at the beginning of the Usage section, the code is based on the [**
 
 Below are the instructions to configure and run the tracker under PyTracking.
 
-**1.** Go to the working directory of pytracking.
+**1.** Create a virtual environment and install required libraries.
+
+You can use the requirements file [lib/stare_conda_env.yml](lib/stare_conda_env.yml) we exported to build the environment. The entire installation process takes about 0.5h to 1h, depending on the network environment.
 ```
-cd lib/pytracking
+cd [/PATH/TO/STARE]
+
+conda env create -f ./lib/stare_conda_env.yml --verbose --debug
+conda activate stare
 ```
 
-**2.** Create a virtual environment and install required libraries.
+Besides, our code is mainly built based on PyTracking, and you can also refer to [lib/pytracking/INSTALL.md](lib/pytracking/INSTALL.md) for detailed installation and configuration.
 ```
 conda create -n stare python=3.8
 conda activate stare
-pip/conda install ...
+[pip/conda install ...]
 ```
-Our code is mainly built based on PyTracking, and you can refer to [lib/pytracking/INSTALL.md](lib/pytracking/INSTALL.md) for detailed installation and configuration.
 
-You can also use the requirement file [lib/stare_conda_env.yml](lib/stare_conda_env.yml) we exported to build the environment.
+**2.** Preprare the dataset.
 ```
-conda env create -f ../stare_conda_env.yml --verbose --debug
-conda activate stare
+ln -s [/PATH/TO/ESOT500] ./data/ESOT500
 ```
-The entire installation process takes about 0.5h to 1h, depending on the network environment.
 
-**3.** Preprare the dataset.
+**3.** Go to the working directory of pytracking.
 ```
-ln -s [/PATH/TO/ESOT500] ../data/ESOT500
+cd ./lib/pytracking
 ```
 
 **4.** Set environment for pytracking.
@@ -303,8 +305,10 @@ conda activate stare
 ```
 
 **3.** Install the missing libraries.
+
+(If you use the requirements file we provide, you can skip this step.)
 ```
-pip/conda install ...
+[pip/conda install ...]
 ```
 In fact, if you have PyTracking installed, you can directly find and install the missing packages according to the error by running the subsequent scripts.
 Only a few dependencies are different, and it takes a few minutes to install.
