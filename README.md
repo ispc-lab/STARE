@@ -188,8 +188,8 @@ cd lib/pytracking
 
 **2.** Create a virtual environment and install required libraries.
 ```
-conda create -n STARE python=3.8
-conda activate STARE
+conda create -n stare python=3.8
+conda activate stare
 pip/conda install ...
 ```
 Our code is mainly built based on PyTracking, and you can refer to [lib/pytracking/INSTALL.md](lib/pytracking/INSTALL.md) for detailed installation and configuration.
@@ -252,23 +252,23 @@ python [/PATH/TO/STARE]/lib/event_utils_new/esot500_preprocess.py --path_to_data
 ln -s [/PATH/TO/ESOT500]/500_w2ms [/PATH/TO/ESOT500]/500
 
 # run three trackers(atom, dimp18 and kys) for 'real streaming & windows=20ms' settings
-python pytracking/run_experiment_streaming.py exp_stare fast_test_streaming
+python pytracking/run_experiment_streaming.py exp_stare fast_test_stare
 
 # align the prediction with GT timestamp
-python eval/streaming_eval_v3.py exp_stare fast_test_streaming
+python eval/streaming_eval_v3.py exp_stare fast_test_stare
 ```
 The instructions given are for real-time testing on your own hardware. 
 If you want to reproduce the results in our paper, please refer to `pytracking/stream_settings/s14`.
 
 **Note:** 
 
-The details of `fast_test_streaming` setting are as follows:
+The details of `fast_test_stare` setting are as follows:
 ```
 trackers_fast_test =  trackerlist('atom', 'default') + \
             trackerlist('dimp', 'dimp18') + \
             trackerlist('kys', 'default')
 
-def fast_test_streaming():
+def fast_test_stare():
     trackers = trackers_fast_test
     dataset = get_dataset('esot500s')
     stream_setting_id = 0  # Default streaming setting, for real-time testing on your own hardware. 
