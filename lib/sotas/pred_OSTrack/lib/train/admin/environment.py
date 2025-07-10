@@ -7,6 +7,8 @@ def create_default_local_file():
     path = os.path.join(os.path.dirname(__file__), 'local.py')
 
     empty_str = '\'\''
+    esot500_dir = f"\'{os.environ.get('ESOT500_DIR', '')}\'"
+    
     default_settings = OrderedDict({
         'workspace_dir': empty_str,
         'tensorboard_dir': 'self.workspace_dir + \'/tensorboard/\'',
@@ -24,11 +26,11 @@ def create_default_local_file():
         'msra10k_dir': empty_str,
         'davis_dir': empty_str,
         'youtubevos_dir': empty_str,
-        'fe240_dir':empty_str,
-        'visEvent_dir':empty_str,
-        'eventcarla_dir':empty_str,
-        'esot500_dir':empty_str,
-        'esot2_dir':empty_str,
+        'fe240_dir': empty_str,
+        'visEvent_dir': empty_str,
+        'eventcarla_dir': empty_str,
+        'esot500_dir': esot500_dir,
+        'esot2_dir': empty_str,
         
         })
 
