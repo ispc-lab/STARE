@@ -73,6 +73,6 @@ def parameters():
     _, config = parse_option()
     params.tracking_net = ETracking_Net(SwinT = build_model(config)).cuda()
     params.tracking_net.eval()
-    params.net_path = '/home/test4/code/EventBenchmark/lib/pytracking/pytracking/networks/egt_state_dict.pkl'
+    params.net_path = 'egt/egt_state_dict.pkl'
 
     return params
