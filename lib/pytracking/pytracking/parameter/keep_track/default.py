@@ -65,10 +65,10 @@ def parameters():
     # KeepTrack parameters
     params.use_certainty_for_weight_computation = True
     params.certainty_for_weight_computation_ths = 0.5
-    params.target_candidate_matching_net = NetWrapper(net_path='keep_track.pth.tar', use_gpu=params.use_gpu)
+    params.target_candidate_matching_net = NetWrapper(net_path='keep_track/keep_track.pth.tar', use_gpu=params.use_gpu)
 
     params.vot_anno_conversion_type = 'preserve_area'
-    params.net = NetWithBackbone(net_path='super_dimp_simple.pth.tar', use_gpu=params.use_gpu)
+    params.net = NetWithBackbone(net_path='keep_track/super_dimp_simple.pth.tar', use_gpu=params.use_gpu)
 
     params.visualize_candidate_matching = False
     params.visualize_candidate_assignment_matrix = False
