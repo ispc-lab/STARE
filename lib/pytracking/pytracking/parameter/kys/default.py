@@ -67,7 +67,7 @@ def parameters():
     params.remove_offset_in_fused_score = True
     params.score_downsample_factor = 1
 
-    params.net = NetWithBackbone(net_path='kys.pth',
+    params.net = NetWithBackbone(net_path='kys/kys.pth',
                                  use_gpu=params.use_gpu)
 
     params.vot_anno_conversion_type = 'preserve_area'
