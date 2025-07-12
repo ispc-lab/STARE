@@ -273,12 +273,12 @@ trackers_fast_test =  trackerlist('atom', 'default') + \
 def fast_test_stare():
     trackers = trackers_fast_test
     dataset = get_dataset('esot500s')
-    stream_setting_id = 0  # Default streaming setting, for real-time testing on your own hardware. 
+    stream_setting_id = 100  # Default streaming setting, for real-time testing on your own hardware. 
     stream_setting = load_stream_setting(f's{stream_setting_id}')
     return trackers, dataset, stream_setting
 ```
-- currently, default `run_id` is `None` and `stream_setting_id=0`, the tracking results will eventually be saved in `pytracking/output/tracking_results_rt_final/{tracker_name}/{tracker_params}/{stream_setting_id}/`, e.g. `pytracking/output/tracking_results_rt_final/atom/default/0/`
-- if you set `run_id=0`, the tracking results will be saved in `pytracking/output/tracking_results_rt_final/{tracker_name}/{tracker_params}_{run_id}/{stream_setting_id}/`, e.g. `pytracking/output/tracking_results_rt_final/atom/default_000/0/`
+- currently, default `run_id` is `None` and `stream_setting_id=100`, the tracking results will eventually be saved in `pytracking/output/tracking_results_rt_final/{tracker_name}/{tracker_params}/{stream_setting_id}/`, e.g. `pytracking/output/tracking_results_rt_final/atom/default/100/`
+- if you set `run_id=0`, the tracking results will be saved in `pytracking/output/tracking_results_rt_final/{tracker_name}/{tracker_params}_{run_id}/{stream_setting_id}/`, e.g. `pytracking/output/tracking_results_rt_final/atom/default_000/100/`
 - you can change the paths by modifying the relevant variables in `local.py`
 
 **8.** To evaluate the results, use `pytracking/analysis/analysis_results_demo.ipynb`. 
@@ -336,8 +336,8 @@ Similar as `Trackers under PyTracking`, the results are by default in the folder
 
 **7.** Run stream-based latency-aware evaluation demo **without predictive module**.
 ```
-python tracking/test_streaming.py ostrack esot500_baseline s14 --dataset_name esot500s [--runid 66 --use_aas]
-python tracking/streaming_eval_v4.py ostrack esot500_baseline s14 --dataset_name esot500s [--runid 66]
+python tracking/test_streaming.py ostrack esot500_baseline s100 --dataset_name esot500s [--runid 66 --use_aas]
+python tracking/streaming_eval_v4.py ostrack esot500_baseline s100 --dataset_name esot500s [--runid 66]
 ```
 Similar as `Trackers under PyTracking`, the results are by default in the folders `lib/test/tracking_results_rt_final`.
 
@@ -347,8 +347,8 @@ Similar as `Trackers under PyTracking`, the results are by default in the folder
 
 **8.** Run stream-based latency-aware evaluation demo **with predictive module**.
 ```
-python tracking/test_streaming.py ostrack pred_esot500_4step s14 --dataset_name esot500s --pred_next 1 [--runid 66 --use_aas]
-python tracking/streaming_predspeed.py ostrack pred_esot500_4step s14 [--runid 66]
+python tracking/test_streaming.py ostrack pred_esot500_4step s100 --dataset_name esot500s --pred_next 1 [--runid 66 --use_aas]
+python tracking/streaming_predspeed.py ostrack pred_esot500_4step s100 [--runid 66]
 ```
 Similar as `Trackers under PyTracking`, the results are by default in the folders `lib/test/tracking_results_rt_final`.
 
