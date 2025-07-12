@@ -2,12 +2,12 @@ from pytracking.evaluation import Tracker, get_dataset, trackerlist, load_stream
 
 
 # Note:
-# Currently, default run_id is None and stream_setting_id=0, the tracking results will eventually
+# Currently, default run_id is None and stream_setting_id=100, the tracking results will eventually
 # be saved in pytracking/output/tracking_results_rt_final/{tracker_name}/{tracker_params}/{stream_setting_id}/
-# e.g. pytracking/output/tracking_results_rt_final/atom/default/0/
+# e.g. pytracking/output/tracking_results_rt_final/atom/default/100/
 # if you set run_id=0, the tracking results will
 # be saved in pytracking/output/tracking_results_rt_final/{tracker_name}/{tracker_params}_{run_id}/{stream_setting_id}/
-# e.g. pytracking/output/tracking_results_rt_final/atom/default_000/0/
+# e.g. pytracking/output/tracking_results_rt_final/atom/default_000/100/
 
 trackers_fast_test =  trackerlist('atom', 'default') + \
             trackerlist('dimp', 'dimp18') + \
@@ -16,12 +16,12 @@ trackers_fast_test =  trackerlist('atom', 'default') + \
 def fast_test_stare():
     trackers = trackers_fast_test
     dataset = get_dataset('esot500s')
-    stream_setting_id = 0  # Default streaming setting, for real-time testing on your own hardware.
+    stream_setting_id = 100  # Default streaming setting, for real-time testing on your own hardware.
     stream_setting = load_stream_setting(f's{stream_setting_id}')
     return trackers, dataset, stream_setting
 
-def esot500_stare_all():
-    trackers =  trackerlist('dimp', 'dimp18', range(1)) + \
+
+trackers_stare_all = trackerlist('dimp', 'dimp18', range(1)) + \
                 trackerlist('dimp', 'dimp18_esot500', range(1)) + \
                 trackerlist('dimp', 'dimp50', range(1)) + \
                 trackerlist('dimp', 'dimp50_esot500', range(1)) + \
@@ -39,9 +39,63 @@ def esot500_stare_all():
                 trackerlist('rts', 'rts50', range(1)) + \
                 trackerlist('egt', 'egt', range(1))
 
+# for sim real-time testing on your own hardware.
+def esot500_stare_w2ms():
+    trackers =  trackers_stare_all
     dataset = get_dataset('esot500s')
-    
-    stream_setting_id = 14  # for sim real-time testing on your own hardware.
+
+    # id:101 is designed to simulate the real-time running of STARE (2ms) to reproduce the results
+    stream_setting_id = 101
+    stream_setting = load_stream_setting(f's{stream_setting_id}')
+
+    return trackers, dataset, stream_setting
+
+def esot500_stare_w20ms():
+    trackers =  trackers_stare_all
+    dataset = get_dataset('esot500s')
+
+    # id:102 is designed to simulate the real-time running of STARE (20ms) to reproduce the results
+    stream_setting_id = 102
+    stream_setting = load_stream_setting(f's{stream_setting_id}')
+
+    return trackers, dataset, stream_setting
+
+def esot500_stare_w50ms():
+    trackers =  trackers_stare_all
+    dataset = get_dataset('esot500s')
+
+    # id:103 is designed to simulate the real-time running of STARE (50ms) to reproduce the results
+    stream_setting_id = 103
+    stream_setting = load_stream_setting(f's{stream_setting_id}')
+
+    return trackers, dataset, stream_setting
+
+def esot500_stare_w100ms():
+    trackers =  trackers_stare_all
+    dataset = get_dataset('esot500s')
+
+    # id:104 is designed to simulate the real-time running of STARE (100ms) to reproduce the results
+    stream_setting_id = 104
+    stream_setting = load_stream_setting(f's{stream_setting_id}')
+
+    return trackers, dataset, stream_setting
+
+def esot500_stare_w150ms():
+    trackers =  trackers_stare_all
+    dataset = get_dataset('esot500s')
+
+    # id:105 is designed to simulate the real-time running of STARE (150ms) to reproduce the results
+    stream_setting_id = 105
+    stream_setting = load_stream_setting(f's{stream_setting_id}')
+
+    return trackers, dataset, stream_setting
+
+def esot500_stare_w200ms():
+    trackers =  trackers_stare_all
+    dataset = get_dataset('esot500s')
+
+    # id:106 is designed to simulate the real-time running of STARE (200ms) to reproduce the results
+    stream_setting_id = 106
     stream_setting = load_stream_setting(f's{stream_setting_id}')
 
     return trackers, dataset, stream_setting
