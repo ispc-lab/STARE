@@ -21,23 +21,23 @@ def fast_test_stare():
     return trackers, dataset, stream_setting
 
 
-trackers_stare_all = trackerlist('dimp', 'dimp18', range(1)) + \
-                trackerlist('dimp', 'dimp18_esot500', range(1)) + \
-                trackerlist('dimp', 'dimp50', range(1)) + \
-                trackerlist('dimp', 'dimp50_esot500', range(1)) + \
-                trackerlist('kys', 'default', range(1)) + \
-                trackerlist('kys', 'esot500', range(1)) + \
-                trackerlist('atom', 'default', range(1)) + \
-                trackerlist('atom', 'esot500', range(1)) + \
-                trackerlist('tomp', 'tomp50', range(1)) + \
-                trackerlist('tomp', 'tomp50_esot500', range(1)) + \
-                trackerlist('tomp', 'tomp101', range(1)) + \
-                trackerlist('tomp', 'tomp101_esot500', range(1)) + \
-                trackerlist('dimp', 'prdimp18', range(1)) + \
-                trackerlist('dimp', 'prdimp50', range(1)) + \
-                trackerlist('keep_track','default',range(1)) + \
-                trackerlist('rts', 'rts50', range(1)) + \
-                trackerlist('egt', 'egt', range(1))
+trackers_stare_all = trackerlist('dimp', 'dimp18') + \
+                trackerlist('dimp', 'dimp18_esot500') + \
+                trackerlist('dimp', 'dimp50') + \
+                trackerlist('dimp', 'dimp50_esot500') + \
+                trackerlist('kys', 'default') + \
+                trackerlist('kys', 'esot500') + \
+                trackerlist('atom', 'default') + \
+                trackerlist('atom', 'esot500') + \
+                trackerlist('tomp', 'tomp50') + \
+                trackerlist('tomp', 'tomp50_esot500') + \
+                trackerlist('tomp', 'tomp101') + \
+                trackerlist('tomp', 'tomp101_esot500') + \
+                trackerlist('dimp', 'prdimp18') + \
+                trackerlist('dimp', 'prdimp50') + \
+                trackerlist('keep_track','default') + \
+                trackerlist('rts', 'rts50') + \
+                trackerlist('egt', 'egt')
 
 # for sim real-time testing on your own hardware.
 def esot500_stare_w2ms():
