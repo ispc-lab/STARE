@@ -1,18 +1,23 @@
-from pytracking.tracker.base import BaseTracker
+import os
+import time
+import math
+import numpy as np
 import torch
 import torch.nn.functional as F
 from torch.nn.modules.module import Module
-import math
-import time
-import numpy as np
+
+from pytracking.tracker.base import BaseTracker
 from pytracking import dcf, TensorList
 from pytracking.features.preprocessing import numpy_to_torch
 from pytracking.utils.plotting import show_tensor, plot_graph
 from pytracking.features.preprocessing import sample_patch_multiscale, sample_patch_transformed
 from pytracking.features import augmentation
+from pytracking.evaluation.environment import env_settings
+
 import ltr.data.bounding_box_utils as bbutils
 from ltr.models.target_classifier.initializer import FilterInitializerZero
 from ltr.models.layers import activation
+
 
 def load_model(model,mode_dict):
     from collections import OrderedDict
@@ -27,6 +32,7 @@ def load_model(model,mode_dict):
     state_dict_m.update(new_state_dict)
     model.load_state_dict(state_dict_m)
     model.eval()
+
     return model
 
 class EGT(Module):
@@ -36,11 +42,21 @@ class EGT(Module):
         self.params = params
         self.visdom = None
         Tracking_net = params.tracking_net
-        state_dict = torch.load(params.net_path, map_location='cpu')
+
+        net_path = params.net_path
+        if os.path.isabs(net_path):
+            net_path_full = net_path
+        else:
+            root = env_settings().network_path
+            net_path_full = os.path.join(root, net_path)
+
+        state_dict = torch.load(net_path_full, map_location='cpu')
         OutDict = state_dict['Dict']
         load_model(Tracking_net, OutDict)
+
         self.tracking_net = Tracking_net
         self.tracking_net.eval()
+
         self.indx = 1
         self.sample_idx = 1
         self.sample_range = 1
@@ -50,8 +66,10 @@ class EGT(Module):
         self.Tempalate_fea_stable = None
         self.Tempalate_fea_variad = None
         self.pred2curr_box = None
+
         self.update_inter = params.update_inter
         self.search_size = params.search_size
+
         self.eval()
 
     def _apply_mask(self, Fea, Pnt, GT, Temp=False):
@@ -72,6 +90,7 @@ class EGT(Module):
         mask = torch.exp(Dist.detach())
         mask = 1/(mask+1e-6)
         Fea01 = Fea * mask
+
         return Fea01
         
     def _init_box(self,box):
@@ -226,7 +245,7 @@ class EGT(Module):
         if not self.params.has('device'):
             self.params.device = 'cuda' if self.params.use_gpu else 'cpu'
 
-        assert(Temp.shape[1] == 5)
+        assert Temp.shape[1] == 5, "Egt init template should be processed event streams"
 
         # Time initialization
         tic = time.time()
@@ -251,14 +270,19 @@ class EGT(Module):
         ratio = temp_point / (B * P)
         with torch.no_grad():
             Temp = Temp.to(self.params.device)
-            Temp = self.tracking_net.extractor(Temp,out_num=256,Is_temp=True,Temp_ratio=max(0.02,ratio))
+            Temp = self.tracking_net.extractor(Temp, out_num=256, Is_temp=True, Temp_ratio=max(0.02, ratio))
 
-            Emb_Temp, _ = self.tracking_net.SwinTrans.track_embedding(Temp.permute([0,2,1]))
+            Emb_Temp, _ = self.tracking_net.SwinTrans.track_embedding(Temp.permute([0, 2, 1]))
 
-            Emb_Temp = self.tracking_net._ensemble_fea([Emb_Temp[-1].permute([0,2,1]) , Emb_Temp[-2].permute([0,2,1]), Emb_Temp[-3].permute([0,2,1]), Emb_Temp[-4].permute([0,2,1])])
+            Emb_Temp = self.tracking_net._ensemble_fea([
+                Emb_Temp[-1].permute([0, 2, 1]),
+                Emb_Temp[-2].permute([0, 2, 1]),
+                Emb_Temp[-3].permute([0, 2, 1]),
+                Emb_Temp[-4].permute([0, 2, 1])
+            ])
 
-            Temp_pos = Emb_Temp[:,:3,:]
-            Emb_Temp = Emb_Temp[:,5:,:]
+            Temp_pos = Emb_Temp[:, :3, :]
+            Emb_Temp = Emb_Temp[:, 5:, :]
 
 
         B,C,P = Temp_pos.shape
@@ -320,6 +344,7 @@ class EGT(Module):
         self.Tempalate_fea_mid = {'Temp': torch.cat([fea_stable_0, fea_variad_1], dim=2), 'Temp_pos': torch.cat([fea_stable_pos_0, fea_variad_pos_1], dim=2)}
 
         return True
+
     def _resample_point(self,fea,fea_pos,clus_idx,num):
         fea_ = fea[:,:,clus_idx]
         fea_pos_ = fea_pos[:,:,clus_idx]
@@ -354,6 +379,7 @@ class EGT(Module):
 
         prob_out = 1 - 1.1 * dist_p2b
         prob_out = torch.clamp(prob_out, min = 0, max = 1)
+
         return prob_out[:,None,:]
 
     def _cluster_resample(self, X, X_pos, prob, clus_num = 3):
@@ -474,9 +500,9 @@ class EGT(Module):
             np.savetxt('/home/test4/code/EventBenchmark/lib/pytracking/temp/after_project'+str(self.indx)+'.xyz', torch.cat([Warpped_pos[0,:,:], Ensemble_X_01[0,2:3,:]],dim=0).permute([1,0]).detach().cpu().numpy())
             np.savetxt('/home/test4/code/EventBenchmark/lib/pytracking/temp/before_project'+str(self.indx)+'.xyz', Ensemble_X_01[0,:3,:].permute([1,0]).detach().cpu().numpy())
 
-        X_pos = Emb_X[:,:3,:].clone()
+        X_pos = Emb_X[:, :3, :].clone()
 
-        Emb_X = Emb_X[:,5:,:]
+        Emb_X = Emb_X[:, 5:, :]
 
         X_pos_emb = self.tracking_net.pos_embedding(X_pos)
 
@@ -522,75 +548,74 @@ class EGT(Module):
         
         flag_prob = prob_out >= 0.9
 
-        flag_prob = flag_prob[0,0,:]
+        flag_prob = flag_prob[0, 0, :]
 
-        X_ = Emb_X[:,:,flag_prob]
+        X_ = Emb_X[:, :, flag_prob]
 
-        X_pos_ = X_pos[:,:,flag_prob]
+        X_pos_ = X_pos[:, :, flag_prob]
 
-        prob_ = prob_sem[:,:,flag_prob]
+        prob_ = prob_sem[:, :, flag_prob]
 
-        idx_prob = prob_.sort(-1,descending = False)[-1]
-        B,C,P = X_.shape
+        idx_prob = prob_.sort(-1, descending=False)[-1]
+        B, C, P = X_.shape
 
-        idx_prob_ = idx_prob.repeat([1,C,1])
-        idx_prob_pos = idx_prob.repeat([1,3,1])
+        idx_prob_ = idx_prob.repeat([1, C, 1])
+        idx_prob_pos = idx_prob.repeat([1, 3, 1])
 
-        X_ = torch.gather(X_,-1,idx_prob_)
+        X_ = torch.gather(X_, -1, idx_prob_)
 
         X_pos_ = torch.gather(X_pos_, -1, idx_prob_pos)
 
         Flag_template_pred = self.tracking_net._Point_in_box(X_pos_, Pred_bbox_final)
-        Flag_template_pred = Flag_template_pred.bool()[0,0,:]
+        Flag_template_pred = Flag_template_pred.bool()[0, 0, :]
 
-        X_ = X_[:,:,Flag_template_pred]
-        X_pos_ = X_pos_[:,:,Flag_template_pred]
+        X_ = X_[:, :, Flag_template_pred]
+        X_pos_ = X_pos_[:, :, Flag_template_pred]
 
         self._update_template(X_, X_pos_)
 
-        return Pred_bbox_final[:,None,:], Pred_bboxs[0,:,:].permute([1,0]), prob_sem, prob_phy, X_pos, Warpped_pos, flow 
+        return Pred_bbox_final[:, None, :], Pred_bboxs[0, :, :].permute([1, 0]), prob_sem, prob_phy, X_pos, Warpped_pos, flow
 
     def forward(self,X, Temp, GT, GT_temp):
-        
-        assert(torch.isnan(X).sum()==0)
-        assert(torch.isnan(Temp).sum()==0)
+
+        assert (torch.isnan(X).sum() == 0)
+        assert (torch.isnan(Temp).sum() == 0)
         assert(X.shape[1] == 4)
         assert(Temp.shape[1] == 5)
 
         B,C,P = X.shape
-        X0 = torch.zeros([B,1,P],device = X.device).float()
-        X = torch.cat([X,X0],dim = 1)
-        X = self.extractor(X,out_num=1024,Is_temp=False)
-        X_pos = X[:,:3,:]
+        X0 = torch.zeros([B, 1, P], device=X.device).float()
+        X = torch.cat([X, X0], dim=1)
+        X = self.extractor(X, out_num=1024, Is_temp=False)
+        X_pos = X[:, :3, :]
         B,C,P = Temp.shape
-        temp_point = Temp[:,4,:].abs().sum()
+        temp_point = Temp[:, 4, :].abs().sum()
         ratio = temp_point / (B * P)
 
-        Temp = self.extractor(Temp,out_num=256,Is_temp=True,Temp_ratio=max(0.02,ratio))
-        Temp_pos = Temp[:,:3,:]
-        X = X[:,5:,:]
-        temp_point = Temp[:,4,:].abs().detach()
-        sum_point = temp_point.sum(-1,keepdim=True)
+        Temp = self.extractor(Temp, out_num=256, Is_temp=True, Temp_ratio=max(0.02, ratio))
+        Temp_pos = Temp[:, :3, :]
+        X = X[:, 5:, :]
+        temp_point = Temp[:, 4, :].abs().detach()
+        sum_point = temp_point.sum(-1, keepdim=True)
 
-        Temp = Temp[:,5:,:]
+        Temp = Temp[:, 5:, :]
 
         X = self.SelfTransFormer1(X)
         Temp = self.SelfTransFormer1(Temp)
 
-        Temp_output, sparse_loss_01, H_01 = self.CrossTransFormer(X,Temp)
+        Temp_output, sparse_loss_01, H_01 = self.CrossTransFormer(X, Temp)
 
         Distance = torch.zeros(20)
 
+        Temp_output, sparse_loss_02, H_02 = self.CrossTransFormer2(X, Temp_output)
 
-        Temp_output, sparse_loss_02, H_02 = self.CrossTransFormer2(X,Temp_output)
-
-        temp_point = temp_point[:,None,:]
+        temp_point = temp_point[:, None, :]
 
         Temp_output = Temp_output*temp_point
         B0, C0, P0 = X.shape
         weighted_Temp =self._weight_point(Temp_output, Temp_pos)
-        
-        Temp_output = weighted_Temp.repeat([1,1,P0])
+
+        Temp_output = weighted_Temp.repeat([1, 1, P0])
         prob = self.Regress_relation(torch.cat([X, Temp_output],dim=1))
         assert(prob.shape[1] == 1)
 
@@ -603,12 +628,11 @@ class EGT(Module):
         corp_loss_pos = corp_loss_pos.sum([1,2]) / (GT_prob.sum([1,2]) + 1e-6)
         corp_loss_neg = corp_loss_neg.sum([1,2]) / (GT_prob_neg.sum([1,2]) + 1e-6)
         X1 = X * prob
-        
 
-        weighted_fea =self._weight_point(X,prob, Temp_output, X_pos)
-
+        weighted_fea = self._weight_point(X, prob, Temp_output, X_pos)
         bbox = self.Regression_layer(weighted_fea)
-        return bbox.permute([0,2,1]), bbox.permute([0,2,1]), Distance, corp_loss_pos, corp_loss_neg, prob, X_pos
+
+        return bbox.permute([0, 2, 1]), bbox.permute([0, 2, 1]), Distance, corp_loss_pos, corp_loss_neg, prob, X_pos
     
     def visdom_draw_tracking(self, image, box, segmentation=None):
         if hasattr(self, 'search_area_box'):
