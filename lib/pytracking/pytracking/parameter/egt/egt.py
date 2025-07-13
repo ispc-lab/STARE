@@ -1,15 +1,17 @@
+import argparse
+import torch
+
 from pytracking.utils import TrackerParams, FeatureParams
 from pytracking.features.extractor import MultiResolutionExtractor
 from pytracking.features import deep
-import torch
 from pytracking.parameter.egt.TrackNet import ETracking_Net
 from pytracking.features.swin_transformer import SwinTransformer
-import argparse
 from pytracking.parameter.egt.config import get_config
+
 
 def parse_option():
     parser = argparse.ArgumentParser('Swin Transformer training and evaluation script', add_help=False)
-    parser.add_argument('--cfg', type=str, default='/home/test4/code/EventBenchmark/lib/pytracking/pytracking/parameter/egt/swin_tiny_patch4_window7_224.yaml', metavar="FILE", help='path to config file', )
+    parser.add_argument('--cfg', type=str, default='pytracking/parameter/egt/swin_tiny_patch4_window7_224.yaml', metavar="FILE", help='path to config file', )
     parser.add_argument("--opts",help="Modify config options by adding 'KEY VALUE' pairs. ",default=None,nargs='+',)
     # easy config modification
     parser.add_argument('--batch-size', type=int, help="batch size for single GPU")
@@ -59,7 +61,9 @@ def build_model(config):
                                 ape=config.MODEL.SWIN.APE,
                                 patch_norm=config.MODEL.SWIN.PATCH_NORM,
                                 use_checkpoint=config.TRAIN.USE_CHECKPOINT)
+
     return model
+
 def parameters():
     params = TrackerParams()
 
