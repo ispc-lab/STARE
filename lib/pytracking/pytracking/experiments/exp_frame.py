@@ -43,3 +43,154 @@ def esot500_frame_all():
     )
 
     return trackers, dataset
+
+def esot500_sim_frame_egt_500_w2ms():
+    trackers =  trackerlist('egt', 'egt', range(1))
+    dataset = get_dataset('esot500s')
+
+    # id:201 is designed to simulate the frame-based (500FPS, 2ms) evaluation for egt to reproduce the results
+    stream_setting_id = 201
+    stream_setting = load_stream_setting(f's{stream_setting_id}')
+
+    return trackers, dataset, stream_setting
+
+def esot500_sim_frame_egt_500_w20ms():
+    trackers =  trackerlist('egt', 'egt', range(1))
+    dataset = get_dataset('esot500s')
+
+    # id:202 is designed to simulate the frame-based (500FPS, 20ms) evaluation for egt to reproduce the results
+    stream_setting_id = 202
+    stream_setting = load_stream_setting(f's{stream_setting_id}')
+
+    return trackers, dataset, stream_setting
+
+def esot500_sim_frame_egt_500_w50ms():
+    trackers =  trackerlist('egt', 'egt', range(1))
+    dataset = get_dataset('esot500s')
+
+    # id:203 is designed to simulate the frame-based (500FPS, 50ms) evaluation for egt to reproduce the results
+    stream_setting_id = 203
+    stream_setting = load_stream_setting(f's{stream_setting_id}')
+
+    return trackers, dataset, stream_setting
+
+def esot500_sim_frame_egt_500_w100ms():
+    trackers =  trackerlist('egt', 'egt', range(1))
+    dataset = get_dataset('esot500s')
+
+    # id:204 is designed to simulate the frame-based (500FPS, 100ms) evaluation for egt to reproduce the results
+    stream_setting_id = 204
+    stream_setting = load_stream_setting(f's{stream_setting_id}')
+
+    return trackers, dataset, stream_setting
+
+def esot500_sim_frame_egt_500_w150ms():
+    trackers =  trackerlist('egt', 'egt', range(1))
+    dataset = get_dataset('esot500s')
+
+    # id:205 is designed to simulate the frame-based (500FPS, 150ms) evaluation for egt to reproduce the results
+    stream_setting_id = 205
+    stream_setting = load_stream_setting(f's{stream_setting_id}')
+
+    return trackers, dataset, stream_setting
+
+def esot500_sim_frame_egt_250_w2ms():
+    trackers =  trackerlist('egt', 'egt', range(1))
+    dataset = get_dataset('esot500s')
+
+    # id:206 is designed to simulate the frame-based (250FPS, 2ms) evaluation for egt to reproduce the results
+    stream_setting_id = 206
+    stream_setting = load_stream_setting(f's{stream_setting_id}')
+
+    return trackers, dataset, stream_setting
+
+def esot500_sim_frame_egt_250_w20ms():
+    trackers =  trackerlist('egt', 'egt', range(1))
+    dataset = get_dataset('esot500s')
+
+    # id:207 is designed to simulate the frame-based (250FPS, 20ms) evaluation for egt to reproduce the results
+    stream_setting_id = 207
+    stream_setting = load_stream_setting(f's{stream_setting_id}')
+
+    return trackers, dataset, stream_setting
+
+def esot500_sim_frame_egt_250_w50ms():
+    trackers =  trackerlist('egt', 'egt', range(1))
+    dataset = get_dataset('esot500s')
+
+    # id:208 is designed to simulate the frame-based (250FPS, 50ms) evaluation for egt to reproduce the results
+    stream_setting_id = 208
+    stream_setting = load_stream_setting(f's{stream_setting_id}')
+
+    return trackers, dataset, stream_setting
+
+def esot500_sim_frame_egt_250_w100ms():
+    trackers =  trackerlist('egt', 'egt', range(1))
+    dataset = get_dataset('esot500s')
+
+    # id:209 is designed to simulate the frame-based (250FPS, 100ms) evaluation for egt to reproduce the results
+    stream_setting_id = 209
+    stream_setting = load_stream_setting(f's{stream_setting_id}')
+
+    return trackers, dataset, stream_setting
+
+def esot500_sim_frame_egt_250_w150ms():
+    trackers =  trackerlist('egt', 'egt', range(1))
+    dataset = get_dataset('esot500s')
+
+    # id:210 is designed to simulate the frame-based (250FPS, 150ms) evaluation for egt to reproduce the results
+    stream_setting_id = 210
+    stream_setting = load_stream_setting(f's{stream_setting_id}')
+
+    return trackers, dataset, stream_setting
+
+def esot500_sim_frame_egt_20_w2ms():
+    trackers =  trackerlist('egt', 'egt', range(1))
+    dataset = get_dataset('esot500s')
+
+    # id:211 is designed to simulate the frame-based (20FPS, 2ms) evaluation for egt to reproduce the results
+    stream_setting_id = 211
+    stream_setting = load_stream_setting(f's{stream_setting_id}')
+
+    return trackers, dataset, stream_setting
+
+def esot500_sim_frame_egt_20_w20ms():
+    trackers =  trackerlist('egt', 'egt', range(1))
+    dataset = get_dataset('esot500s')
+
+    # id:212 is designed to simulate the frame-based (20FPS, 20ms) evaluation for egt to reproduce the results
+    stream_setting_id = 212
+    stream_setting = load_stream_setting(f's{stream_setting_id}')
+
+    return trackers, dataset, stream_setting
+
+def esot500_sim_frame_egt_20_w50ms():
+    trackers =  trackerlist('egt', 'egt', range(1))
+    dataset = get_dataset('esot500s')
+
+    # id:213 is designed to simulate the frame-based (20FPS, 50ms) evaluation for egt to reproduce the results
+    stream_setting_id = 213
+    stream_setting = load_stream_setting(f's{stream_setting_id}')
+
+    return trackers, dataset, stream_setting
+
+def esot500_sim_frame_egt_20_w100ms():
+    trackers =  trackerlist('egt', 'egt', range(1))
+    dataset = get_dataset('esot500s')
+
+    # id:214 is designed to simulate the frame-based (20FPS, 100ms) evaluation for egt to reproduce the results
+    stream_setting_id = 214
+    stream_setting = load_stream_setting(f's{stream_setting_id}')
+
+    return trackers, dataset, stream_setting
+
+def esot500_sim_frame_egt_20_w150ms():
+    trackers =  trackerlist('egt', 'egt', range(1))
+    dataset = get_dataset('esot500s')
+
+    # id:215 is designed to simulate the frame-based (20FPS, 150ms) evaluation for egt to reproduce the results
+    stream_setting_id = 215
+    stream_setting = load_stream_setting(f's{stream_setting_id}')
+
+    return trackers, dataset, stream_setting
+    
