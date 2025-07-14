@@ -132,7 +132,7 @@ class EGT(Module):
 
             B, C, N = output.shape
 
-            print('search before resample: ', N)
+            # print('search before resample: ', N)
             
             if self.indx < 5:
                 t_min = Seq[0,2,:].min()
@@ -210,33 +210,34 @@ class EGT(Module):
             #     # return output[None,None,:], output[None,None,:], prob, prob_phy, flow, Warpped_pos, X_pos
             # else:
                 temp = self._previous_pred
-                output_state = temp[None,None,:].to(X.device)
-                Pred_bboxs = temp[None,None,:].to(X.device)
+                output_state = temp[None, None, :].to(X.device)
+                Pred_bboxs = temp[None, None, :].to(X.device)
                 prob = prob_phy = flow = Warpped_pos = X_pos = torch.zeros(20).to(X.device)
                 # return temp[None,None,:].to(X.device), temp[None,None,:].to(X.device), torch.zeros(20).to(X.device), torch.zeros(20).to(X.device), torch.zeros(20).to(X.device), torch.zeros(20).to(X.device), torch.zeros(20).to(X.device)
-            xc, yc, w, h = output_state.detach().cpu().numpy()[0][0]
-            x = xc - w/2
-            y = yc - h/2
 
-            x = x*346
-            y = y*260
-            w = w*346
-            h = h*260
+            xc, yc, w, h = output_state.detach().cpu().numpy()[0][0]
+            x = xc - w / 2
+            y = yc - h / 2
+
+            x = x * 346
+            y = y * 260
+            w = w * 346
+            h = h * 260
             output_state_restore = [x, y, w, h]
 
-            print('inner state: ',self._previous_pred)
-            print('bbox_restored: ',output_state_restore)
+            # print('inner state: ', self._previous_pred)
+            # print('bbox_restored: ', output_state_restore)
             # output_state = torch.tensor(output_state_restore).float()
-            
-            
-            return {'target_bbox': output_state_restore,
-                    'Pred_bboxs': Pred_bboxs,
-                    'prob': prob,
-                    'prob_phy': prob_phy,
-                    'flow': flow,
-                    'Warpped_pos': Warpped_pos,
-                    'X_pos':X_pos,
-                    }
+
+            return {
+                'target_bbox': output_state_restore,
+                'Pred_bboxs': Pred_bboxs,
+                'prob': prob,
+                'prob_phy': prob_phy,
+                'flow': flow,
+                'Warpped_pos': Warpped_pos,
+                'X_pos':X_pos,
+            }
     
     # def encoding_template(self, Temp, info: dict) -> dict:
     def initialize(self, Temp, info: dict) -> dict:
@@ -260,13 +261,13 @@ class EGT(Module):
         w = w / 346
         h = h / 260
 
-        state = [x+w/2, y+h/2, w, h]
+        state = [x + w / 2, y + h / 2, w, h]
         
         self._previous_pred = torch.tensor(state).float().to(self.params.device)
         self.sample_idx = 1
 
-        B,C,P = Temp.shape
-        temp_point = Temp[:,4,:].abs().sum()
+        B, C, P = Temp.shape
+        temp_point = Temp[:, 4, :].abs().sum()
         ratio = temp_point / (B * P)
         with torch.no_grad():
             Temp = Temp.to(self.params.device)
@@ -285,13 +286,16 @@ class EGT(Module):
             Emb_Temp = Emb_Temp[:, 5:, :]
 
 
-        B,C,P = Temp_pos.shape
+        B, C, P = Temp_pos.shape
 
         # Temp = self.tracking_net.SelfTransFormer1(Temp)
         # self.Tempalate_fea = {'Temp': Temp[:,:,:2*P], 'Temp_pos': Temp_pos[:,:,:2*P]}
-        print('Encoding template !! shape of Emb_Temp:{}'.format(Emb_Temp.shape))
+
+        # print('Encoding template !! shape of Emb_Temp:{}'.format(Emb_Temp.shape))
+
         self.Tempalate_fea = {'Temp': Emb_Temp, 'Temp_pos': Temp_pos}
         # self.Tempalate_fea = {'Temp': Temp, 'Temp_pos': Temp_pos}
+
         self.Tempalate_fea_mid = None
         self.Tempalate_fea_stable = None
         self.Tempalate_fea_variad = None
