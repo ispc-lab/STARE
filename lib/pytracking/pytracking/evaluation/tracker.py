@@ -123,6 +123,7 @@ class Tracker:
         tracker.visdom = self.visdom
         return tracker
 
+
     def run_sequence(self, seq, stream_setting=None, visualization=None, debug=None, visdom_info=None, multiobj_mode=None):
         """Run tracker on sequence.
         args:
@@ -173,7 +174,9 @@ class Tracker:
             output = self._track_evstream(tracker, seq, init_info, stream_setting)
         else:
             output = self._track_sequence(tracker, seq, init_info)
+
         return output
+
 
     def _track_sequence(self, tracker, seq, init_info):
         # Define outputs
@@ -287,7 +290,8 @@ class Tracker:
         output['object_presence_score_threshold'] = tracker.params.get('object_presence_score_threshold', 0.55)
 
         return output
-    
+
+
     def _track_evstream(self, tracker, seq, init_info, stream_setting, **kwargs):
         """
         Core Function
@@ -308,9 +312,8 @@ class Tracker:
         timestamps = events['timestamp']
         # TODO: adjust timestamps to seconds ?
 
-        eval_setting = {}
-
         #init
+        eval_setting = {}
         pred_bboxes = []
         in_timestamps = []
         runtime = []
@@ -416,7 +419,7 @@ class Tracker:
         out_timestamps.append(t_algo_init + t_template)
         
         # =================== Tracking =====================
-        while 1:
+        while True:
             t_algo_total = sum(runtime) + t_template
             if t_algo_total > t_stream_total:
                 break
@@ -447,10 +450,16 @@ class Tracker:
 
             slicing_ = stream_setting.get('slicing_', None)
             if slicing_ and slicing_ in ['egt']:
+                # solve the problem of empty events
+                if idx_start >= idx_end:
+                    idx_start = idx_end - 1
+                    events_search = events[idx_start:idx_end]
+
                 # convert format for egt
                 event_rep = sampling_search_egt(events_search)
+
             else:
-                event_rep = convert_event_img_aedat(events_search,stream_setting.representation)
+                event_rep = convert_event_img_aedat(events_search, stream_setting.representation)
 
             info = {} # changed
             info['previous_output'] = prev_output
