@@ -327,8 +327,13 @@ class Tracker:
         t0 = perf_counter() * 1e6
 
         # ============== Initialization ====================
-        if stream_setting.template_ == 'default':
+        if (stream_setting.template_ == 'egt') or ('egt' in self.name):
+            t_template = init_info.get('init_timestamp') * 1e6
+            idx_end = interpolation_search(timestamps, t_template)
+            template_events_raw = events[idx_start:idx_end]
+            template_events = sampling_template_egt(events, init_info)
 
+        elif stream_setting.template_ == 'default':
             if stream_setting.slicing == 'FxTime':
                 t_template = stream_setting.window_size
                 idx_end = interpolation_search(timestamps, t_template)
@@ -356,16 +361,13 @@ class Tracker:
             idx_end = interpolation_search(timestamps, t_template)
             template_events = events[idx_start:idx_end]
 
-        elif stream_setting.template_ == 'egt':
-            t_template = init_info.get('init_timestamp') * 1e6
-            idx_end = interpolation_search(timestamps, t_template)
-            template_events_raw = events[idx_start:idx_end]
-            template_events = sampling_template_egt(events, init_info)
-                
         else:
             raise NotImplementedError
 
-        event_rep = convert_event_img_aedat(template_events, stream_setting.representation)
+        if 'egt' in self.name:
+            event_rep = template_events
+        else:
+            event_rep = convert_event_img_aedat(template_events, stream_setting.representation)
 
         # t_convert record the couvert time of the template frame.
         t_convert = perf_counter() * 1e6 - t0
@@ -449,7 +451,7 @@ class Tracker:
             events_search = events[idx_start:idx_end]
 
             slicing_ = stream_setting.get('slicing_', None)
-            if slicing_ and slicing_ in ['egt']:
+            if (slicing_ and slicing_ in ['egt']) or ('egt' in self.name):
                 # solve the problem of empty events
                 if idx_start >= idx_end:
                     idx_start = idx_end - 1
@@ -513,7 +515,7 @@ class Tracker:
             segmentation = None
             if stream_setting.representation in ['VoxelGridComplex']:
                 event_img = event_rep
-            elif stream_setting.representation =='Raw':
+            elif stream_setting.representation == 'Raw':
                 event_img = convert_event_img_aedat(events_search, 'VoxelGridComplex')
 
             if self.visdom is not None:
@@ -542,6 +544,7 @@ class Tracker:
         debug_ = debug
         if debug is None:
             debug_ = getattr(params, 'debug', 0)
+
         params.debug = debug_
 
         params.tracker_name = self.name
@@ -555,8 +558,10 @@ class Tracker:
             tracker = self.create_tracker(params)
             if hasattr(tracker, 'initialize_features'):
                 tracker.initialize_features()
+
         elif multiobj_mode == 'parallel':
             tracker = MultiObjectWrapper(self.tracker_class, params, self.visdom, fast_load=True)
+
         else:
             raise ValueError('Unknown multi object mode {}'.format(multiobj_mode))
 
@@ -572,8 +577,10 @@ class Tracker:
                     self.target_tl = (x, y)
                     self.target_br = (x, y)
                     self.mode = 'select'
+
                 elif event == cv.EVENT_MOUSEMOVE and self.mode == 'select':
                     self.target_br = (x, y)
+
                 elif event == cv.EVENT_LBUTTONDOWN and self.mode == 'select':
                     self.target_br = (x, y)
                     self.mode = 'init'
@@ -588,8 +595,8 @@ class Tracker:
             def get_bb(self):
                 tl = self.get_tl()
                 br = self.get_br()
-
                 bb = [min(tl[0], br[0]), min(tl[1], br[1]), abs(br[0] - tl[0]), abs(br[1] - tl[1])]
+
                 return bb
 
         ui_control = UIControl()
@@ -604,13 +611,14 @@ class Tracker:
         if videofilepath is not None:
             assert os.path.isfile(videofilepath), "Invalid param {}".format(videofilepath)
             ", videofilepath must be a valid videofile"
+
             cap = cv.VideoCapture(videofilepath)
             ret, frame = cap.read()
             frame_number += 1
             cv.imshow(display_name, frame)
+
         else:
             cap = cv.VideoCapture(0)
-
 
         next_object_id = 1
         sequence_object_ids = []
@@ -619,16 +627,20 @@ class Tracker:
 
         if optional_box is not None:
             assert isinstance(optional_box, (list, tuple))
-            assert len(optional_box) == 4, "valid box's format is [x,y,w,h]"
+            assert len(optional_box) == 4, "valid box's format is [x, y, w, h]"
 
-            out = tracker.initialize(frame, {'init_bbox': OrderedDict({next_object_id: optional_box}),
-                                       'init_object_ids': [next_object_id, ],
-                                       'object_ids': [next_object_id, ],
-                                       'sequence_object_ids': [next_object_id, ]})
+            out = tracker.initialize(
+                frame, {
+                    'init_bbox': OrderedDict({next_object_id: optional_box}),
+                    'init_object_ids': [next_object_id,],
+                    'object_ids': [next_object_id,],
+                    'sequence_object_ids': [next_object_id,]
+                }
+            )
 
             prev_output = OrderedDict(out)
 
-            output_boxes[next_object_id] = [optional_box, ]
+            output_boxes[next_object_id] = [optional_box,]
             sequence_object_ids.append(next_object_id)
             next_object_id += 1
 
@@ -658,6 +670,7 @@ class Tracker:
                 sequence_object_ids.append(next_object_id)
                 if save_results:
                     output_boxes[next_object_id] = [init_state, ]
+
                 next_object_id += 1
 
             # Draw box
@@ -677,6 +690,7 @@ class Tracker:
                         mask_image = overlay_mask(mask_image, out['segmentation'])
                         if not os.path.exists(self.results_dir):
                             os.makedirs(self.results_dir)
+
                         cv.imwrite(self.results_dir + f"seg_{frame_number}.jpg", mask_image)
 
                 if 'target_bbox' in out:
@@ -703,18 +717,20 @@ class Tracker:
             key = cv.waitKey(1)
             if key == ord('q'):
                 break
+
             elif key == ord('r'):
                 next_object_id = 1
                 sequence_object_ids = []
                 prev_output = OrderedDict()
 
                 info = OrderedDict()
-
                 info['object_ids'] = []
                 info['init_object_ids'] = []
                 info['init_bbox'] = OrderedDict()
+
                 tracker.initialize(frame, info)
                 ui_control.mode = 'init'
+
             # 'Space' to pause video
             elif key == 32 and videofilepath is not None:
                 paused = not paused
@@ -726,14 +742,16 @@ class Tracker:
         if save_results:
             if not os.path.exists(self.results_dir):
                 os.makedirs(self.results_dir)
+
             video_name = "webcam" if videofilepath is None else Path(videofilepath).stem
             base_results_path = os.path.join(self.results_dir, 'video_{}'.format(video_name))
+
             print(f"Save results to: {base_results_path}")
+
             for obj_id, bbox in output_boxes.items():
                 tracked_bb = np.array(bbox).astype(int)
                 bbox_file = '{}_{}.txt'.format(base_results_path, obj_id)
                 np.savetxt(bbox_file, tracked_bb, delimiter='\t', fmt='%d')
-
 
     def run_vot2020(self, debug=None, visdom_info=None):
         params = self.get_parameters()
@@ -763,11 +781,18 @@ class Tracker:
         import pytracking.evaluation.vot2020 as vot
 
         def _convert_anno_to_list(vot_anno):
-            vot_anno = [vot_anno[0], vot_anno[1], vot_anno[2], vot_anno[3]]
+            vot_anno = [
+                vot_anno[0],
+                vot_anno[1],
+                vot_anno[2],
+                vot_anno[3],
+            ]
+
             return vot_anno
 
         def _convert_image_path(image_path):
             return image_path
+
 
         """Run tracker on VOT."""
 
@@ -781,8 +806,8 @@ class Tracker:
         image_path = handle.frame()
         if not image_path:
             return
-        image_path = _convert_image_path(image_path)
 
+        image_path = _convert_image_path(image_path)
         image = self._read_image(image_path)
 
         if output_segmentation:
@@ -793,9 +818,9 @@ class Tracker:
             vot_anno_mask = None
 
         out = tracker.initialize(image, {'init_mask': vot_anno_mask, 'init_bbox': bbox})
-
         if out is None:
             out = {}
+
         prev_output = OrderedDict(out)
 
         # Track
@@ -803,8 +828,8 @@ class Tracker:
             image_path = handle.frame()
             if not image_path:
                 break
-            image_path = _convert_image_path(image_path)
 
+            image_path = _convert_image_path(image_path)
             image = self._read_image(image_path)
 
             info = OrderedDict()
@@ -818,6 +843,7 @@ class Tracker:
             else:
                 state = out['target_bbox']
                 pred = vot.Rectangle(*state)
+
             handle.report(pred, 1.0)
 
             segmentation = out['segmentation'] if 'segmentation' in out else None
@@ -825,7 +851,6 @@ class Tracker:
                 tracker.visdom_draw_tracking(image, out['target_bbox'], segmentation)
             elif tracker.params.visualization:
                 self.visualize(image, out['target_bbox'], segmentation)
-
 
     def run_vot(self, debug=None, visdom_info=None):
         params = self.get_parameters()
@@ -853,13 +878,20 @@ class Tracker:
         import pytracking.evaluation.vot as vot
 
         def _convert_anno_to_list(vot_anno):
-            vot_anno = [vot_anno[0][0][0], vot_anno[0][0][1], vot_anno[0][1][0], vot_anno[0][1][1],
-                        vot_anno[0][2][0], vot_anno[0][2][1], vot_anno[0][3][0], vot_anno[0][3][1]]
+            vot_anno = [
+                vot_anno[0][0][0], vot_anno[0][0][1],
+                vot_anno[0][1][0], vot_anno[0][1][1],
+                vot_anno[0][2][0], vot_anno[0][2][1],
+                vot_anno[0][3][0], vot_anno[0][3][1],
+            ]
+
             return vot_anno
 
         def _convert_image_path(image_path):
-            image_path_new = image_path[20:- 2]
+            image_path_new = image_path[20:-2]
+
             return "".join(image_path_new)
+
 
         """Run tracker on VOT."""
 
@@ -867,14 +899,13 @@ class Tracker:
 
         vot_anno_polygon = handle.region()
         vot_anno_polygon = _convert_anno_to_list(vot_anno_polygon)
-
         init_state = convert_vot_anno_to_rect(vot_anno_polygon, tracker.params.vot_anno_conversion_type)
 
         image_path = handle.frame()
         if not image_path:
             return
-        image_path = _convert_image_path(image_path)
 
+        image_path = _convert_image_path(image_path)
         image = self._read_image(image_path)
         tracker.initialize(image, {'init_bbox': init_state})
 
@@ -883,8 +914,8 @@ class Tracker:
             image_path = handle.frame()
             if not image_path:
                 break
-            image_path = _convert_image_path(image_path)
 
+            image_path = _convert_image_path(image_path)
             image = self._read_image(image_path)
             out = tracker.track(image)
             state = out['target_bbox']
@@ -901,15 +932,14 @@ class Tracker:
         """Get parameters."""
         param_module = importlib.import_module('pytracking.parameter.{}.{}'.format(self.name, self.parameter_name))
         params = param_module.parameters()
-        return params
 
+        return params
 
     def init_visualization(self):
         self.pause_mode = False
         self.fig, self.ax = plt.subplots(1)
         self.fig.canvas.mpl_connect('key_press_event', self.press)
         plt.tight_layout()
-
 
     def visualize(self, image, state, segmentation=None):
         self.ax.cla()
@@ -934,6 +964,7 @@ class Tracker:
             gt_state = self.gt_state
             rect = patches.Rectangle((gt_state[0], gt_state[1]), gt_state[2], gt_state[3], linewidth=1, edgecolor='g', facecolor='none')
             self.ax.add_patch(rect)
+
         self.ax.set_axis_off()
         self.ax.axis('equal')
         draw_figure(self.fig)
@@ -950,10 +981,15 @@ class Tracker:
         if event.key == 'p':
             self.pause_mode = not self.pause_mode
             print("Switching pause mode!")
+
         elif event.key == 'r':
             self.reset_tracker()
             print("Resetting target pos to gt!")
 
     def _read_image(self, image_file: str):
         im = cv.imread(image_file)
+
         return cv.cvtColor(im, cv.COLOR_BGR2RGB)
+
+
+
