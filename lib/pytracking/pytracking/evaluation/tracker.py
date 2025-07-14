@@ -1,26 +1,31 @@
 import importlib
 import os
-import numpy as np
-from collections import OrderedDict
-from pytracking.evaluation.environment import env_settings
+import torch
 import time
+
+import numpy as np
+import torchvision.transforms as T
 import cv2 as cv
-from pytracking.utils.visdom import Visdom
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+
+from collections import OrderedDict
+from pathlib import Path
+from time import perf_counter
+from dv import AedatFile
+
+from pytracking.evaluation.environment import env_settings
+from pytracking.utils.visdom import Visdom
 from pytracking.utils.plotting import draw_figure, overlay_mask
 from pytracking.utils.convert_vot_anno_to_rect import convert_vot_anno_to_rect
-from ltr.data.bounding_box_utils import masks_to_bboxes
 from pytracking.evaluation.multi_object_wrapper import MultiObjectWrapper
-from pathlib import Path
-import torch
-from time import perf_counter
 from pytracking.utils.search import interpolation_search
 from pytracking.utils.convert_event_img import convert_event_img_aedat
-from dv import AedatFile
-import torchvision.transforms as T
-import cv2 as cv2
-import importlib
+from pytracking.utils.sampling import sampling_template_egt, sampling_search_egt
+from pytracking.utils.sampling import EventStreamSampler
+from ltr.data.bounding_box_utils import masks_to_bboxes
+
+
 transform = T.ToPILImage()
 
 _tracker_disp_colors = {1: (0, 255, 0), 2: (0, 0, 255), 3: (255, 0, 0),
@@ -148,7 +153,7 @@ class Tracker:
 
         # Get init information
         '''JieChu:
-        This init_info() function is in evaluation/data.py,and as the param is None,
+        This init_info() function is in evaluation/data.py, and as the param is None,
         it will return the bbox and timestamp of the 1st annotation.
         '''
         init_info = seq.init_info()
@@ -186,10 +191,12 @@ class Tracker:
         # object in frame i
         # segmentation[i] is the multi-label segmentation mask for frame i (numpy array)
 
-        output = {'target_bbox': [],
-                  'time': [],
-                  'segmentation': [],
-                  'object_presence_score': []}
+        output = {
+            'target_bbox': [],
+            'time': [],
+            'segmentation': [],
+            'object_presence_score': []
+        }
 
         def _store_outputs(tracker_out: dict, defaults=None):
             defaults = {} if defaults is None else defaults
@@ -200,7 +207,6 @@ class Tracker:
 
         # Initialize
         image = self._read_image(seq.frames[0])
-
         if tracker.params.visualization and self.visdom is None:
             self.visualize(image, init_info.get('init_bbox'))
 
@@ -211,11 +217,13 @@ class Tracker:
 
         prev_output = OrderedDict(out)
 
-        init_default = {'target_bbox': init_info.get('init_bbox'),
-                        'clf_target_bbox': init_info.get('init_bbox'),
-                        'time': time.time() - start_time,
-                        'segmentation': init_info.get('init_mask'),
-                        'object_presence_score': 1.}
+        init_default = {
+            'target_bbox': init_info.get('init_bbox'),
+            'clf_target_bbox': init_info.get('init_bbox'),
+            'time': time.time() - start_time,
+            'segmentation': init_info.get('init_mask'),
+            'object_presence_score': 1.
+        }
 
         _store_outputs(out, init_default)
 
@@ -243,7 +251,7 @@ class Tracker:
                 else:
                     time.sleep(0.1)
 
-            #我记得就是在这一句报了错
+            # Maybe some bugs here
             image = self._read_image(frame_path)
 
             start_time = time.time()
@@ -293,12 +301,12 @@ class Tracker:
 
         aeFile = seq.events
         with AedatFile(aeFile) as f:
-            print('Processing:',aeFile)
+            print('Processing:', aeFile)
             events = np.hstack([packet for packet in f['events'].numpy()])
-            events['timestamp'] = events['timestamp'] -events['timestamp'][0]
+            events['timestamp'] = events['timestamp'] - events['timestamp'][0]
 
         timestamps = events['timestamp']
-        #TODO: adjust timestamps to seconds
+        # TODO: adjust timestamps to seconds ?
 
         eval_setting = {}
 
@@ -310,116 +318,140 @@ class Tracker:
         t_stream_total = timestamps[-1] 
 
         # Initialize
-        # t_start = perf_counter()*1e6
+        # t_start = perf_counter() * 1e6
         t_left = 0
         idx_start = 0
-        t0 = perf_counter()*1e6
+        t0 = perf_counter() * 1e6
+
         # ============== Initialization ====================
         if stream_setting.template_ == 'default':
+
             if stream_setting.slicing == 'FxTime':
                 t_template = stream_setting.window_size
-                idx_end = interpolation_search(timestamps,t_template)
+                idx_end = interpolation_search(timestamps, t_template)
+
             elif stream_setting.slicing == 'FxNum':
                 idx_end = stream_setting.num_events
                 t_template = timestamps[idx_end]
+
             elif stream_setting.slicing == 'Last':
                 t_template = init_info.get('init_timestamp')*1e6
-                idx_end = interpolation_search(timestamps,t_template)  
-                '''JieChu:
-                I can figure out how this slicing==Adaptive plays its role.
-                Maybe it's another TODO.
-                '''          
+                idx_end = interpolation_search(timestamps, t_template)
+
             elif stream_setting.slicing == 'Adaptive':
-                from pytracking.utils.sampling import EventStreamSampler
                 stream_sampler = EventStreamSampler()
                 idx_end, t_template = stream_sampler.init_with_template(events, init_info, stream_setting)
-                # t_template = stream_setting.window_size_template # TODO: use first timestamp
+
+                # TODO: use first timestamp
+                # t_template = stream_setting.window_size_template
                 # idx_end = interpolation_search(timestamps,t_template)
+
             template_events = events[idx_start:idx_end]
+
         elif stream_setting.template_ == 'seperate':
-                t_template = stream_setting.window_size_template
-                idx_end = interpolation_search(timestamps,t_template)
-                template_events = events[idx_start:idx_end]
+            t_template = stream_setting.window_size_template
+            idx_end = interpolation_search(timestamps, t_template)
+            template_events = events[idx_start:idx_end]
+
         elif stream_setting.template_ == 'egt':
-                from pytracking.utils.sampling import sampling_template_egt, sampling_search_egt
-                t_template = init_info.get('init_timestamp')*1e6
-                idx_end = interpolation_search(timestamps,t_template)
-                template_events_raw = events[idx_start:idx_end]
-                template_events = sampling_template_egt(events, init_info)
+            t_template = init_info.get('init_timestamp') * 1e6
+            idx_end = interpolation_search(timestamps, t_template)
+            template_events_raw = events[idx_start:idx_end]
+            template_events = sampling_template_egt(events, init_info)
+                
         else:
             raise NotImplementedError
-        event_rep = convert_event_img_aedat(template_events,stream_setting.representation)
-        '''JieChu:
-        t_convert record the couvert time of the template frame.
-        '''
-        t_convert = perf_counter()*1e6 - t0
+
+        event_rep = convert_event_img_aedat(template_events, stream_setting.representation)
+
+        # t_convert record the couvert time of the template frame.
+        t_convert = perf_counter() * 1e6 - t0
+
         # event_img_pil = transform(event_rep)
         # event_img_array = np.array(event_img_pil)
         # event_img = cv2.cvtColor(event_img_array,cv2.COLOR_RGB2BGR)
+
         if tracker.params.visualization and self.visdom is None:
             if stream_setting.representation in ['VoxelGridComplex']:
                 event_img = event_rep
                 self.visualize(event_img, init_info.get('init_bbox'))
             elif stream_setting.representation in ['Raw']:
-                event_img = convert_event_img_aedat(template_events_raw,'VoxelGridComplex')
+                event_img = convert_event_img_aedat(template_events_raw, 'VoxelGridComplex')
                 self.visualize(event_img, init_info.get('init_bbox'))
+
         torch.cuda.synchronize()
-        t1 = t_start = perf_counter()*1e6
+
+        t1 = t_start = perf_counter() * 1e6
         out = tracker.initialize(event_rep, init_info)
         if out is None:
             out = {}
+
         prev_output = OrderedDict(out)
         pred_bbox = init_info.get('init_bbox')
         pred_bboxes.append(pred_bbox)
+
         torch.cuda.synchronize()
-        t2 = perf_counter()*1e6
-        t_algo_init=t2-t1
+
+        t2 = perf_counter() * 1e6
+        t_algo_init = t2 - t1
         t_algo_init = out.get('time') * 1e6 if out.get('time') else t_algo_init
-        # t_algo = out.get('time',t_algo)
+        # t_algo = out.get('time', t_algo)
+
         if stream_setting.sim:
-            sim_runtime = stream_setting.sim_runtime_init.get(self.name+'_'+self.parameter_name,stream_setting.sim_runtime_rt)
+            sim_runtime = stream_setting.sim_runtime_init.get(self.name + '_' + self.parameter_name, stream_setting.sim_runtime_rt)
             sim_disturb = sim_runtime * stream_setting.sim_disturb
             t_algo_init = np.random.normal(loc=sim_runtime, scale=sim_disturb, size=1)[0]
+
         if stream_setting.init_time == False:
-            sim_runtime = stream_setting.sim_runtime.get(self.name+'_'+self.parameter_name,stream_setting.sim_runtime_rt)
+            sim_runtime = stream_setting.sim_runtime.get(self.name + '_' + self.parameter_name, stream_setting.sim_runtime_rt)
             sim_disturb = sim_runtime * stream_setting.sim_disturb
             t_algo_init = np.random.normal(loc=sim_runtime, scale=sim_disturb, size=1)[0]
-        # print(t_algo/1e6)
+
+        # print(t_algo / 1e6)
         if stream_setting.convert_time:
             t_algo_init += t_convert
+
         runtime.append(t_algo_init)
         in_timestamps.append(t_template)
-        out_timestamps.append(t_algo_init+t_template)
+        out_timestamps.append(t_algo_init + t_template)
         
         # =================== Tracking =====================
         while 1:
             t_algo_total = sum(runtime) + t_template
-            if t_algo_total>t_stream_total:
+            if t_algo_total > t_stream_total:
                 break
-            t0 = perf_counter()*1e6
-            t_right = out_timestamps[-1] # Current world-time
-            idx_end = interpolation_search(timestamps,t_right)
+
+            t0 = perf_counter() * 1e6
+            t_right = out_timestamps[-1]  # Current world-time
+            idx_end = interpolation_search(timestamps, t_right)
+
             if stream_setting.slicing == 'FxTime':
                 t_left = t_right - stream_setting.window_size
                 t_left = t_left if t_left >= timestamps[0] else timestamps[0]
-                idx_start = interpolation_search(timestamps,t_left)
+                idx_start = interpolation_search(timestamps, t_left)
+
             elif stream_setting.slicing == 'FxNum':
                 idx_start = idx_end - stream_setting.num_events
                 idx_start = max(idx_start, 0)
-            elif stream_setting.slicing in ['Last','egt']:
+
+            elif stream_setting.slicing in ['Last', 'egt']:
                 t_left = in_timestamps[-1]
-                idx_start = interpolation_search(timestamps,t_left)
+                idx_start = interpolation_search(timestamps, t_left)
+
             elif stream_setting.slicing == 'Adaptive':
                 idx_start, t_left = stream_sampler.sample(events[:idx_end], pred_bboxes, stream_setting)
                 # sampling = load_sampling_func(stream_setting.adaptive_)
                 # idx_start, t_left  = sampling(events[:idx_end], pred_bboxes, stream_setting)
+
             events_search = events[idx_start:idx_end]
+
             slicing_ = stream_setting.get('slicing_', None)
             if slicing_ and slicing_ in ['egt']:
                 # convert format for egt
                 event_rep = sampling_search_egt(events_search)
             else:
                 event_rep = convert_event_img_aedat(events_search,stream_setting.representation)
+
             info = {} # changed
             info['previous_output'] = prev_output
 
@@ -428,26 +460,35 @@ class Tracker:
             # event_img = cv2.cvtColor(event_img_array,cv2.COLOR_RGB2BGR)
             # cv2.imwrite('debug/test2.jpg',event_img)
             # event_img.save('debug/test.jpg')
-            t1 = perf_counter()*1e6
-            t_convert = t1-t0
-            out = tracker.track(event_rep, info)
 
+            t1 = perf_counter() * 1e6
+            t_convert = t1 - t0
+
+            out = tracker.track(event_rep, info)
             prev_output = OrderedDict(out)
             torch.cuda.synchronize()
-            t2 = perf_counter()*1e6
-            t_algo=t2-t1
-            # t_algo = out.get('time',t_algo)
+
+            t2 = perf_counter() * 1e6
+            t_algo = t2 - t1
+
+            # t_algo = out.get('time', t_algo)
             t_algo = out.get('time') * 1e6 if out.get('time') else t_algo
+
             if stream_setting.sim:
-                sim_runtime = stream_setting.sim_runtime.get(self.name+'_'+self.parameter_name,stream_setting.sim_runtime_rt)
+                sim_runtime = stream_setting.sim_runtime.get(self.name + '_' + self.parameter_name, stream_setting.sim_runtime_rt)
                 sim_disturb = sim_runtime * stream_setting.sim_disturb
                 t_algo = np.random.normal(loc=sim_runtime, scale=sim_disturb, size=1)[0]
+
             # print(t_algo/1e6)
+
             if stream_setting.convert_time:
                 t_algo += t_convert
+
             runtime.append(t_algo)
+
             in_timestamps.append(out_timestamps[-1])
-            out_timestamps.append(out_timestamps[-1]+t_algo)
+            out_timestamps.append(out_timestamps[-1] + t_algo)
+
             pred_bbox = out['target_bbox']
             # print('target_bbox:', pred_bbox)
             pred_bboxes.append(pred_bbox) # box [x1, y1, w, h]
@@ -459,23 +500,26 @@ class Tracker:
                 bboxes.append(out['clf_search_area'])
             if 'segm_search_area' in out:
                 bboxes.append(out['segm_search_area'])
+
             segmentation = None
             if stream_setting.representation in ['VoxelGridComplex']:
                 event_img = event_rep
             elif stream_setting.representation =='Raw':
                 event_img = convert_event_img_aedat(events_search, 'VoxelGridComplex')
+
             if self.visdom is not None:
                 tracker.visdom_draw_tracking(event_img, bboxes, segmentation)
             elif tracker.params.visualization:
                 self.visualize(event_img, bboxes, segmentation)
                 
-        output={
-                    'results_raw': pred_bboxes,
-                    'out_timestamps': out_timestamps,
-                    'in_timestamps': in_timestamps,
-                    'runtime': runtime,
-                    'stream_setting':stream_setting.id,
-                }
+        output = {
+            'results_raw': pred_bboxes,
+            'out_timestamps': out_timestamps,
+            'in_timestamps': in_timestamps,
+            'runtime': runtime,
+            'stream_setting': stream_setting.id,
+        }
+
         return output
 
     def run_video_generic(self, debug=None, visdom_info=None, videofilepath=None, optional_box=None, save_results=False):
@@ -904,6 +948,3 @@ class Tracker:
     def _read_image(self, image_file: str):
         im = cv.imread(image_file)
         return cv.cvtColor(im, cv.COLOR_BGR2RGB)
-
-
-
