@@ -22,9 +22,9 @@ class EventStreamSampler:
         t_left = t_right - stream_setting.window_size
 
         t_left = t_left if t_left >= timestamps[0] else timestamps[0]
-        idx_start = interpolation_search(timestamps,t_left)
+        idx_start = interpolation_search(timestamps, t_left)
         density_box = densityInBox(events[idx_start:], boxes[-1])
-        if density_box < 0.5* self.density_template:
+        if density_box < 0.5 * self.density_template:
             t_left = t_right - 2 * stream_setting.window_size
         elif density_box > 2 * self.density_template:
             t_left = t_right - 0.5 * stream_setting.window_size
@@ -100,36 +100,42 @@ def sampling_template_egt(events, init_info):
     box = init_info.get('init_bbox')
     t_template = init_info.get('init_timestamp')
     timestamps = events['timestamp']
-    idx_end = interpolation_search(timestamps,t_template*1e6)
+
+    idx_end = interpolation_search(timestamps, t_template * 1e6)
     events = events[:idx_end]
-    template_events = events[(events['x']>=box[0]) & (events['y']>=box[1]) & (events['x']<=box[0]+box[2]) & (events['y']<=box[1]+box[3])]
-    print('size of template:{}'.format(template_events.shape))
-    event_img = convert_event_img_aedat(template_events,'VoxelGridComplex')
+    template_events = events[(events['x'] >= box[0]) & (events['y'] >= box[1]) & (events['x'] <= box[0] + box[2]) & (events['y'] <= box[1] + box[3])]
+
+    # print('size of template:{}'.format(template_events.shape))
+
+    # event_img = convert_event_img_aedat(template_events, 'VoxelGridComplex')
     # event_img.save('debug/test.jpg')
+
     n1 = template_events.shape
-    pn1 = np.random.randint(0,n1,[10000])
+    pn1 = np.random.randint(0, n1, [10000])
     template_events = template_events[pn1]
     timestamps, x, y, polarities = template_events['timestamp'], template_events['x'], template_events['y'], template_events['polarity']
     template_events = np.stack((x, y, timestamps, polarities))
     template_events = np.swapaxes(template_events, 0, 1).astype(np.float_)
 
-    l1,c1 = template_events.shape
-    Indicator1 = np.ones([l1,1])
+    l1, c1 = template_events.shape
+    Indicator1 = np.ones([l1, 1])
     template_events = np.concatenate([template_events, Indicator1], axis = 1)
     p0x = box[0]
     p0y = box[1]
-    p1x = box[0]+ box[2] 
-    p1y = box[1]+ box[3]
-    template_events[:,0] = (template_events[:,0] - p0x) / (p1x - p0x + 1e-6)
-    template_events[:,1] = (template_events[:,1] - p0y) / (p1y - p0y + 1e-6)
+    p1x = box[0] + box[2]
+    p1y = box[1] + box[3]
 
-    template_events[:,2] = template_events[:,2] - template_events[0,2]
-    template_events[:,2] = template_events[:,2] / 1e6
-    template_events[:,3] = template_events[:,3]*2 - 1
-    ratio_t = np.array([1,1,1,1,1])[:,np.newaxis]
-    template_events = template_events.transpose([1,0]) / ratio_t
-    template_events = template_events[np.newaxis,:]
+    template_events[:, 0] = (template_events[:, 0] - p0x) / (p1x - p0x + 1e-6)
+    template_events[:, 1] = (template_events[:, 1] - p0y) / (p1y - p0y + 1e-6)
+    template_events[:, 2] = template_events[:, 2] - template_events[0, 2]
+    template_events[:, 2] = template_events[:, 2] / 1e6
+    template_events[:, 3] = template_events[:, 3] * 2 - 1
+
+    ratio_t = np.array([1, 1, 1, 1, 1])[:, np.newaxis]
+    template_events = template_events.transpose([1, 0]) / ratio_t
+    template_events = template_events[np.newaxis, :]
     template_events = torch.from_numpy(template_events).float()
+
     return template_events
 
 def sampling_search_egt(events):
@@ -140,17 +146,17 @@ def sampling_search_egt(events):
     events = np.stack((x, y, timestamps, polarities))
     events = np.swapaxes(events, 0, 1).astype(np.float_)
 
-
-    events[:,2] = events[:,2] - events[0,2]
-    events[:,2] = events[:,2] / 1e6
-    events[:,3] = events[:,3]*2 - 1
+    events[:,2] = events[:, 2] - events[0, 2]
+    events[:,2] = events[:, 2] / 1e6
+    events[:,3] = events[:, 3] * 2 - 1
 
     # H = 260
     # W = 346
-    events[:,0] = events[:,0]/346
-    events[:,1] = events[:,1]/260
+    events[:, 0] = events[:, 0] / 346
+    events[:, 1] = events[:, 1] / 260
 
-    events = events[np.newaxis,:]
+    events = events[np.newaxis, :]
     events = torch.from_numpy(events).float()
     events = torch.transpose(events, 2, 1)
+
     return events
