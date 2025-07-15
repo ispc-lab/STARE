@@ -136,6 +136,7 @@ dependencies:
   - xz=5.2.6=h166bdaf_0
   - zeromq=4.3.4=h9c3ff4c_1
   - zlib=1.2.12=h166bdaf_3
+  - ninja
   - pip:
     - absl-py==1.0.0
     - cachetools==5.0.0
