@@ -350,6 +350,7 @@ Similar as `Trackers under PyTracking`, the results are by default in the folder
 
 **8.** Run stream-based latency-aware evaluation demo **with predictive module**.
 ```
+# under pred_OSTrack dir
 python tracking/test_streaming.py ostrack pred_esot500_4step s100 --dataset_name esot500s --pred_next 1 [--runid 66 --use_aas]
 python tracking/streaming_predspeed.py ostrack pred_esot500_4step s100 [--runid 66]
 ```
