@@ -3,15 +3,17 @@ import sys
 import argparse
 import importlib
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+# os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 prj_path = os.path.join(os.path.dirname(__file__), '..')
 if prj_path not in sys.path:
     sys.path.append(prj_path)
+    
 pytracking_path = os.path.join(os.path.dirname(__file__), '../../../pytracking')
 if pytracking_path not in sys.path:
     sys.path.append(pytracking_path)
-print(sys.path)
+    
+# print(sys.path)
 
 from lib.test.evaluation import get_dataset
 from lib.test.evaluation.running import run_dataset, run_dataset_stream
