@@ -21,7 +21,7 @@ def trackerlist(name: str, parameter_name: str, dataset_name: str, run_ids = Non
     """
     if run_ids is None or isinstance(run_ids, int):
         run_ids = [run_ids]
-    return [Tracker(name, parameter_name, dataset_name, run_id, display_name, result_only) for run_id in run_ids]
+    return [Tracker(name, parameter_name, dataset_name, run_id, display_name=display_name, result_only=result_only) for run_id in run_ids]
 
 
 class Tracker:
