@@ -32,8 +32,7 @@ def esot500_frame_all():
                 trackerlist('dimp', 'prdimp18', range(1)) + \
                 trackerlist('dimp', 'prdimp50', range(1)) + \
                 trackerlist('keep_track', 'default', range(1)) + \
-                trackerlist('rts', 'rts50', range(1)) + \
-                trackerlist('egt', 'egt', range(1))
+                trackerlist('rts', 'rts50', range(1))
 
     dataset = get_dataset(
         'esot_500_2', 'esot_250_2', 'esot_20_2',
