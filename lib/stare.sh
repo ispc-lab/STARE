@@ -20,7 +20,7 @@ ln -s $ESOT500_DIR data/ESOT500
 
 # Define the optional values for FPS and WINDOW
 fps_options=(500 250 20)
-window_options=(2 50 100 150)
+window_options=(2 20 50 100 150)
 
 echo "Starting ESOT500 dataset preprocessing..."
 echo "ESOT500 Data Directory: $ESOT500_DIR"
@@ -46,7 +46,7 @@ echo "All ESOT500 data preprocessing tasks completed."
 #############################################################
 
 # go to the pytracking directory
-cd lib/pytracking
+cd lib/pytracking || { echo "Error: pytracking directory not found. Please check the path."; exit 1; }
 
 # Create the default local file for pytracking
 python -c "from pytracking.evaluation.environment import create_default_local_file; create_default_local_file()"
@@ -59,16 +59,34 @@ cp -r $STARE_CKPTS_DIR/pytracking lib/pytracking/pytracking/networks
 echo "Starting frame-based tracking tests for trackers under PyTracking..."
 echo "------------------------------------"
 python pytracking/run_experiment.py exp_frame esot500_frame_all
-
 echo "------------------------------------"
+
+# special case for egt
+for fps in "${fps_options[@]}"; do
+  for window in "${window_options[@]}"; do
+    setting_name="esot500_sim_frame_egt_${fps}_w${window}ms"
+    python pytracking/run_experiment_streaming.py exp_frame "${setting_name}"
+    python eval/streaming_eval_v5.py exp_frame "${setting_name}" --sim_frame --fps "${fps}" --window "${window}"
+  done
+done
 
 # Run stare tracking
 echo "Starting stare tracking tests for trackers under PyTracking..."
 echo "------------------------------------"
-python pytracking/run_experiment_streaming.py exp_stare esot500_stare_all
 
-# align the prediction with GT timestamp
-python eval/streaming_eval_v3.py exp_stare esot500_stare_all
+# Define the list of STARE window settings for evaluation
+stare_window_options=(2 20 50 100 150 200)
+
+# Loop through each window setting
+for window in "${stare_window_options[@]}"; do
+  setting="esot500_stare_w${window}ms"
+  echo "Running stare experiment for ${setting}..."
+  # Run the stare experiment
+  python pytracking/run_experiment_streaming.py exp_stare "${setting}"
+  # Align the prediction with GT timestamp
+  python eval/streaming_eval_v3.py exp_stare "${setting}"
+  echo "------------------------------------"
+done
 
 echo "All tracking tests completed for trackers under PyTracking."
 
@@ -77,11 +95,11 @@ echo "All tracking tests completed for trackers under PyTracking."
 #############################################################
 
 # go to the sotas directory
-cd ../sotas
+cd ../sotas || { echo "Error: sotas directory not found. Please check the path."; exit 1; }
 
 # Step 3.1: MixFormer
 
-cd MixFormer
+cd MixFormer || { echo "Error: MixFormer directory not found. Please check the path."; exit 1; }
 
 # Create the default local file for MixFormer
 python -c "from lib.test.evaluation.environment import create_default_local_file; create_default_local_file()"
@@ -94,19 +112,14 @@ cp -r $STARE_CKPTS_DIR/sotas/mixformer_convmae_online lib/test/networks
 echo "Starting frame-based tracking tests with MixFormer ConvMAE Online baseline..."
 echo "------------------------------------"
 
-# Define the list of dataset names
-dataset_names=(
-    'esot_500_2' 'esot_250_2' 'esot_20_2'
-    'esot_500_50' 'esot_250_50' 'esot_20_50'
-    'esot_500_100' 'esot_250_100' 'esot_20_100'
-    'esot_500_150' 'esot_250_150' 'esot_20_150'
-)
-
 # Loop through each dataset name
-for dataset in "${dataset_names[@]}"; do
-  echo "Running test for dataset: ${dataset}"
-  python tracking/test.py mixformer_convmae_online baseline --dataset_name "${dataset}"
-  echo "------------------------------------"
+for fps in "${fps_options[@]}"; do
+  for window in "${window_options[@]}"; do
+    dataset="esot_${fps}_${window}"
+    echo "Running test for dataset: ${dataset}"
+    python tracking/test.py mixformer_convmae_online baseline --dataset_name "${dataset}"
+    echo "------------------------------------"
+  done
 done
 
 # Run stare tracking
@@ -128,7 +141,7 @@ echo "All tracking tests completed for MixFormer."
 
 # Step 3.2: Stark
 
-cd ../Stark
+cd ../Stark || { echo "Error: Stark directory not found. Please check the path."; exit 1; }
 
 # Create the default local file for Stark
 python -c "from lib.test.evaluation.environment import create_default_local_file; create_default_local_file()"
@@ -142,15 +155,17 @@ echo "Starting frame-based tracking tests with Stark_S baseline ..."
 echo "------------------------------------"
 
 # Loop through each dataset name
-for dataset in "${dataset_names[@]}"; do
-  echo "Running test for dataset: ${dataset}"
-  python tracking/test.py stark_s baseline --dataset_name "${dataset}"
-  echo "------------------------------------"
+for fps in "${fps_options[@]}"; do
+  for window in "${window_options[@]}"; do
+    dataset="esot_${fps}_${window}"
+    echo "Running test for dataset: ${dataset}"
+    python tracking/test.py stark_s baseline --dataset_name "${dataset}"
+    echo "------------------------------------"
+  done
 done
 
 # Run stare tracking
 echo "Starting stare tracking tests with Stark_S baseline ..."
-echo "Dataset: esot500s"
 echo "------------------------------------"
 
 # Loop through each setting option
@@ -165,7 +180,7 @@ echo "All tracking tests completed for Stark."
 
 # Step 3.3: OSTrack
 
-cd ../OSTrack
+cd ../OSTrack || { echo "Error: OSTrack directory not found. Please check the path."; exit 1; }
 
 # Create the default local file for OSTrack
 python -c "from lib.test.evaluation.environment import create_default_local_file; create_default_local_file()"
@@ -179,10 +194,13 @@ echo "Starting frame-based tracking tests with OSTrack ..."
 echo "------------------------------------"
 
 # Loop through each dataset name
-for dataset in "${dataset_names[@]}"; do
-  echo "Running test for dataset: ${dataset}"
-  python tracking/test.py ostrack esot500mix --dataset_name "${dataset}"
-  echo "------------------------------------"
+for fps in "${fps_options[@]}"; do
+  for window in "${window_options[@]}"; do
+    dataset="esot_${fps}_${window}"
+    echo "Running test for dataset: ${dataset}"
+    python tracking/test.py ostrack esot500mix --dataset_name "${dataset}"
+    echo "------------------------------------"
+  done
 done
 
 echo "All tracking tests completed."
@@ -214,7 +232,7 @@ echo "All stare tracking tests completed with OSTrack."
 
 # Step 3.4: OSTrack + P
 
-cd ../pred_OSTrack
+cd ../pred_OSTrack || { echo "Error: Directory pred_OSTrack not found. Skipping OSTrack + P tests."; exit 1; }
 
 # Create the default local file for OSTrack + P
 python -c "from lib.test.evaluation.environment import create_default_local_file; create_default_local_file()"
@@ -249,5 +267,3 @@ done
 echo "All stare tracking tests completed with OSTrack + P."
 
 echo "All tasks completed successfully."
-
-
