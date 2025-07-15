@@ -28,6 +28,9 @@ Neuromorphic vision systems, inspired by biological sensory processing, offer tr
       <a href="#demo">Demo</a>
     </li>
     <li>
+      <a href="#full-reproduction">Full Reproduction</a>
+    </li>
+    <li>
       <a href="#support">Support</a>
     </li>
     <li>
@@ -260,7 +263,7 @@ python pytracking/run_experiment_streaming.py exp_stare fast_test_stare
 python eval/streaming_eval_v3.py exp_stare fast_test_stare
 ```
 The instructions given are for real-time testing on your own hardware. 
-If you want to reproduce the results in our paper, please refer to `pytracking/stream_settings/s14`.
+If you want to reproduce the results in our paper, please refer to `pytracking/stream_settings/s100`.
 
 **Note:** 
 
@@ -383,6 +386,22 @@ cd lib/pytracking
 **4.** Visualization
 
 - Then run `python pytracking/visualize_stare_result.py` to visualize the tracking results.
+
+<br><br>
+
+## Full Reproduction
+
+We also provide a bash script to reproduce almost all the results mentioned in the paper. To use the script, you need first build the [`stare` conda environment](#trackers-under-pytracking) and download the [ESOT500 dataset and all the tracker checkpoints](#dataset-and-checkpoints-preparation) we provide, then execute the following command:
+```
+cd [your/path/to/STARE]
+
+export ESOT500_DIR='/your/path/to/ESOT500'
+export STARE_CKPTS_DIR='/your/path/to/stare_ckpts'
+
+bash lib/stare.sh 2>&1 | tee stare.log
+```
+
+After this, you can use the corresponding Jupyter Notebook (Pytracking tracker:`/pytracking/analysis/analysis_results_all.ipynb` or SOTAs tracker:`/lib/test/analysis/analysis_results_demo.ipynb`) to evaluate the results.
 
 <br><br>
 
