@@ -53,7 +53,7 @@ python -c "from pytracking.evaluation.environment import create_default_local_fi
 python -c "from ltr.admin.environment import create_default_local_file; create_default_local_file()"
 
 # Copy the checkpoints to the pytracking networks directory
-cp -r $STARE_CKPTS_DIR/pytracking/* lib/pytracking/pytracking/networks
+cp -r $STARE_CKPTS_DIR/pytracking/* pytracking/networks
 
 # Run frame-based tracking
 echo "Starting frame-based tracking tests for trackers under PyTracking..."
