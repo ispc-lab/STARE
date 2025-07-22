@@ -13,7 +13,7 @@ def preprocess_aedat4(path_to_dir, fps, window, width, height, style='VoxelGridC
     transform = ToPILImage()
     file_list = os.listdir(path_to_dir + "/aedat4")
     sequence_todo = [x.split('.')[0] for x in file_list]
-    assert 1 < window < 1e3  # ms
+    # assert 1 < window < 1e3  # ms
 
     for sequence in sequence_todo:
         ae_file = path_to_dir + '/aedat4/{}.aedat4'.format(sequence)
@@ -25,11 +25,11 @@ def preprocess_aedat4(path_to_dir, fps, window, width, height, style='VoxelGridC
                 print('Processing:', ae_file)
 
                 # Read events from the file
-                events = np.hstack([packet for packet in f['events'].numpy()])
+                # events = np.hstack([packet for packet in f['events'].numpy()])
 
                 # testing for subset of large files
-                # events_iterator = f['events'].numpy()
-                # events = np.hstack([packet for packet in itertools.islice(events_iterator, 10000)])
+                events_iterator = f['events'].numpy()
+                events = np.hstack([packet for packet in itertools.islice(events_iterator, 10000)])
 
                 events['timestamp'] = events['timestamp'] - events['timestamp'][0]
 
@@ -38,10 +38,10 @@ def preprocess_aedat4(path_to_dir, fps, window, width, height, style='VoxelGridC
                 os.makedirs(save_dir)
 
             count = 0
-            time_right = 0
+            time_left = 0
             while True:
-                time_left = time_right
-                time_right += window * 1e3  # ms to us
+                time_left += 1000 / fps * 1e3  # ms to us
+                time_right = time_left + window * 1e3  # ms to us
                 if time_right > events['timestamp'][-1]:
                     break
 
