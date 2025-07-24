@@ -1,116 +1,275 @@
 import os
 import sys
 import time
+import datetime
+import threading
 
-import cv2 as cv
 import numpy as np
 import dv_processing as dv
-import open3d as o3d
+import cv2 as cv
+import matplotlib.pyplot as plt
+
+from collections import OrderedDict
+from readerwriterlock import rwlock
+from mpl_toolkits.mplot3d import Axes3D
 
 
-EVENT_COUNT_THRESHOLD = 10
+env_path = os.path.join(os.path.dirname(__file__), '..', '..')
+if env_path not in sys.path:
+    sys.path.append(env_path)
 
-def find_feature_center(events):
-    """
-    A simple feature detector:
-    when the number of events in the packet exceeds a threshold, compute the centroid
-    """
-    if events is not None and len(events) > EVENT_COUNT_THRESHOLD:
-        coords = events.coordinates()
-        centroid = np.mean(coords, axis=0)
+from lib.test.evaluation.tracker import Tracker
 
-        return centroid
+env_path = os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', 'pytracking')
+if env_path not in sys.path:
+    sys.path.append(env_path)
 
-    return None
+from pytracking.utils.convert_event_img import convert_event_img_aedat
+
+
+BUFFER_HISTORY_MS = 100
+SAMPLING_WINDOW_MS = 20
+
+
+def event_collector(capture: dv.io.CameraCapture, camera_idx: int, events_buffer: list, buffer_rwlock: rwlock.RWLockFair,
+                    stop_event: threading.Event, history_ms: int):
+    print(f"Event collector for camera [{camera_idx}] started.")
+    history_us = history_ms * 1e3
+
+    while not stop_event.is_set():
+        events = capture.getNextEventBatch()
+        if events is not None:
+            with buffer_rwlock.gen_wlock():
+                events_buffer[camera_idx].add(events)
+                if len(events_buffer[camera_idx]) > 0:
+                    latest_ts = events_buffer[camera_idx].getHighestTime()
+                    cutoff_ts = int(latest_ts - history_us)
+                    events_buffer[camera_idx] = events_buffer[camera_idx].sliceTime(cutoff_ts)
+
+        else:
+            time.sleep(0.0001)
+
+    print(f"Event collector for camera [{camera_idx}] stopped.")
+
+
+def tracking_bbox_collector(ostrack, tracker_idx: int, window: int, events_buffer: list, buffer_rwlock: rwlock.RWLockFair, pred_bbox: list, bbox_rwlock: rwlock.RWLockFair, prev_output: list, stop_event: threading.Event):
+    print(f"Tracking bbox collector [{tracker_idx}] thread has started.")
+
+    info = {}
+    info['previous_output'] = prev_output[tracker_idx]
+
+    while not stop_event.is_set():
+        if events_buffer[tracker_idx] is not None:
+            info['previous_output'] = prev_output[tracker_idx]
+            window_us = window * 1e3
+
+            with buffer_rwlock.gen_rlock():
+                latest_ts = events_buffer[tracker_idx].getHighestTime()
+                cutoff_ts = int(latest_ts - window_us)
+                events = events_buffer[tracker_idx].sliceTime(cutoff_ts)
+
+            event_rep = convert_event_img_aedat(events.numpy(), 'VoxelGridComplex')
+            out = ostrack.track(event_rep, info)
+
+            prev_output[tracker_idx] = OrderedDict(out)
+
+            with bbox_rwlock.gen_wlock():
+                pred_bbox[tracker_idx] = out['target_bbox']
+
+        else:
+            time.sleep(0.0001)
+
+    print(f"Tracking bbox collector [{tracker_idx}] thread has stopped.")
+
 
 def triangulate(pt1_undistorted, pt2_undistorted, p1_matrix, p2_matrix):
     points_4d_hom = cv.triangulatePoints(p1_matrix, p2_matrix, pt1_undistorted.T, pt2_undistorted.T)
     points_3d = points_4d_hom / points_4d_hom[3]
+
     return points_3d[:3].flatten()
 
 
-# --- Load stereo calibration parameters from a file ---
-try:
-    save_path = os.path.dirname(__file__) + '/stereo_calibration.npz'
-    # save_path = './stereo_calibration.npz'
-    calib = np.load(save_path)
-    K1, D1 = calib['K1'], calib['D1']
-    K2, D2 = calib['K2'], calib['D2']
-    R, T = calib['R'], calib['T']
-    image_size = calib['image_size']
-    print("Successfully loaded calibration parameters:")
+def main():
 
-except FileNotFoundError:
-    print("Error: Calibration file not found. Please run stereo_dvs_calibrate.py first.")
-    sys.exit(1)
+    # ------ Camera Initialization ------
+    cameras = dv.io.discoverDevices()
 
-# --- Create projection matrices for both cameras ---
-# P1 = K1 * [I|0]
-P1 = K1 @ np.hstack([np.eye(3), np.zeros((3, 1))])
-# P2 = K2 * [R|T]
-P2 = K2 @ np.hstack([R, T])
+    if len(cameras) < 2:
+        print("Error: Less than two DVS cameras found. Please connect a stereo pair and try again.")
+        sys.exit(1)
 
-# --- Real-time inference setup ---
-cameras = dv.io.discoverDevices()
+    else:
+        print("Available DVS cameras:")
+        for idx, camera in enumerate(cameras):
+            print(f"{idx}: {camera}")
 
-if len(cameras) < 2:
-    print("Error: Less than two DVS cameras found. Please connect a stereo pair and try again.")
-    sys.exit(1)
+    try:
+        capture = dv.io.StereoCapture(cameras[0], cameras[1])
+        print("Stereo Camera capture started.")
 
-else:
-    print("Available DVS cameras:")
-    for idx, camera in enumerate(cameras):
-        print(f"{idx}: {camera}")
-
-try:
-    capture = dv.io.StereoCapture(cameras[0], cameras[1])
-    print("Stereo Camera capture started.")
-
-except Exception as e:
-    print(f"Failed to start camera capture: {e}")
-    sys.exit(1)
+    except Exception as e:
+        print(f"Failed to start camera capture: {e}")
+        sys.exit(1)
 
 
-resolution = capture.left.getEventResolution()
-visualizer = dv.visualization.EventVisualizer(resolution)
+    # ------ Start Event Stream Recording Thread ------
+    events_buffer = [dv.EventStore(), dv.EventStore()]
+    buffer_lock = [rwlock.RWLockFair(), rwlock.RWLockFair()]
+    stop_event = [threading.Event(), threading.Event()]
 
-# --- 初始化 Open3D 可视化窗口 ---
-vis = o3d.visualization.Visualizer()
-vis.create_window(window_name="3D Trajectory Visualization")
+    collector_thread_left = threading.Thread(
+        target=event_collector,
+        args=(capture.left, 0, events_buffer, buffer_lock[0], stop_event[0], BUFFER_HISTORY_MS)
+    )
+    collector_thread_left.start()
 
-# 创建一个坐标系来表示相机（原点）
-# +X为红色, +Y为绿色, +Z为蓝色
-coordinate_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=100.0, origin=[0, 0, 0])
-vis.add_geometry(coordinate_frame)
-
-# 用于存储轨迹点和绘制线条
-trajectory_points = []
-line_set = o3d.geometry.LineSet()
-vis.add_geometry(line_set) # 将空的线集添加到场景中
-
-# 设置渲染选项，使背景为黑色
-opt = vis.get_render_option()
-opt.background_color = np.asarray([0, 0, 0])
+    collector_thread_right = threading.Thread(
+        target=event_collector,
+        args=(capture.right, 1, events_buffer, buffer_lock[1], stop_event[1], BUFFER_HISTORY_MS)
+    )
+    collector_thread_right.start()
 
 
-# --- Main loop for real-time stereo DVS processing ---
-print("\nStarting real-time processing....")
-print("Close the 3D window to exit.")
-while capture.left.isRunning() and capture.right.isRunning() and vis.poll_events():
-    events_left = capture.left.getNextEventBatch()
-    events_right = capture.right.getNextEventBatch()
+    # ------ OSTrack Tracker Initialization ------
+    tracker = Tracker('ostrack', 'esot500mix', 'esot_500_20')
+    params = tracker.get_parameters()
+    params.debug = False
 
-    if events_left is not None and events_right is not None:
-        left_event_frame = visualizer.generateImage(events_left)
-        left_center = find_feature_center(events_left)
+    ostrack = [
+        tracker.create_tracker(params),
+        tracker.create_tracker(params),
+    ]
 
-        right_event_frame = visualizer.generateImage(events_right)
-        right_center = find_feature_center(events_right)
+    init_info = [
+        {'init_bbox': [175, 117, 33, 35],},
+        {'init_bbox': [110, 136, 52, 56],},
+    ]
+
+    template = [
+        tracker._read_image(os.path.dirname(__file__) + '/init/template/left_1.jpg'),
+        tracker._read_image(os.path.dirname(__file__) + '/init/template/right_1.jpg'),
+    ]
+
+    outs = [ostrack[i].initialize(template[i], init_info[i]) for i in range(2)]
+    outs = [out if out is not None else {} for out in outs]
+
+
+    # ------ Start Tracking Threads ------
+    prev_output = [OrderedDict(out) for out in outs]
+    pred_bbox = [init_info[i].get('init_bbox') for i in range(2)]
+    bbox_lock = [rwlock.RWLockFair(), rwlock.RWLockFair()]
+
+    tracking_thread_left = threading.Thread(
+        target=tracking_bbox_collector,
+        args=(ostrack[0], 0, SAMPLING_WINDOW_MS, events_buffer, buffer_lock[0], pred_bbox, bbox_lock[0], prev_output, stop_event[0])
+    )
+    tracking_thread_left.start()
+
+    tracking_thread_right = threading.Thread(
+        target=tracking_bbox_collector,
+        args=(ostrack[1], 1, SAMPLING_WINDOW_MS, events_buffer, buffer_lock[1], pred_bbox, bbox_lock[1], prev_output, stop_event[1])
+    )
+    tracking_thread_right.start()
+
+
+    # ------ Load stereo calibration parameters ------
+    try:
+        save_path = os.path.dirname(__file__) + '/stereo_calibration.npz'
+        # save_path = './stereo_calibration.npz'
+        calib = np.load(save_path)
+        K1, D1 = calib['K1'], calib['D1']
+        K2, D2 = calib['K2'], calib['D2']
+        R, T = calib['R'], calib['T']
+        image_size = calib['image_size']
+        print("Successfully loaded calibration parameters:")
+
+    except FileNotFoundError:
+        print("Error: Calibration file not found. Please run stereo_dvs_calibrate.py first.")
+        sys.exit(1)
+
+    # projection matrices
+    P1 = K1 @ np.hstack([np.eye(3), np.zeros((3, 1))]) # P1 = K1 * [I|0]
+    P2 = K2 @ np.hstack([R, T]) # P2 = K2 * [R|T]
+
+
+    # ------ Visualization ------
+    resolution = capture.left.getEventResolution()
+    visualizer = dv.visualization.EventVisualizer(resolution)
+
+    plt.ion()
+    fig = plt.figure(figsize=(8, 8))
+    ax = fig.add_subplot(111, projection='3d')
+
+    scatter_plot = ax.scatter([], [], [], c='red', s=10, label='Current Position')
+
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    ax.set_title('Real-time 3D Position')
+    ax.legend()
+
+    ax.set_xlim(-10, 10)
+    ax.set_ylim(-10, 10)
+    ax.set_zlim(0, 20)
+
+    op_x, op_y, op_w, op_h = init_info[0]['init_bbox']
+    left_center = [op_x + op_w / 2, op_y + op_h / 2]
+    op_x, op_y, op_w, op_h = init_info[1]['init_bbox']
+    right_center = [op_x + op_w / 2, op_y + op_h / 2]
+
+    while capture.left.isRunning() and capture.right.isRunning():
+
+        with buffer_lock[0].gen_rlock():
+            latest_ts = events_buffer[0].getHighestTime()
+            cutoff_ts = int(latest_ts - SAMPLING_WINDOW_MS * 1e3)
+            events_left = events_buffer[0].sliceTime(cutoff_ts)
+
+        if events_left is not None:
+            with bbox_lock[0].gen_rlock():
+                op_x, op_y, op_w, op_h = pred_bbox[0]
+
+            left_event_frame = visualizer.generateImage(events_left)
+            cv.rectangle(
+                left_event_frame,
+                (int(op_x), int(op_y)),
+                (int(op_x + op_w), int(op_y + op_h)),
+                (0, 0, 255),
+                2,
+            )
+            cv.imshow("Left-STARE-Tracking", left_event_frame)
+
+            left_center = [op_x + op_w / 2, op_y + op_h / 2]
+
+
+        with buffer_lock[1].gen_rlock():
+            latest_ts = events_buffer[1].getHighestTime()
+            cutoff_ts = int(latest_ts - SAMPLING_WINDOW_MS * 1e3)
+            events_right = events_buffer[1].sliceTime(cutoff_ts)
+
+        if events_right is not None:
+            with bbox_lock[1].gen_rlock():
+                op_x, op_y, op_w, op_h = pred_bbox[1]
+
+            right_event_frame = visualizer.generateImage(events_right)
+            cv.rectangle(
+                right_event_frame,
+                (int(op_x), int(op_y)),
+                (int(op_x + op_w), int(op_y + op_h)),
+                (0, 0, 255),
+                2,
+            )
+            cv.imshow("Right-STARE-Tracking", right_event_frame)
+
+            right_center = [op_x + op_w / 2, op_y + op_h / 2]
+
 
         if left_center is not None and right_center is not None:
+            print("Left Feature Center:", left_center)
+            print("Right Feature Center:", right_center)
+
             # get the centroids of the detected features, [x, y] format
-            pt_left = left_center.reshape(1, 1, 2).astype(np.float32)
-            pt_right = right_center.reshape(1, 1, 2).astype(np.float32)
+            pt_left = np.array(left_center).reshape(1, 1, 2).astype(np.float32)
+            pt_right = np.array(right_center).reshape(1, 1, 2).astype(np.float32)
 
             # remove distortion using the calibration parameters
             pt_left_undistorted = cv.undistortPoints(pt_left, K1, D1)
@@ -118,40 +277,29 @@ while capture.left.isRunning() and capture.right.isRunning() and vis.poll_events
 
             # perform triangulation to get the 3D point
             point_3d = triangulate(pt_left_undistorted, pt_right_undistorted, P1, P2)
+            scatter_plot._offsets3d = ([point_3d[0]], [point_3d[1]], [point_3d[2]])
+            print("Matching features detected, 3D Coordinates (mm): ")
+            print(f"X={point_3d[0]:.2f}, Y={point_3d[1]:.2f}, Z={point_3d[2]:.2f}")
 
-            print(f"Matching features detected, 3D Coordinates (mm): X={point_3d[0]:.2f}, Y={point_3d[1]:.2f}, Z={point_3d[2]:.2f}")
-            print(f"Left Feature: {left_center}, Right Feature: {right_center}")
+        plt.draw()
+        plt.pause(0.001)
 
-            trajectory_points.append(point_3d)
-            if len(trajectory_points) > 1:
-                # Open3D需要特定的数据类型
-                points_o3d = o3d.utility.Vector3dVector(trajectory_points)
+        time.sleep(0.02)
 
-                # 创建连接线段
-                # line_indices[i] = [i, i+1] 连接第i个点和第i+1个点
-                line_indices = [[i, i + 1] for i in range(len(trajectory_points) - 1)]
+        if not plt.fignum_exists(fig.number):
+            print("Plot window closed. Exiting.")
+            break
 
-                # 为线段设置颜色 (例如，从蓝色渐变到红色)
-                colors = [[i / len(line_indices), 0, 1 - i / len(line_indices)] for i in range(len(line_indices))]
+        if cv.waitKey(2) & 0xFF == ord('q'):
+            print("Camera capture stopped.")
+            break
 
-                # 更新线集的点、线和颜色
-                line_set.points = points_o3d
-                line_set.lines = o3d.utility.Vector2iVector(line_indices)
-                line_set.colors = o3d.utility.Vector3dVector(colors)
+    cv.destroyAllWindows()
+    plt.ioff()
+    plt.show()
 
-                # 通知可视化器几何体已更新
-                vis.update_geometry(line_set)
+    print("Program exited.")
 
-        # Display all
-        cv.imshow("Left Event Stream", left_event_frame)
-        cv.imshow("Right Event Stream", right_event_frame)
-        vis.update_renderer()
 
-    else:
-        time.sleep(0.0001)
-
-    if cv.waitKey(1) & 0xFF == ord('q'):
-        break
-
-cv.destroyAllWindows()
-print("Program exited.")
+if __name__ == '__main__':
+    main()
