@@ -38,10 +38,10 @@ def preprocess_aedat4(path_to_dir, fps, window, width, height, style='VoxelGridC
                 os.makedirs(save_dir)
 
             count = 0
-            time_left = 0
+            time_right = window * 1e3 - 1000 / fps * 1e3 # ms to us
             while True:
-                time_left += 1000 / fps * 1e3  # ms to us
-                time_right = time_left + window * 1e3  # ms to us
+                time_right += 1000 / fps * 1e3   # ms to us
+                time_left = time_right - window * 1e3  # ms to us
                 if time_right > events['timestamp'][-1]:
                     break
 
@@ -53,6 +53,7 @@ def preprocess_aedat4(path_to_dir, fps, window, width, height, style='VoxelGridC
                 file_name = str(count).zfill(5) + '.jpg'
                 img.save(os.path.join(save_dir, file_name))
                 count += 1
+                
         else:
             print('!!! Aedat4 File Not Found:', sequence)
 
