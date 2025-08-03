@@ -133,15 +133,29 @@ def main():
         tracker.create_tracker(params),
     ]
 
+    # ---------- slow init ----------------------------------
+    # init_info = [
+    #     {'init_bbox': [175, 117, 33, 35],},
+    #     {'init_bbox': [110, 136, 52, 56],},
+    # ]
+    #
+    # template = [
+    #     tracker._read_image(os.path.dirname(__file__) + '/init/template/left_1.jpg'),
+    #     tracker._read_image(os.path.dirname(__file__) + '/init/template/right_1.jpg'),
+    # ]
+    # -------------------------------------------------------
+
+    # ---------- fast init ----------------------------------
     init_info = [
-        {'init_bbox': [175, 117, 33, 35],},
-        {'init_bbox': [110, 136, 52, 56],},
+        {'init_bbox': [171, 88, 19, 20], },
+        {'init_bbox': [120, 133, 29, 31], },
     ]
 
     template = [
-        tracker._read_image(os.path.dirname(__file__) + '/init/template/left_1.jpg'),
-        tracker._read_image(os.path.dirname(__file__) + '/init/template/right_1.jpg'),
+        tracker._read_image(os.path.dirname(__file__) + '/init/template/left_fast_1.jpg'),
+        tracker._read_image(os.path.dirname(__file__) + '/init/template/right_fast_1.jpg'),
     ]
+    # -------------------------------------------------------
 
     outs = [ostrack[i].initialize(template[i], init_info[i]) for i in range(2)]
     outs = [out if out is not None else {} for out in outs]
@@ -179,7 +193,7 @@ def main():
         print("Successfully loaded calibration parameters:")
 
     except FileNotFoundError:
-        print("Error: Calibration file not found. Please run stereo_dvs_calibrate.py first.")
+        print("Error: Rectified Calibration file not found. Please run rectify_calibration_result.py first.")
         sys.exit(1)
 
 
@@ -188,26 +202,49 @@ def main():
     visualizer = dv.visualization.EventVisualizer(resolution)
 
     plt.ion()
-    fig = plt.figure(figsize=(8, 8))
-    ax = fig.add_subplot(111, projection='3d')
 
-    scatter_plot = ax.scatter([], [], [], c='red', s=200, label='Current Position')
+    fig = plt.figure(figsize=(16, 8))
+    fig.suptitle('Real-time 3D Tracking and X-Z Plane View', fontsize=16)
 
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Z')
-    ax.set_title('Real-time 3D Position')
-    ax.legend()
 
-    ax.set_xlim(-500, 500)
-    ax.set_ylim(-500, 500)
-    ax.set_zlim(-200, 200)
+    # --- left subplot: 3D view ---
+    ax_3d = fig.add_subplot(1, 2, 1, projection='3d')
+    scatter_3d = ax_3d.scatter([], [], [], c='red', s=150, label='Current Position')
 
+    ax_3d.set_xlabel('X (mm)')
+    ax_3d.set_ylabel('Y (mm)')
+    ax_3d.set_zlabel('Z (mm)')
+    ax_3d.set_title('3D View')
+
+    ax_3d.set_xlim(-1000, 1000)
+    ax_3d.set_ylim(-1000, 1000)
+    ax_3d.set_zlim(-1000, 1000)
+    ax_3d.legend()
+
+    # --- right subplot: 2D X-Z plane view (front-end view) ---
+    ax_2d = fig.add_subplot(1, 2, 2)
+    scatter_xz = ax_2d.scatter([], [], c='blue', s=150, label='Current X-Z Position')
+
+    ax_2d.set_xlabel('X (mm)')
+    ax_2d.set_ylabel('Z (mm)')
+    ax_2d.set_title('Top-Down View (X-Z Plane)')
+
+    ax_2d.set_xlim(-1500, 1500)
+    ax_2d.set_ylim(-1500, 1500)
+
+    ax_2d.set_aspect('equal', adjustable='box')
+    ax_2d.grid(True)
+    ax_2d.legend()
+
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+
+    # Initialize the centers of the bounding boxes
     op_x, op_y, op_w, op_h = init_info[0]['init_bbox']
     left_center = [op_x + op_w / 2, op_y + op_h / 2]
     op_x, op_y, op_w, op_h = init_info[1]['init_bbox']
     right_center = [op_x + op_w / 2, op_y + op_h / 2]
 
+    # main loop for tracking and visualization
     while capture.left.isRunning() and capture.right.isRunning():
 
         with buffer_lock[0].gen_rlock() and buffer_lock[1].gen_rlock():
@@ -243,6 +280,7 @@ def main():
                 (0, 0, 255),
                 2,
             )
+            # left_event_frame = cv.resize(left_event_frame, None, fx=3, fy=3, interpolation=cv.INTER_LINEAR)
             cv.imshow("Left-STARE-Tracking", left_event_frame)
 
             right_event_frame = visualizer.generateImage(events_right)
@@ -253,6 +291,7 @@ def main():
                 (0, 0, 255),
                 2,
             )
+            # right_event_frame = cv.resize(right_event_frame, None, fx=3, fy=3, interpolation=cv.INTER_LINEAR)
             cv.imshow("Right-STARE-Tracking", right_event_frame)
 
         if left_center is not None and right_center is not None:
@@ -279,10 +318,13 @@ def main():
             point_3d = R0.T @ (point_3d - t0) * scale_mm  # apply rectification and scale
             point_3d = point_3d.flatten()
 
-            scatter_plot._offsets3d = ([point_3d[0]], [point_3d[1]], [point_3d[2]])
+            # update the scatter plot with the new 3D point
+            scatter_3d._offsets3d = ([point_3d[0]], [point_3d[1]], [point_3d[2]])
+            scatter_xz.set_offsets([point_3d[0], point_3d[2]])
 
             print("Matching features detected, 3D Coordinates (mm): ")
             print(f"X={point_3d[0]:.2f}, Y={point_3d[1]:.2f}, Z={point_3d[2]:.2f}")
+
 
         plt.draw()
         plt.pause(0.001)
