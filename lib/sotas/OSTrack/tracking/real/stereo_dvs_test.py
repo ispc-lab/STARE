@@ -30,8 +30,8 @@ def main():
     resolution = capture.left.getEventResolution()
     visualizer = dv.visualization.EventVisualizer(resolution)
 
-    capture.left.setDavisFrameInterval(datetime.timedelta(milliseconds=33))
-    capture.right.setDavisFrameInterval(datetime.timedelta(milliseconds=33))
+    capture.left.setDavisFrameInterval(datetime.timedelta(milliseconds=10))
+    capture.right.setDavisFrameInterval(datetime.timedelta(milliseconds=10))
 
     while capture.left.isRunning() and capture.right.isRunning():
         events_left = capture.left.getNextEventBatch()

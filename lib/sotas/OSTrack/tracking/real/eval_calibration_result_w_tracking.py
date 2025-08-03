@@ -4,11 +4,14 @@ import time
 import datetime
 import threading
 
+import numpy as np
 import dv_processing as dv
 import cv2 as cv
+import matplotlib.pyplot as plt
 
 from collections import OrderedDict
 from readerwriterlock import rwlock
+from mpl_toolkits.mplot3d import Axes3D
 
 
 env_path = os.path.join(os.path.dirname(__file__), '..', '..')
@@ -161,59 +164,144 @@ def main():
     )
     tracking_thread_right.start()
 
+
+    # ------ Load stereo calibration parameters ------
+    try:
+        save_path = os.path.dirname(__file__) + '/stereo_calib_rect.npz'
+        # save_path = './stereo_calib_rect.npz'
+        calib = np.load(save_path)
+        K1, D1 = calib['K1'], calib['D1']
+        K2, D2 = calib['K2'], calib['D2']
+        R, T = calib['R'], calib['T']  # 3x3, 3x1
+        R0, t0 = calib['R0'], calib['t0']  # 3x3, 3x1
+        scale_mm = float(calib['scale_mm'])
+
+        print("Successfully loaded calibration parameters:")
+
+    except FileNotFoundError:
+        print("Error: Calibration file not found. Please run stereo_dvs_calibrate.py first.")
+        sys.exit(1)
+
+
     # ------ Visualization ------
     resolution = capture.left.getEventResolution()
     visualizer = dv.visualization.EventVisualizer(resolution)
 
+    plt.ion()
+    fig = plt.figure(figsize=(8, 8))
+    ax = fig.add_subplot(111, projection='3d')
+
+    scatter_plot = ax.scatter([], [], [], c='red', s=200, label='Current Position')
+
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    ax.set_title('Real-time 3D Position')
+    ax.legend()
+
+    ax.set_xlim(-500, 500)
+    ax.set_ylim(-500, 500)
+    ax.set_zlim(-200, 200)
+
+    op_x, op_y, op_w, op_h = init_info[0]['init_bbox']
+    left_center = [op_x + op_w / 2, op_y + op_h / 2]
+    op_x, op_y, op_w, op_h = init_info[1]['init_bbox']
+    right_center = [op_x + op_w / 2, op_y + op_h / 2]
+
     while capture.left.isRunning() and capture.right.isRunning():
 
-        with buffer_lock[0].gen_rlock():
+        with buffer_lock[0].gen_rlock() and buffer_lock[1].gen_rlock():
             latest_ts = events_buffer[0].getHighestTime()
             cutoff_ts = int(latest_ts - SAMPLING_WINDOW_MS * 1e3)
             events_left = events_buffer[0].sliceTime(cutoff_ts)
 
-        if events_left is not None:
-            with bbox_lock[0].gen_rlock():
+            latest_ts = events_buffer[1].getHighestTime()
+            cutoff_ts = int(latest_ts - SAMPLING_WINDOW_MS * 1e3)
+            events_right = events_buffer[1].sliceTime(cutoff_ts)
+
+        if events_left is not None and events_right is not None:
+            with bbox_lock[0].gen_rlock() and bbox_lock[1].gen_rlock():
                 op_x, op_y, op_w, op_h = pred_bbox[0]
+                left_center = [op_x + op_w / 2, op_y + op_h / 2]
+                left_pt = [
+                    (int(op_x), int(op_y)),
+                    (int(op_x + op_w), int(op_y + op_h)),
+                ]
+
+                op_x, op_y, op_w, op_h = pred_bbox[1]
+                right_center = [op_x + op_w / 2, op_y + op_h / 2]
+                right_pt = [
+                    (int(op_x), int(op_y)),
+                    (int(op_x + op_w), int(op_y + op_h)),
+                ]
 
             left_event_frame = visualizer.generateImage(events_left)
             cv.rectangle(
                 left_event_frame,
-                (int(op_x), int(op_y)),
-                (int(op_x + op_w), int(op_y + op_h)),
+                left_pt[0],
+                left_pt[1],
                 (0, 0, 255),
                 2,
             )
             cv.imshow("Left-STARE-Tracking", left_event_frame)
 
-
-        with buffer_lock[1].gen_rlock():
-            latest_ts = events_buffer[1].getHighestTime()
-            cutoff_ts = int(latest_ts - SAMPLING_WINDOW_MS * 1e3)
-            events_right = events_buffer[1].sliceTime(cutoff_ts)
-
-        if events_right is not None:
-            with bbox_lock[1].gen_rlock():
-                op_x, op_y, op_w, op_h = pred_bbox[1]
-
             right_event_frame = visualizer.generateImage(events_right)
             cv.rectangle(
                 right_event_frame,
-                (int(op_x), int(op_y)),
-                (int(op_x + op_w), int(op_y + op_h)),
+                right_pt[0],
+                right_pt[1],
                 (0, 0, 255),
                 2,
             )
             cv.imshow("Right-STARE-Tracking", right_event_frame)
 
+        if left_center is not None and right_center is not None:
+            print("Left Feature Center:", left_center)
+            print("Right Feature Center:", right_center)
+
+            # get the centroids of the detected features, [x, y] format
+            pt_left = np.array(left_center).reshape(1, 1, 2).astype(np.float32)
+            pt_right = np.array(right_center).reshape(1, 1, 2).astype(np.float32)
+
+            # remove distortion using the calibration parameters
+            pt_left_undistorted = cv.undistortPoints(pt_left, K1, D1)
+            pt_right_undistorted = cv.undistortPoints(pt_right, K2, D2)
+
+            # prject the undistorted points to the image plane
+            P1 = np.hstack([np.eye(3), np.zeros((3, 1))])  # P1 = I * [R|T]
+            P2 = np.hstack([R, T.reshape(3, 1)])
+
+            # perform triangulation to get the 3D point
+            point_4d = cv.triangulatePoints(P1, P2, pt_left_undistorted.T, pt_right_undistorted.T)
+            point_3d = point_4d[:3] / point_4d[3]  # convert to 3D coordinates
+
+            # convert to millimeters and apply rectification
+            point_3d = R0.T @ (point_3d - t0) * scale_mm  # apply rectification and scale
+            point_3d = point_3d.flatten()
+
+            scatter_plot._offsets3d = ([point_3d[0]], [point_3d[1]], [point_3d[2]])
+
+            print("Matching features detected, 3D Coordinates (mm): ")
+            print(f"X={point_3d[0]:.2f}, Y={point_3d[1]:.2f}, Z={point_3d[2]:.2f}")
+
+        plt.draw()
+        plt.pause(0.001)
 
         time.sleep(0.02)
+
+        if not plt.fignum_exists(fig.number):
+            print("Plot window closed. Exiting.")
+            break
 
         if cv.waitKey(2) & 0xFF == ord('q'):
             print("Camera capture stopped.")
             break
 
     cv.destroyAllWindows()
+    plt.ioff()
+    plt.show()
+
+    print("Program exited.")
 
 
 if __name__ == '__main__':
