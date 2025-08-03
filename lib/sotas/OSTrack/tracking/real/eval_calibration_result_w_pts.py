@@ -91,7 +91,7 @@ def click_callback(event, x, y, flags, param):
     img, clicked_pt, idx, wdname = param
     if event == cv.EVENT_LBUTTONDOWN:
         clicked_pt[idx] = [x, y]
-        print(f"[{wdname}] 选点: ({x}, {y})")
+        print(f"[{wdname}] select: ({x}, {y})")
         cv.circle(img, (x, y), 5, (0, 0, 255), -1)
         cv.imshow(wdname, img)
 
