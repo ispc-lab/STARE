@@ -3,7 +3,6 @@ channels:
   - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch
   - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge
   - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main
-  - https://mirrors.aliyun.com/anaconda/pkgs/main
   - conda-forge
   - defaults
 dependencies:
@@ -199,7 +198,7 @@ dependencies:
     - shortuuid==1.0.8
     - smmap==5.0.0
     - spatial-correlation-sampler==0.4.0
-    - tb-nightly
+    - tensorboard
     - tensorboard-data-server==0.6.1
     - tensorboard-plugin-wit==1.8.1
     - termcolor==1.1.0
