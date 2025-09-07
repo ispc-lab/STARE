@@ -26,7 +26,7 @@ def parse_args():
     parser.add_argument('tracker_param', type=str, help='Name of config file.')
     parser.add_argument('stream_setting', type=str, help='Name of stream_setting file.')
     parser.add_argument('--runid', type=int, default=None, help='The run id.')
-    # parser.add_argument('--dataset_name', type=str, default='esot500s', help='Name of dataset.')
+    parser.add_argument('--dataset_name', type=str, default='esot500s', help='Name of dataset.')
     parser.add_argument('--sequence', type=str, default=None, help='Sequence number or name.')
 
     args = parser.parse_args()
@@ -95,7 +95,7 @@ def main():
 
                 for line in gt_anno_t:
                     gt_t = line[0]
-                    in_time, pred_label, bbox_speed = find_last_pred(gt_t, raw_result,gt_anno_t[0][0])
+                    in_time, pred_label, bbox_speed = find_last_pred(gt_t, raw_result, gt_anno_t[0][0])
                     pred_time = in_time
 
                     pred_bbox = (np.array(pred_label).reshape(-1, 4)
