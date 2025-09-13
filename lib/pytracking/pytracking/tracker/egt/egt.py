@@ -143,8 +143,13 @@ class EGT(Module):
                 flag00 = output[:,2,:] <= t1
 
                 temp_point = output[:,:,flag00[0,:]]
-                # np.savetxt('/home/zhu_19/evt_tracking/points/target'+str(self.indx)+'.xyz', temp_point[0,:3,:].permute([1,0]).detach().cpu().numpy())
-                np.savetxt('/home/test4/code/EventBenchmark/lib/pytracking/temp/target'+str(self.indx)+'.xyz', temp_point[0,:3,:].permute([1,0]).detach().cpu().numpy())
+
+                save_dir = os.path.join(os.path.dirname(__file__), 'temp')
+                os.makedirs(save_dir, exist_ok=True)
+                np.savetxt(
+                    save_dir + f'/target{self.indx}.xyz',
+                    temp_point[0,:3,:].permute([1,0]).detach().cpu().numpy()
+                )
 
 
             pn_ = torch.randint(0,N,[15000]).to(output.device)
@@ -171,7 +176,7 @@ class EGT(Module):
 
         return output
 
-    # def eval_data(self,X, GT, Temp=None, GT_temp=None):
+    # def eval_data(self, X, GT, Temp=None, GT_temp=None):
     def track(self, X, info: dict = None)-> dict:
         X = X.to(self.params.device)
         with torch.no_grad():
@@ -179,7 +184,7 @@ class EGT(Module):
             try:
                 X, range_low, range_high = self._Crop_input_resmaple01(X)
 
-                self.pred2curr_box = self.scale_transformation_g2l(self._previous_pred.clone(), range_low, range_high )
+                self.pred2curr_box = self.scale_transformation_g2l(self._previous_pred.clone(), range_low, range_high)
 
                 if X.shape[2] >= 300:
                     bbox, bboxs, prob, prob_phy, X_pos, Warpped_pos, flow  = self._forward_with_template(X)
@@ -201,14 +206,17 @@ class EGT(Module):
                     self.sample_idx = self.sample_idx + 1
                     output_state = output[None,None,:]
                     Pred_bboxs = output[None,None,:]
+
                 else:
                     raise
+
             except:
             #     temp = self._previous_pred
             #     return temp[None,None,:].to(X.device), temp[None,None,:].to(X.device), torch.zeros(20).to(X.device), torch.zeros(20).to(X.device), torch.zeros(20).to(X.device), torch.zeros(20).to(X.device), torch.zeros(20).to(X.device)
                 
             #     # return output[None,None,:], output[None,None,:], prob, prob_phy, flow, Warpped_pos, X_pos
             # else:
+
                 temp = self._previous_pred
                 output_state = temp[None, None, :].to(X.device)
                 Pred_bboxs = temp[None, None, :].to(X.device)
@@ -256,7 +264,7 @@ class EGT(Module):
         # print('Init box:', box_xywh)
         
         x, y, w, h = box_xywh
-        x = x / 346
+        x = x / 346 # TODO: change the size according to the dataset
         y = y / 260
         w = w / 346
         h = h / 260
@@ -501,8 +509,16 @@ class EGT(Module):
         prob_phy = self.tracking_net._regress_phy_pro_test(Warpped_pos, self.pred2curr_box[None,:].clone())
 
         if self.indx < 5:
-            np.savetxt('/home/test4/code/EventBenchmark/lib/pytracking/temp/after_project'+str(self.indx)+'.xyz', torch.cat([Warpped_pos[0,:,:], Ensemble_X_01[0,2:3,:]],dim=0).permute([1,0]).detach().cpu().numpy())
-            np.savetxt('/home/test4/code/EventBenchmark/lib/pytracking/temp/before_project'+str(self.indx)+'.xyz', Ensemble_X_01[0,:3,:].permute([1,0]).detach().cpu().numpy())
+            save_dir = os.path.join(os.path.dirname(__file__), 'temp')
+            os.makedirs(save_dir, exist_ok=True)
+            np.savetxt(
+                save_dir + '/after_project'+ str(self.indx) + '.xyz',
+                torch.cat([Warpped_pos[0, :, :], Ensemble_X_01[0, 2:3, :]], dim=0).permute([1, 0]).detach().cpu().numpy()
+            )
+            np.savetxt(
+                save_dir + '/before_project' + str(self.indx) + '.xyz',
+                Ensemble_X_01[0,:3,:].permute([1,0]).detach().cpu().numpy()
+            )
 
         X_pos = Emb_X[:, :3, :].clone()
 
