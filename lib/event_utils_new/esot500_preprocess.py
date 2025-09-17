@@ -19,9 +19,19 @@ def preprocess_esot500(path_to_esot500, fps, window, style='VoxelGridComplex'):
     
     transform = ToPILImage()
     anno_dir = path_to_esot500 + '/anno_t'
-    anno_list = os.listdir(anno_dir)
-    sequence_todo = [x.split('.')[0] for x in anno_list]
+
+    # anno_list = os.listdir(anno_dir)
+    # sequence_todo = [x.split('.')[0] for x in anno_list]
+
+    sequence_todo = []
+    with open('{}/{}.txt'.format(path_to_esot500, 'test'), 'r') as f:
+        for line in f:
+            sequence_todo.append(line.strip())
+
     multiple = 500 // fps
+
+    height = 720 if path_to_esot500[-1] == 'H' else 260
+    width = 1280 if path_to_esot500[-1] == 'H' else 346
 
     for sequence in sequence_todo:
         ae_file = path_to_esot500 + '/aedat4/{}.aedat4'.format(sequence)
@@ -69,7 +79,7 @@ def preprocess_esot500(path_to_esot500, fps, window, style='VoxelGridComplex'):
 
                 idx_start = interpolation_search(events['timestamp'], time_left)
                 idx_end = interpolation_search(events['timestamp'], time_right)
-                event_img = convert_event_img_aedat(events[idx_start:idx_end], style)
+                event_img = convert_event_img_aedat(events[idx_start:idx_end], style, height, width)
 
                 img = transform(event_img)
                 file_name = str(count).zfill(5) + '.jpg'
@@ -86,7 +96,7 @@ def preprocess_esot500(path_to_esot500, fps, window, style='VoxelGridComplex'):
 
 def main():
     parser = argparse.ArgumentParser(description='Preprocess the raw events into event frames')
-    parser.add_argument('--path_to_data', type=str, default="/path/to/esot500", help="Path to ESOT500 dataset")
+    parser.add_argument('--path_to_data', type=str, default="/path/to/ESOT500(-H)", help="Path to ESOT500(-H) dataset")
     parser.add_argument('--fps', type=int, default=500, help='Output frame rate.')
     parser.add_argument('--window', type=int, default=2, help='window size of each frame (ms).')
     parser.add_argument('--style', type=str, default='VoxelGridComplex', help='Event frame style.')
