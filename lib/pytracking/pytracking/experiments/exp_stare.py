@@ -39,6 +39,13 @@ trackers_stare_all = trackerlist('dimp', 'dimp18') + \
                 trackerlist('rts', 'rts50') + \
                 trackerlist('egt', 'egt')
 
+trackers_stare_esot500h = trackerlist('kys', 'default') + \
+                trackerlist('kys', 'esot500') + \
+                trackerlist('dimp', 'prdimp18') + \
+                trackerlist('keep_track', 'default') + \
+                trackerlist('rts', 'rts50') + \
+                trackerlist('egt', 'egt')
+
 # for sim real-time testing on your own hardware.
 def esot500_stare_w2ms():
     trackers =  trackers_stare_all
@@ -46,6 +53,26 @@ def esot500_stare_w2ms():
 
     # id:101 is designed to simulate the real-time running of STARE (2ms) to reproduce the results
     stream_setting_id = 101
+    stream_setting = load_stream_setting(f's{stream_setting_id}')
+
+    return trackers, dataset, stream_setting
+
+def esot500h_stare_w2ms():
+    trackers =  trackers_stare_esot500h
+    dataset = get_dataset('esot500hs')
+
+    # id:101 is designed to simulate the real-time running of STARE (2ms) to reproduce the results
+    stream_setting_id = 101
+    stream_setting = load_stream_setting(f's{stream_setting_id}')
+
+    return trackers, dataset, stream_setting
+
+def esot500h_stare_w8ms():
+    trackers =  trackers_stare_esot500h
+    dataset = get_dataset('esot500hs')
+
+    # id:107 is designed to simulate the real-time running of STARE (8ms) to reproduce the results
+    stream_setting_id = 107
     stream_setting = load_stream_setting(f's{stream_setting_id}')
 
     return trackers, dataset, stream_setting
@@ -60,9 +87,29 @@ def esot500_stare_w20ms():
 
     return trackers, dataset, stream_setting
 
+def esot500h_stare_w20ms():
+    trackers =  trackers_stare_esot500h
+    dataset = get_dataset('esot500hs')
+
+    # id:102 is designed to simulate the real-time running of STARE (20ms) to reproduce the results
+    stream_setting_id = 102
+    stream_setting = load_stream_setting(f's{stream_setting_id}')
+
+    return trackers, dataset, stream_setting
+
 def esot500_stare_w50ms():
     trackers =  trackers_stare_all
     dataset = get_dataset('esot500s')
+
+    # id:103 is designed to simulate the real-time running of STARE (50ms) to reproduce the results
+    stream_setting_id = 103
+    stream_setting = load_stream_setting(f's{stream_setting_id}')
+
+    return trackers, dataset, stream_setting
+
+def esot500h_stare_w50ms():
+    trackers =  trackers_stare_esot500h
+    dataset = get_dataset('esot500hs')
 
     # id:103 is designed to simulate the real-time running of STARE (50ms) to reproduce the results
     stream_setting_id = 103
