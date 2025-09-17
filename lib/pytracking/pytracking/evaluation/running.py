@@ -61,7 +61,7 @@ def _save_tracker_output(seq: Sequence, tracker: Tracker, output: dict, stream_s
     if not os.path.exists(tracker.results_dir):
         os.makedirs(tracker.results_dir)
 
-    if seq.dataset in ['esot500s', 'esot2s']:
+    if seq.dataset in ['esot500s', 'esot500hs']:
         save_dir = os.path.join(tracker.results_dir_rt, str(stream_setting.id))
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
@@ -133,7 +133,7 @@ def run_sequence(seq: Sequence, tracker: Tracker, debug=False, visdom_info=None)
     """Runs a tracker on a sequence."""
 
     def _results_exist():
-        if seq.dataset == 'esot500s':
+        if seq.dataset in ['esot500s', 'esot500hs']:
             bbox_file = '{}/{}.txt'.format(tracker.results_dir_rt, seq.name)
             return os.path.isfile(bbox_file)
         if seq.dataset == 'oxuva':
@@ -186,8 +186,8 @@ def run_sequence(seq: Sequence, tracker: Tracker, debug=False, visdom_info=None)
         else:
             exec_time = sum(output['runtime'])
             num_frames = len(output['runtime'])
-            avg_runtime = np.mean(output['runtime'])/1e3 # unit:ms
-        print('Average runtime: {} ms, FPS: {}'.format(avg_runtime,1000/avg_runtime))
+            avg_runtime = np.mean(output['runtime']) / 1e3 # unit:ms
+        print('Average runtime: {} ms, FPS: {}'.format(avg_runtime, 1000 / avg_runtime))
 
     if not debug:
         if seq.dataset == 'oxuva':
@@ -199,12 +199,14 @@ def run_sequence_stream(seq: Sequence, tracker: Tracker, stream_setting, debug=F
     """Runs a tracker on a sequence."""
 
     def _results_exist():
-        if seq.dataset in ['esot500s','esot2s']:
+        if seq.dataset in ['esot500s', 'esot500hs']:
             bbox_file = '{}/{}/{}.pkl'.format(tracker.results_dir_rt, stream_setting.id, seq.name)
             return os.path.isfile(bbox_file)
+
         elif seq.object_ids is None:
             bbox_file = '{}/{}.txt'.format(tracker.results_dir, seq.name)
             return os.path.isfile(bbox_file)
+
         else:
             bbox_files = ['{}/{}_{}.txt'.format(tracker.results_dir, seq.name, obj_id) for obj_id in seq.object_ids]
             missing = [not os.path.isfile(f) for f in bbox_files]
@@ -212,7 +214,7 @@ def run_sequence_stream(seq: Sequence, tracker: Tracker, stream_setting, debug=F
 
     visdom_info = {} if visdom_info is None else visdom_info
 
-    print('Tracker: {} {} {} ,  Sequence: {}, Stream setting: {} '.format(tracker.name, tracker.parameter_name, tracker.run_id, seq.name, stream_setting.id))
+    print('Tracker: {} {}, Run ID: {}, Sequence: {}, Stream setting: {}'.format(tracker.name, tracker.parameter_name, tracker.run_id, seq.name, stream_setting.id))
 
     # '''JieChu:
     # I want the previous result file be covered
@@ -241,6 +243,7 @@ def run_sequence_stream(seq: Sequence, tracker: Tracker, stream_setting, debug=F
             num_frames = len(output['time'])
 
         print('FPS: {}'.format(num_frames / exec_time))
+
     if output.get('runtime'):
         if isinstance(output['runtime'][0], (dict, OrderedDict)):
             exec_time = sum([sum(times.values()) for times in output['runtime']])
@@ -248,8 +251,9 @@ def run_sequence_stream(seq: Sequence, tracker: Tracker, stream_setting, debug=F
         else:
             exec_time = sum(output['runtime'])
             num_frames = len(output['runtime'])
-            avg_runtime = np.mean(output['runtime'])/1e3 # unit:ms
-        print('Average runtime: {} ms, FPS: {}'.format(avg_runtime,1000/avg_runtime))
+            avg_runtime = np.mean(output['runtime']) / 1e3 # unit:ms
+
+        print('Average runtime: {} ms, FPS: {}'.format(avg_runtime, 1000 / avg_runtime))
 
     if not debug:
         _save_tracker_output(seq, tracker, output, stream_setting)
@@ -312,8 +316,10 @@ def run_dataset_stream(dataset, trackers, stream_setting, debug=False, threads=0
         for seq in dataset:
             for tracker_info in trackers:
                 run_sequence_stream(seq, tracker_info, stream_setting, debug=debug, visdom_info=visdom_info)
+
     elif mode == 'parallel':
         param_list = [(seq, tracker_info, stream_setting, debug, visdom_info) for seq, tracker_info in product(dataset, trackers)]
         with multiprocessing.Pool(processes=threads) as pool:
             pool.starmap(run_sequence_stream, param_list)
+
     print('Done')
