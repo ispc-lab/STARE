@@ -13,6 +13,7 @@ dataset_dict = dict(
     visevent_presence = DatasetInfo(module=pt % "visevent", class_name="VisEventDataset", kwargs=dict(split='test',version='presence')),
     visevent_172 = DatasetInfo(module=pt % "visevent", class_name="VisEventDataset", kwargs=dict(split='test',version='172')),
     eventcarla = DatasetInfo(module=pt % "eventcarla", class_name="EventCarlaDataset",  kwargs=dict(split='test')),
+    
     esot_500_2 = DatasetInfo(module=pt % "esot500", class_name="ESOT500Dataset",  kwargs=dict(split='test',fps=500,window=2)),
     esot_500_4 = DatasetInfo(module=pt % "esot500", class_name="ESOT500Dataset",  kwargs=dict(split='test',fps=500,window=4)),
     esot_500_8 = DatasetInfo(module=pt % "esot500", class_name="ESOT500Dataset",  kwargs=dict(split='test',fps=500,window=8)),
@@ -51,34 +52,51 @@ dataset_dict = dict(
 
     esot500 = DatasetInfo(module=pt % "esot500", class_name="ESOT500Dataset",  kwargs=dict(split='test',fps=500)),
     esot_challenging = DatasetInfo(module=pt % "esot500Challenging", class_name="ESOT500DatasetChallenging", kwargs=dict(split='test')),
+    esot500s_cas=DatasetInfo(module=pt % "esot500Stream", class_name="ESOT500DatasetStream", kwargs=dict(split='cas')),
 
     esot500s = DatasetInfo(module=pt % "esot500Stream", class_name="ESOT500DatasetStream",  kwargs=dict(split='test')),
     esot500hs = DatasetInfo(module=pt % "esot500Stream", class_name="ESOT500HDatasetStream",  kwargs=dict(split='test')),
-    # esot2s = DatasetInfo(module=pt % "esot2Stream", class_name="ESOT2DatasetStream",  kwargs=dict(split='test')),
+    esot500hs_cas = DatasetInfo(module=pt % "esot500Stream", class_name="ESOT500HDatasetStream", kwargs=dict(split='cas')),
+
+    esoth_20_2 = DatasetInfo(module=pt % "esot500", class_name="ESOT500HDataset",  kwargs=dict(split='test', fps=20, window=2)),
+    esoth_20_8 = DatasetInfo(module=pt % "esot500", class_name="ESOT500HDataset",  kwargs=dict(split='test', fps=20, window=8)),
+    esoth_20_20 = DatasetInfo(module=pt % "esot500", class_name="ESOT500HDataset",  kwargs=dict(split='test', fps=20, window=20)),
+    esoth_20_50 = DatasetInfo(module=pt % "esot500", class_name="ESOT500HDataset",  kwargs=dict(split='test', fps=20, window=50)),
+
+    esoth_250_2 = DatasetInfo(module=pt % "esot500", class_name="ESOT500HDataset",  kwargs=dict(split='test', fps=250, window=2)),
+    esoth_250_8 = DatasetInfo(module=pt % "esot500", class_name="ESOT500HDataset",  kwargs=dict(split='test', fps=250, window=8)),
+    esoth_250_20 = DatasetInfo(module=pt % "esot500", class_name="ESOT500HDataset",  kwargs=dict(split='test', fps=250, window=20)),
+    esoth_250_50 = DatasetInfo(module=pt % "esot500", class_name="ESOT500HDataset",  kwargs=dict(split='test', fps=250, window=50)),
+
+    esoth_500_2 = DatasetInfo(module=pt % "esot500", class_name="ESOT500HDataset",  kwargs=dict(split='test', fps=500, window=2)),
+    esoth_500_8 = DatasetInfo(module=pt % "esot500", class_name="ESOT500HDataset",  kwargs=dict(split='test', fps=500, window=8)),
+    esoth_500_20 = DatasetInfo(module=pt % "esot500", class_name="ESOT500HDataset",  kwargs=dict(split='test', fps=500, window=20)),
+    esoth_500_50 = DatasetInfo(module=pt % "esot500", class_name="ESOT500HDataset",  kwargs=dict(split='test', fps=500, window=50)),
 
     # esot250 = DatasetInfo(module=pt % "esot500", class_name="ESOT500Dataset",  kwargs=dict(split='test',variant='250')),
     # esot125 = DatasetInfo(module=pt % "esot500", class_name="ESOT500Dataset",  kwargs=dict(split='test',variant='125')),
     # esot050 = DatasetInfo(module=pt % "esot500", class_name="ESOT500Dataset",  kwargs=dict(split='test',variant='050')),
     # esot020 = DatasetInfo(module=pt % "esot500", class_name="ESOT500Dataset",  kwargs=dict(split='test',variant='020')),
-    esoth = DatasetInfo(module=pt % "esot500V", class_name="ESOT500VDataset",  kwargs=dict(split='test',variant='VariableH')),
-    esotm = DatasetInfo(module=pt % "esot500V", class_name="ESOT500VDataset",  kwargs=dict(split='test',variant='VariableM')),
-    esotl = DatasetInfo(module=pt % "esot500V", class_name="ESOT500VDataset",  kwargs=dict(split='test',variant='VariableL')),
-
-    esot2_default = DatasetInfo(module=pt % "esot2", class_name="ESOT2Dataset",  kwargs=dict(split='test',interpolate=1, window=0)),
-    esot2_2_20 = DatasetInfo(module=pt % "esot2", class_name="ESOT2Dataset",  kwargs=dict(split='test',interpolate=2, window=20)),
-    esot2_5_20 = DatasetInfo(module=pt % "esot2", class_name="ESOT2Dataset",  kwargs=dict(split='test',interpolate=5, window=20)),
-    esot2_10_20 = DatasetInfo(module=pt % "esot2", class_name="ESOT2Dataset",  kwargs=dict(split='test',interpolate=10, window=20)),
-
-    esot2_2_50 = DatasetInfo(module=pt % "esot2", class_name="ESOT2Dataset",  kwargs=dict(split='test',interpolate=2, window=100)),
-    esot2_5_50 = DatasetInfo(module=pt % "esot2", class_name="ESOT2Dataset",  kwargs=dict(split='test',interpolate=5, window=100)),
-    esot2_10_50 = DatasetInfo(module=pt % "esot2", class_name="ESOT2Dataset",  kwargs=dict(split='test',interpolate=10, window=100)),
-
-    esot2_2_100 = DatasetInfo(module=pt % "esot2", class_name="ESOT2Dataset",  kwargs=dict(split='test',interpolate=2, window=100)),
-    esot2_5_100 = DatasetInfo(module=pt % "esot2", class_name="ESOT2Dataset",  kwargs=dict(split='test',interpolate=5, window=100)),
-    esot2_10_100 = DatasetInfo(module=pt % "esot2", class_name="ESOT2Dataset",  kwargs=dict(split='test',interpolate=10, window=100)),
-
-
     
+    # esoth = DatasetInfo(module=pt % "esot500V", class_name="ESOT500VDataset",  kwargs=dict(split='test',variant='VariableH')),
+    # esotm = DatasetInfo(module=pt % "esot500V", class_name="ESOT500VDataset",  kwargs=dict(split='test',variant='VariableM')),
+    # esotl = DatasetInfo(module=pt % "esot500V", class_name="ESOT500VDataset",  kwargs=dict(split='test',variant='VariableL')),
+
+    # esot2s = DatasetInfo(module=pt % "esot2Stream", class_name="ESOT2DatasetStream",  kwargs=dict(split='test')),
+    
+    # esot2_default = DatasetInfo(module=pt % "esot2", class_name="ESOT2Dataset",  kwargs=dict(split='test',interpolate=1, window=0)),
+    # esot2_2_20 = DatasetInfo(module=pt % "esot2", class_name="ESOT2Dataset",  kwargs=dict(split='test',interpolate=2, window=20)),
+    # esot2_5_20 = DatasetInfo(module=pt % "esot2", class_name="ESOT2Dataset",  kwargs=dict(split='test',interpolate=5, window=20)),
+    # esot2_10_20 = DatasetInfo(module=pt % "esot2", class_name="ESOT2Dataset",  kwargs=dict(split='test',interpolate=10, window=20)),
+
+    # esot2_2_50 = DatasetInfo(module=pt % "esot2", class_name="ESOT2Dataset",  kwargs=dict(split='test',interpolate=2, window=100)),
+    # esot2_5_50 = DatasetInfo(module=pt % "esot2", class_name="ESOT2Dataset",  kwargs=dict(split='test',interpolate=5, window=100)),
+    # esot2_10_50 = DatasetInfo(module=pt % "esot2", class_name="ESOT2Dataset",  kwargs=dict(split='test',interpolate=10, window=100)),
+
+    # esot2_2_100 = DatasetInfo(module=pt % "esot2", class_name="ESOT2Dataset",  kwargs=dict(split='test',interpolate=2, window=100)),
+    # esot2_5_100 = DatasetInfo(module=pt % "esot2", class_name="ESOT2Dataset",  kwargs=dict(split='test',interpolate=5, window=100)),
+    # esot2_10_100 = DatasetInfo(module=pt % "esot2", class_name="ESOT2Dataset",  kwargs=dict(split='test',interpolate=10, window=100)),
+
     otb=DatasetInfo(module=pt % "otb", class_name="OTBDataset", kwargs=dict()),
     nfs=DatasetInfo(module=pt % "nfs", class_name="NFSDataset", kwargs=dict()),
     uav=DatasetInfo(module=pt % "uav", class_name="UAVDataset", kwargs=dict()),
