@@ -19,29 +19,29 @@ def to_img(event_rep):
     
     return event_img
 
-def convert_event_img_aedat(events, style, with_img_return = False):
+def convert_event_img_aedat(events, style, height=260, width=346, with_img_return = False):
     """
     events: aedat4 events
     """
-    if style == 'VisEvent': 
-        dvs_img = np.ones((260, 346, 3), dtype=np.uint8) * 255
+    if style == 'VisEvent':
+        dvs_img = np.ones((height, width, 3), dtype=np.uint8) * 255
         dvs_img[events[:]['y'], events[:]['x']] = 1
         # dvs_img[events[:]['y'], events[:]['x']] = 255
         dvs_img[events[:]['y'], events[:]['x'], events[:]['polarity'] * 2] = 255
 
-    elif style == 'FE240': 
-        dvs_img = np.ones((260, 346, 3), dtype=np.uint8) * 0
+    elif style == 'FE240':
+        dvs_img = np.ones((height, width, 3), dtype=np.uint8) * 0
         dvs_img[events[:]['y'], events[:]['x']] = 1
         dvs_img[events[:]['y'], events[:]['x']] = 255
         dvs_img[events[:]['y'], events[:]['x'], events[:]['polarity'] * 2] = 255
 
     elif style == 'FE108old':
-        dvs_img = torch.ones((260, 346)) * 127
+        dvs_img = torch.ones((height, width)) * 127
         pos_mask = events[:]['polarity'] == 1
         neg_mask = events[:]['polarity'] == 0
-        value=torch.ones(events.shape[0])
-        y= events['y'].astype('int')
-        x= events['x'].astype('int')
+        value = torch.ones(events.shape[0])
+        y = events['y'].astype('int')
+        x = events['x'].astype('int')
         y = torch.Tensor(y).long()
         x = torch.Tensor(x).long()
         value[pos_mask] = 255
@@ -54,11 +54,17 @@ def convert_event_img_aedat(events, style, with_img_return = False):
         ys = torch.from_numpy(events['y']).to(device)
         ts = torch.from_numpy(events['timestamp']).to(device)
         ps = torch.from_numpy(events['polarity']).to(device)
-        B = 3
-        sensor_size = (260, 346)
+        B = 3 # for RGB
+        # sensor_size = (260,346)
         temporal_bilinear = True
-        voxel_pos, voxel_neg = events_to_neg_pos_voxel_torch(xs, ys, ts, ps, B, device, sensor_size, temporal_bilinear)
-        voxel=torch.cat((voxel_pos, voxel_neg), dim=0)
+        voxel_pos, voxel_neg = events_to_neg_pos_voxel_torch(
+            xs, ys, ts, ps,
+            B,
+            device,
+            (height, width),
+            temporal_bilinear
+        )
+        voxel = torch.cat((voxel_pos, voxel_neg), dim=0)
 
         return voxel # (2*3, H , W)
 
@@ -70,9 +76,16 @@ def convert_event_img_aedat(events, style, with_img_return = False):
         ps = torch.from_numpy(events['polarity']).to(device)
         ps[ps == 0] = -1 # for negative events
         B = 3
-        sensor_size = (260, 346)
+        # sensor_size = (260, 346)
         temporal_bilinear = True
-        voxel_complex = events_to_voxel_torch(xs, ys, ts, ps, B, device, sensor_size, temporal_bilinear)
+        voxel_complex = events_to_voxel_torch(
+            xs, ys, ts, ps,
+            B,
+            device,
+            (height, width),
+            temporal_bilinear
+        )
+
         event_img_pil = transform(voxel_complex)
         # event_img_pil.save('debug/test.jpg')
         event_img_array = np.array(event_img_pil)
