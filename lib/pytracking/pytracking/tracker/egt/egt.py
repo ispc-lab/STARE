@@ -70,6 +70,14 @@ class EGT(Module):
         self.update_inter = params.update_inter
         self.search_size = params.search_size
 
+        # change the size according to the dataset
+        if params.dataset == 'esot500s':
+            self.height, self.width = 260, 346
+        elif params.dataset == 'esot500hs':
+            self.height, self.width = 720, 1280
+        else:
+            raise NotImplementedError
+
         self.eval()
 
     def _apply_mask(self, Fea, Pnt, GT, Temp=False):
@@ -227,10 +235,10 @@ class EGT(Module):
             x = xc - w / 2
             y = yc - h / 2
 
-            x = x * 346
-            y = y * 260
-            w = w * 346
-            h = h * 260
+            x = x * self.width
+            y = y * self.height
+            w = w * self.width
+            h = h * self.height
             output_state_restore = [x, y, w, h]
 
             # print('inner state: ', self._previous_pred)
@@ -264,10 +272,10 @@ class EGT(Module):
         # print('Init box:', box_xywh)
         
         x, y, w, h = box_xywh
-        x = x / 346 # TODO: change the size according to the dataset
-        y = y / 260
-        w = w / 346
-        h = h / 260
+        x = x / self.width
+        y = y / self.height
+        w = w / self.width
+        h = h / self.height
 
         state = [x + w / 2, y + h / 2, w, h]
         
