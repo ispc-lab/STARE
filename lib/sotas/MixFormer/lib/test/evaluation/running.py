@@ -17,7 +17,7 @@ def _save_tracker_output(seq: Sequence, tracker: Tracker, output: dict, stream_s
         os.makedirs(tracker.results_dir)
     
     ###streaming setting
-    if seq.dataset in ['esot500s', 'esot2s']:
+    if seq.dataset in ['esot500s', 'esot500hs']:
         save_dir = os.path.join(tracker.results_dir_rt, str(stream_setting.id))
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
@@ -174,7 +174,7 @@ def run_sequence_stream(seq: Sequence, tracker: Tracker, stream_setting, debug=F
     except:
         pass
     def _results_exist():
-        if seq.dataset in ['esot500s','esot2s']:
+        if seq.dataset in ['esot500s','esot500hs']:
             bbox_file = '{}/{}.txt'.format(tracker.results_dir_rt, seq.name)
             return os.path.isfile(bbox_file)
         elif seq.object_ids is None:
