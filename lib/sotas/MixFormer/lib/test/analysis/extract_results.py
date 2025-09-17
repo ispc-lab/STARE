@@ -130,7 +130,7 @@ def extract_results(trackers, dataset, report_name, skip_missing_seq=False, plot
         for trk_id, trk in enumerate(trackers):
             # Load results
             base_results_path = '{}/{}'.format(trk.results_dir, seq.name)
-            if seq.dataset in ['esot500s', 'esot2s']:
+            if seq.dataset in ['esot500s', 'esot500hs']:
                 base_results_path = os.path.join(trk.results_dir_rt_final , str(stream_id), seq.name)
                 
             results_path = '{}.txt'.format(base_results_path)

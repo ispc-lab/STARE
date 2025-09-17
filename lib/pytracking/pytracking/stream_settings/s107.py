@@ -3,10 +3,10 @@ from pytracking.features.net_wrappers import NetWithBackbone, NetWrapper
 
 def parameters():
     params = TrackerParams()
-    params.id = 101
+    params.id = 107
 
     """Standard Setting Part"""
-    """ id:101 is designed to simulate the real-time running of STARE (2ms) to reproduce the results"""
+    """ id:101 is designed to simulate the real-time running of STARE (8ms) to reproduce the results"""
 
     # Hardware
     params.convert_time = False
