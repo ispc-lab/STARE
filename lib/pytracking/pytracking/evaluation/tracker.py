@@ -318,7 +318,12 @@ class Tracker:
         in_timestamps = []
         runtime = []
         out_timestamps = []
-        t_stream_total = timestamps[-1] 
+        t_stream_total = timestamps[-1]
+
+        if seq.dataset == 'esot500hs':
+            height, width = 720, 1280
+        else:
+            height, width = 260, 346
 
         # Initialize
         # t_start = perf_counter() * 1e6
@@ -367,7 +372,7 @@ class Tracker:
         if 'egt' in self.name:
             event_rep = template_events
         else:
-            event_rep = convert_event_img_aedat(template_events, stream_setting.representation)
+            event_rep = convert_event_img_aedat(template_events, stream_setting.representation, height, width)
 
         # t_convert record the couvert time of the template frame.
         t_convert = perf_counter() * 1e6 - t0
@@ -381,7 +386,7 @@ class Tracker:
                 event_img = event_rep
                 self.visualize(event_img, init_info.get('init_bbox'))
             elif stream_setting.representation in ['Raw']:
-                event_img = convert_event_img_aedat(template_events_raw, 'VoxelGridComplex')
+                event_img = convert_event_img_aedat(template_events_raw, 'VoxelGridComplex', height, width)
                 self.visualize(event_img, init_info.get('init_bbox'))
 
         torch.cuda.synchronize()
@@ -461,7 +466,7 @@ class Tracker:
                 event_rep = sampling_search_egt(events_search)
 
             else:
-                event_rep = convert_event_img_aedat(events_search, stream_setting.representation)
+                event_rep = convert_event_img_aedat(events_search, stream_setting.representation, height, width)
 
             info = {} # changed
             info['previous_output'] = prev_output
@@ -516,7 +521,7 @@ class Tracker:
             if stream_setting.representation in ['VoxelGridComplex']:
                 event_img = event_rep
             elif stream_setting.representation == 'Raw':
-                event_img = convert_event_img_aedat(events_search, 'VoxelGridComplex')
+                event_img = convert_event_img_aedat(events_search, 'VoxelGridComplex', height, width)
 
             if self.visdom is not None:
                 tracker.visdom_draw_tracking(event_img, bboxes, segmentation)
@@ -990,6 +995,3 @@ class Tracker:
         im = cv.imread(image_file)
 
         return cv.cvtColor(im, cv.COLOR_BGR2RGB)
-
-
-
