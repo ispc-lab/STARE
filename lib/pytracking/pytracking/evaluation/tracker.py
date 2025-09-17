@@ -147,6 +147,7 @@ class Tracker:
 
         params.visualization = visualization_
         params.debug = debug_
+        params.dataset = seq.dataset
 
         self._init_visdom(visdom_info, debug_)
         if visualization_ and self.visdom is None:
@@ -170,7 +171,7 @@ class Tracker:
         else:
             raise ValueError('Unknown multi object mode {}'.format(multiobj_mode))
 
-        if seq.dataset in ['esot500s','esot2s']:
+        if seq.dataset in ['esot500s','esot500hs']:
             output = self._track_evstream(tracker, seq, init_info, stream_setting)
         else:
             output = self._track_sequence(tracker, seq, init_info)
@@ -322,8 +323,10 @@ class Tracker:
 
         if seq.dataset == 'esot500hs':
             height, width = 720, 1280
-        else:
+        elif seq.dataset == 'esot500s':
             height, width = 260, 346
+        else:
+            raise NotImplementedError
 
         # Initialize
         # t_start = perf_counter() * 1e6
