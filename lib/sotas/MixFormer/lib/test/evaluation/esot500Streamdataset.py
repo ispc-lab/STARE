@@ -120,6 +120,6 @@ class ESOT500HDatasetStream(BaseDataset):
 
 
 if __name__ == '__main__':
-    train_dataset = ESOT500Dataset('test','500')
+    train_dataset = ESOT500DatasetStream('test','500')
     seqlist = train_dataset.get_sequence_list()
     print(seqlist)

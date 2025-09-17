@@ -212,7 +212,14 @@ class Tracker:
         in_timestamps = []
         runtime = []
         out_timestamps = []
-        t_stream_total = timestamps[-1] 
+        t_stream_total = timestamps[-1]
+
+        if seq.dataset == 'esot500hs':
+            height, width = 720, 1280
+        elif seq.dataset == 'esot500s':
+            height, width = 260, 346
+        else:
+            raise NotImplementedError
 
         if not stream_setting.convert_time:
             # Initialize
@@ -249,7 +256,7 @@ class Tracker:
                     template_events = sampling_template_egt(events, init_info)
             else:
                 raise NotImplementedError
-            event_rep = convert_event_img_aedat(template_events,stream_setting.representation)
+            event_rep = convert_event_img_aedat(template_events,stream_setting.representation, height, width)
             # event_img_pil = transform(event_rep)
             # event_img_array = np.array(event_img_pil)
             # event_img = cv2.cvtColor(event_img_array,cv2.COLOR_RGB2BGR)
@@ -310,7 +317,7 @@ class Tracker:
                 if slicing_ and slicing_ in ['egt']:
                     # convert format for egt
                     events_search = sampling_search_egt(events_search)
-                event_rep = convert_event_img_aedat(events_search,stream_setting.representation)
+                event_rep = convert_event_img_aedat(events_search, stream_setting.representation, height, width)
                 info = {} # changed
                 info['previous_output'] = prev_output
 
@@ -372,7 +379,7 @@ class Tracker:
             # idx_start = interpolation_search(timestamps,t_left)
             idx_start = 0
             idx_end = interpolation_search(timestamps,t_right) # merely zero
-            event_rep = convert_event_img_aedat(events[idx_start:idx_end],'VoxelGridComplex')
+            event_rep = convert_event_img_aedat(events[idx_start:idx_end],'VoxelGridComplex', height, width)
             # event_img = transform(event_rep)
             event_img_pil = transform(event_rep)
             event_img_array = np.array(event_img_pil)
@@ -405,7 +412,7 @@ class Tracker:
                 t_left = t_elapsed - stream_setting.window_size
                 idx_start = interpolation_search(timestamps,t_left)
                 idx_end = interpolation_search(timestamps,t_right)
-                event_rep = convert_event_img_aedat(events[idx_start:idx_end],'VoxelGridComplex')
+                event_rep = convert_event_img_aedat(events[idx_start:idx_end],'VoxelGridComplex', height, width)
                 info = {} # changed
                 info['previous_output'] = prev_output
                 event_img_pil = transform(event_rep)

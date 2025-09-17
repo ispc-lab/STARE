@@ -46,7 +46,7 @@ dataset_dict = dict(
     esot500 = DatasetInfo(module=pt % "esot500", class_name="ESOT500Dataset",  kwargs=dict(split='test',variant='500')),
 
     esot500s = DatasetInfo(module=pt % "esot500Stream", class_name="ESOT500DatasetStream",  kwargs=dict(split='test')),
-    esot500hs = DatasetInfo(module=pt % "esot500Stream", class_name="ESOT500DatasetStream",  kwargs=dict(split='test')),
+    esot500hs = DatasetInfo(module=pt % "esot500Stream", class_name="ESOT500HDatasetStream",  kwargs=dict(split='test')),
     # esot2s = DatasetInfo(module=pt % "esot2Stream", class_name="ESOT2DatasetStream",  kwargs=dict(split='test')),
 
     esot_500_100 = DatasetInfo(module=pt % "esot500", class_name="ESOT500Dataset",  kwargs=dict(split='test',fps=500,window=100)),
