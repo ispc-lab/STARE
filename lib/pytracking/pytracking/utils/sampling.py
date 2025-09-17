@@ -3,6 +3,7 @@ import numpy as np
 import torch
 from pytracking.utils.convert_event_img import convert_event_img_aedat
 
+
 class EventStreamSampler:
     def __init__(self) -> None:
         pass
@@ -39,7 +40,6 @@ class EventStreamSampler:
         area = box[2]*box[3]
         density = len(events_in_box)/area
         return density
-
 
 def simpleAdaptive(events, boxes, stream_setting):
     """given last pred bounding box, make sure enough events are accumulated in the box r.w.t box area
@@ -95,7 +95,6 @@ def improvedFixTime(events, boxes, stream_setting):
 
     events[idx_start:]
 
-
 def sampling_template_egt(events, init_info):
     box = init_info.get('init_bbox')
     t_template = init_info.get('init_timestamp')
@@ -138,7 +137,7 @@ def sampling_template_egt(events, init_info):
 
     return template_events
 
-def sampling_search_egt(events):
+def sampling_search_egt(events, height, width):
 
     timestamps = events['timestamp']
 
@@ -152,8 +151,8 @@ def sampling_search_egt(events):
 
     # H = 260
     # W = 346
-    events[:, 0] = events[:, 0] / 346
-    events[:, 1] = events[:, 1] / 260
+    events[:, 0] = events[:, 0] / width
+    events[:, 1] = events[:, 1] / height
 
     events = events[np.newaxis, :]
     events = torch.from_numpy(events).float()
