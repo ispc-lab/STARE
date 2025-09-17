@@ -33,6 +33,7 @@ class EnvSettings:
         self.fe240_dir = ''
         self.visEvent_dir = ''
         self.esot500_dir = os.environ.get('ESOT500_DIR', '')
+        self.esot500h_dir = os.environ.get('ESOT500H_DIR', '')
         self.eventsot_dir = ''
 
 
