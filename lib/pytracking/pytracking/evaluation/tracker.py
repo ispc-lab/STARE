@@ -466,7 +466,7 @@ class Tracker:
                     events_search = events[idx_start:idx_end]
 
                 # convert format for egt
-                event_rep = sampling_search_egt(events_search)
+                event_rep = sampling_search_egt(events_search, height, width)
 
             else:
                 event_rep = convert_event_img_aedat(events_search, stream_setting.representation, height, width)
