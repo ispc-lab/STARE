@@ -28,6 +28,7 @@ def parse_args():
     parser.add_argument('--runid', type=int, default=None, help='The run id.')
     parser.add_argument('--dataset_name', type=str, default='esot500s', help='Name of dataset.')
     parser.add_argument('--sequence', type=str, default=None, help='Sequence number or name.')
+    parser.add_argument('--dynamic_order', type=int, default=1, choices=[1, 2, 3], help='dynamic order of speed compensation')
 
     args = parser.parse_args()
 
@@ -93,18 +94,41 @@ def main():
                 last_time = gt_anno_t[0][0] # the first gt_t
                 ii = 0
 
+                v_last = None
+                a_last = None
                 for line in gt_anno_t:
                     gt_t = line[0]
                     in_time, pred_label, bbox_speed = find_last_pred(gt_t, raw_result, gt_anno_t[0][0])
                     pred_time = in_time
 
-                    pred_bbox = (np.array(pred_label).reshape(-1, 4)
-                                 + np.array(bbox_speed).reshape(-1, 4) * (gt_t * 1e6 - in_time) / 1e3)
+                    # raw result
+                    pred_bbox = np.array(pred_label).reshape(-1, 4)
+                    delta_t = (gt_t * 1e6 - in_time) / 1e3
+
+                    # first order
+                    v_curr = np.array(bbox_speed).reshape(-1, 4)
+                    pred_bbox += v_curr * delta_t
+
+                    # second order
+                    if args.dynamic_order >= 2 and v_last is not None:
+                        a_curr = v_curr - v_last
+                        pred_bbox += 0.5 * a_curr * (delta_t) ** 2
+
+                        # third order
+                        if args.dynamic_order >= 3 and a_last is not None:
+                            j_curr = a_curr - a_last
+                            pred_bbox += (1 / 6) * j_curr * (delta_t) ** 3
+                            
+                        a_last = a_curr
+
+                    v_last = v_curr
+
                     # pred_bbox = np.array(pred_label).reshape(-1, 4)
                     if pred_bbox[0, 2] <= 0:
                         pred_bbox[0, 2] = 1
                     if pred_bbox[0, 3] <= 0:
                         pred_bbox[0, 3] = 1
+
                     pred_final.append(pred_bbox)
 
                 if run_id is None:
