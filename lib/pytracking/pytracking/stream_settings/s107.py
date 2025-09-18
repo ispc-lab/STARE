@@ -6,7 +6,7 @@ def parameters():
     params.id = 107
 
     """Standard Setting Part"""
-    """ id:101 is designed to simulate the real-time running of STARE (8ms) to reproduce the results"""
+    """ id:107 is designed to simulate the real-time running of STARE (8ms) to reproduce the results"""
 
     # Hardware
     params.convert_time = False
