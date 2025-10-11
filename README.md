@@ -121,7 +121,7 @@ We derive two biologically inspired principles: Predictive Motion Extrapolation
 Please refer to the paper for more details.
 
 <p align="center">
-  <img src="img/Model_Enhancement.jpg" width="100%">
+  <img src="img/model_enhancement.jpg" width="100%">
 </p>
 <p align="left">
   <em><strong>Model enhancement strategies: Asynchronous Tracking and Context-Aware Sampling.</strong> <strong>a,</strong> Architecture of Asynchronous Tracking. A slow, high-fidelity base model (orange) performs full inference on event segments, generating initial bounding boxes and sharing features with a fast residual model (green). The residual model recursively updates predictions using shared features and new events, producing high-frequency outputs between base model cycles, leveraging temporal continuity of event stream to boost throughput. <strong>b,</strong> Qualitative example of Context-Aware Sampling in sparse-event scenarios. Top row: Baseline model fails to localize the target (red box) as event density drops. Bottom row: Enhanced model detects sparse events, enters an inactive state, and reuses the last correct prediction (dashed green box) until dense events trigger accurate inference, preventing error accumulation. <strong>c,</strong> Context-Aware Sampling preventing target loss during prolonged inactivity. Top row: Baseline tracker accumulates errors over time and loses the target. Bottom row: Enhanced tracker uses a timer to force reactivation after prolonged inactivity, re-localizing the target before drift causes target loss, balancing efficiency and accuracy.</em>
