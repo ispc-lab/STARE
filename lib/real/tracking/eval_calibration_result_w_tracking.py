@@ -27,16 +27,12 @@ if env_path not in sys.path:
 from pytracking.utils.convert_event_img import convert_event_img_aedat
 
 
-BUFFER_HISTORY_MS = 100
-SAMPLING_WINDOW_MS = 20
+BUFFER_HISTORY_MS = 10
+SAMPLING_WINDOW_MS = 2
 
 
-def event_collector(
-        capture: dv.io.CameraCapture, camera_idx: int,
-        events_buffer: list, buffer_rwlock: rwlock.RWLockFair,
-        stop_event: threading.Event,
-        history_ms: int
-):
+def event_collector(capture: dv.io.CameraCapture, camera_idx: int, events_buffer: list, buffer_rwlock: rwlock.RWLockFair,
+                    stop_event: threading.Event, history_ms: int):
     print(f"Event collector for camera [{camera_idx}] started.")
     history_us = history_ms * 1e3
 
@@ -56,12 +52,7 @@ def event_collector(
     print(f"Event collector for camera [{camera_idx}] stopped.")
 
 
-def tracking_bbox_collector(
-        ostrack, tracker_idx: int,
-        window: int, events_buffer: list, buffer_rwlock: rwlock.RWLockFair,
-        pred_bbox: list, bbox_rwlock: rwlock.RWLockFair, prev_output: list,
-        stop_event: threading.Event
-):
+def tracking_bbox_collector(ostrack, tracker_idx: int, window: int, events_buffer: list, buffer_rwlock: rwlock.RWLockFair, pred_bbox: list, bbox_rwlock: rwlock.RWLockFair, prev_output: list, stop_event: threading.Event):
     print(f"Tracking bbox collector [{tracker_idx}] thread has started.")
 
     info = {}
@@ -97,42 +88,6 @@ def tracking_bbox_collector(
     print(f"Tracking bbox collector [{tracker_idx}] thread has stopped.")
 
 
-def frame_collector_and_tracking(
-        capture: dv.io.CameraCapture, camera_idx: int,
-        ostrack, tracker_idx: int,
-        pred_bbox: list, bbox_rwlock: rwlock.RWLockFair, prev_output: list,
-        stop_event: threading.Event
-):
-    print(f"Frame collector and tracking for camera [{camera_idx}] started.")
-
-    info = {}
-    info['previous_output'] = prev_output[tracker_idx]
-    # last_time = time.perf_counter()
-
-    while not stop_event.is_set():
-        frame = capture.getNextFrame()
-        if frame is not None:
-            info['previous_output'] = prev_output[tracker_idx]
-
-            img = cv.cvtColor(frame.image, cv.COLOR_BGR2RGB)
-            out = ostrack.track(img, info)
-
-            prev_output[tracker_idx] = OrderedDict(out)
-
-            with bbox_rwlock.gen_wlock():
-                pred_bbox[tracker_idx] = out['target_bbox']
-
-            # curr_time = time.perf_counter()
-            # elapsed_time = curr_time - last_time
-            # last_time = curr_time
-            # print(f"[{tracker_idx}] RGB FPS:", 1 / elapsed_time)
-
-        else:
-            time.sleep(0.0001)
-
-    print(f"Frame collector and tracking for camera [{camera_idx}] stopped.")
-
-
 def main():
 
     # ------ Camera Initialization ------
@@ -154,9 +109,6 @@ def main():
     except Exception as e:
         print(f"Failed to start camera capture: {e}")
         sys.exit(1)
-
-    capture.left.setDavisFrameInterval(datetime.timedelta(milliseconds=10))
-    capture.right.setDavisFrameInterval(datetime.timedelta(milliseconds=10))
 
 
     # ------ Start Event Stream Recording Thread ------
@@ -182,15 +134,9 @@ def main():
     params = tracker.get_parameters()
     params.debug = False
 
-    tracker_rgb = Tracker('ostrack', 'vitb_256_mae_ce_32x4_ep300', 'esot_500_20')
-    params_rgb = tracker_rgb.get_parameters()
-    params_rgb.debug = False
-
     ostrack = [
         tracker.create_tracker(params),
         tracker.create_tracker(params),
-        tracker_rgb.create_tracker(params_rgb),
-        tracker_rgb.create_tracker(params_rgb),
     ]
 
     # ---------- slow init ----------------------------------
@@ -205,29 +151,25 @@ def main():
     # ]
     # -------------------------------------------------------
 
-    # ---------- fast event init ----------------------------------
+    # ---------- fast init ----------------------------------
     init_info = [
         {'init_bbox': [171, 88, 19, 20], },
         {'init_bbox': [120, 133, 29, 31], },
-        {'init_bbox': [158, 99, 23, 25], },
-        {'init_bbox': [141, 121, 28, 28], },
     ]
 
     template = [
         tracker._read_image(os.path.dirname(__file__) + '/init/template/left_fast_1.jpg'),
         tracker._read_image(os.path.dirname(__file__) + '/init/template/right_fast_1.jpg'),
-        tracker_rgb._read_image(os.path.dirname(__file__) + '/init/template/left_rgb_1.jpg'),
-        tracker_rgb._read_image(os.path.dirname(__file__) + '/init/template/right_rgb_1.jpg'),
     ]
     # -------------------------------------------------------
 
-    outs = [ostrack[i].initialize(template[i], init_info[i]) for i in range(4)]
+    outs = [ostrack[i].initialize(template[i], init_info[i]) for i in range(2)]
     outs = [out if out is not None else {} for out in outs]
 
 
     # ------ Start Tracking Threads ------
     prev_output = [OrderedDict(out) for out in outs]
-    pred_bbox = [init_info[i].get('init_bbox') for i in range(4)]
+    pred_bbox = [init_info[i].get('init_bbox') for i in range(2)]
     bbox_lock = [rwlock.RWLockFair(), rwlock.RWLockFair()]
 
     tracking_thread_left = threading.Thread(
@@ -241,18 +183,6 @@ def main():
         args=(ostrack[1], 1, SAMPLING_WINDOW_MS, events_buffer, buffer_lock[1], pred_bbox, bbox_lock[1], prev_output, stop_event[1])
     )
     tracking_thread_right.start()
-
-    tracking_thread_rgb_left = threading.Thread(
-        target=frame_collector_and_tracking,
-        args=(capture.left, 0, ostrack[2], 0, pred_bbox, bbox_lock[0], prev_output, stop_event[0])
-    )
-    tracking_thread_rgb_left.start()
-
-    tracking_thread_rgb_right = threading.Thread(
-        target=frame_collector_and_tracking,
-        args=(capture.right, 1, ostrack[3], 1, pred_bbox, bbox_lock[1], prev_output, stop_event[1])
-    )
-    tracking_thread_rgb_right.start()
 
 
     # ------ Load stereo calibration parameters ------
@@ -405,7 +335,7 @@ def main():
         plt.draw()
         plt.pause(0.001)
 
-        time.sleep(0.02)
+        # time.sleep(0.02)
 
         if not plt.fignum_exists(fig.number):
             print("Plot window closed. Exiting.")

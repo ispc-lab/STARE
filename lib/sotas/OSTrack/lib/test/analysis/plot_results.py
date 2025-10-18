@@ -167,7 +167,7 @@ def plot_draw_save(y, x, scores, trackers, plot_draw_styles, result_plot_path, p
     plt.draw()
 
 
-def check_and_load_precomputed_results(trackers, dataset, report_name, force_evaluation=False, **kwargs):
+def check_and_load_precomputed_results(trackers, dataset, report_name, force_evaluation=True, **kwargs):
     # Load data
     settings = env_settings()
 
@@ -213,7 +213,7 @@ def get_prec_curve(ave_success_rate_plot_center, valid_sequence):
 
 
 def plot_results(trackers, dataset, report_name, merge_results=False,
-                 plot_types=('success'), force_evaluation=False, **kwargs):
+                 plot_types=('success'), force_evaluation=True, **kwargs):
     """
     Plot results for the given trackers
 

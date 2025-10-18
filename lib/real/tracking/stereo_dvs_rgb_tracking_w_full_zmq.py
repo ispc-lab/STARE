@@ -3,6 +3,9 @@ import sys
 import time
 import datetime
 import threading
+import zmq
+import json
+import struct
 
 import numpy as np
 import dv_processing as dv
@@ -11,7 +14,6 @@ import matplotlib.pyplot as plt
 
 from collections import OrderedDict
 from readerwriterlock import rwlock
-from mpl_toolkits.mplot3d import Axes3D
 
 
 env_path = os.path.join(os.path.dirname(__file__), '..', '..')
@@ -21,70 +23,107 @@ if env_path not in sys.path:
 from lib.test.evaluation.tracker import Tracker
 
 
-def frame_collector_and_tracking(
-        capture: dv.io.CameraCapture, camera_idx: int, frame_buffer: list,
+IP_REMOTE_PREFIX = "tcp://192.168.110.7:555"
+IP_LOCAL_PREFIX = "tcp://*:555"
+
+
+def img_collector_and_tracking(
+        camera_idx: int, img_buffer: list, img_rwlock: rwlock.RWLockFair,
         ostrack, tracker_idx: int,
         pred_bbox: list, bbox_rwlock: rwlock.RWLockFair, prev_output: list,
         stop_event: threading.Event
 ):
-    print(f"Frame collector and tracking for camera [{camera_idx}] started.")
+    context = zmq.Context()
+    socket = context.socket(zmq.PULL)
+    socket.setsockopt(zmq.RCVHWM, 1)
+    socket.setsockopt(zmq.CONFLATE, 1)
+    socket.bind(IP_LOCAL_PREFIX + f"{camera_idx}")
 
     info = {}
     info['previous_output'] = prev_output[tracker_idx]
-    last_time = time.perf_counter()
+    # last_time = time.perf_counter()
 
+    print(f"Frame collector and tracking for camera [{camera_idx}] started.")
     while not stop_event.is_set():
-        frame = capture.getNextFrame()
-        if frame is not None:
-            frame_buffer[camera_idx] = frame
+        try:
+            data = socket.recv(flags=zmq.NOBLOCK)
+            nparr = np.frombuffer(data, dtype=np.uint8)
+            img = cv.imdecode(nparr, cv.IMREAD_COLOR)
+
+            with img_rwlock.gen_wlock():
+                img_buffer[camera_idx] = img
 
             info['previous_output'] = prev_output[tracker_idx]
-
-            img = cv.cvtColor(frame.image, cv.COLOR_BGR2RGB)
+            img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
             out = ostrack.track(img, info)
-
             prev_output[tracker_idx] = OrderedDict(out)
 
             with bbox_rwlock.gen_wlock():
                 pred_bbox[tracker_idx] = out['target_bbox']
 
-            curr_time = time.perf_counter()
-            elapsed_time = curr_time - last_time
-            last_time = curr_time
-            print(f"[{camera_idx}] RGB FPS:", 1 / elapsed_time)
-
-        else:
-            time.sleep(0.0001)
+        except zmq.Again:
+            time.sleep(0.001)
+            continue
 
     print(f"Frame collector and tracking for camera [{camera_idx}] stopped.")
 
 
+def bbox_sender(
+        camera_idx: int,
+        pred_bbox: list,
+        bbox_rwlock: rwlock.RWLockFair,
+        stop_event: threading.Event
+):
+    context = zmq.Context()
+    socket = context.socket(zmq.PUSH)
+    socket.connect(IP_REMOTE_PREFIX + f"{camera_idx + 2}")
+
+    print(f"bbox sender for camera [{camera_idx}] started.")
+    while not stop_event.is_set():
+        try:
+            with bbox_rwlock.gen_rlock():
+                bbox = pred_bbox[camera_idx]
+
+            data = struct.pack('<4f', *bbox)
+            socket.send(data, flags=zmq.NOBLOCK)
+
+        except zmq.Again:
+            time.sleep(0.001)
+            continue
+
+    print(f"bbox sender for camera [{camera_idx}] stopped.")
+
+
+def point3d_sender(
+        point3d_buffer: list,
+        point_3d_rwlock: rwlock.RWLockFair,
+        stop_event: threading.Event
+):
+    context = zmq.Context()
+    socket = context.socket(zmq.PUSH)
+    socket.connect(IP_REMOTE_PREFIX + "5")
+
+    print("3D point sender started.")
+    while not stop_event.is_set():
+        with point_3d_rwlock.gen_rlock():
+            point_3d = point3d_buffer[0]
+
+        if point_3d is not None:
+            try:
+                data = struct.pack('<3f', *point_3d.tolist())
+                socket.send(data, flags=zmq.NOBLOCK)
+
+            except zmq.Again:
+                time.sleep(0.001)
+                continue
+
+        else:
+            time.sleep(0.001)
+
+    print("3D point sender stopped.")
+
+
 def main():
-
-    # ------ Camera Initialization ------
-    cameras = dv.io.discoverDevices()
-
-    if len(cameras) < 2:
-        print("Error: Less than two DVS cameras found. Please connect a stereo pair and try again.")
-        sys.exit(1)
-
-    else:
-        print("Available DVS cameras:")
-        for idx, camera in enumerate(cameras):
-            print(f"{idx}: {camera}")
-
-    try:
-        capture = dv.io.StereoCapture(cameras[0], cameras[1])
-        print("Stereo Camera capture started.")
-
-    except Exception as e:
-        print(f"Failed to start camera capture: {e}")
-        sys.exit(1)
-
-    capture.left.setDavisFrameInterval(datetime.timedelta(milliseconds=10))
-    capture.right.setDavisFrameInterval(datetime.timedelta(milliseconds=10))
-
-
     # ------ OSTrack Tracker Initialization ------
     tracker_rgb = Tracker('ostrack', 'vitb_256_mae_ce_32x4_ep300', 'esot_500_20')
     params_rgb = tracker_rgb.get_parameters()
@@ -110,23 +149,47 @@ def main():
 
 
     # ------ Start Tracking Threads ------
-    frame_buffer = [None, None]
+    img_buffer = [None, None]
+    img_rwlock = [rwlock.RWLockFair(), rwlock.RWLockFair()]
+
     prev_output = [OrderedDict(out) for out in outs]
     pred_bbox = [init_info[i].get('init_bbox') for i in range(2)]
     bbox_lock = [rwlock.RWLockFair(), rwlock.RWLockFair()]
+
+    point3d_buffer = [None]
+    point_3d_rwlock = rwlock.RWLockFair()
+
     stop_event = [threading.Event(), threading.Event()]
 
     tracking_thread_rgb_left = threading.Thread(
-        target=frame_collector_and_tracking,
-        args=(capture.left, 0, frame_buffer, ostrack[0], 0, pred_bbox, bbox_lock[0], prev_output, stop_event[0])
+        target=img_collector_and_tracking,
+        args=(0, img_buffer, img_rwlock[0], ostrack[0], 0, pred_bbox, bbox_lock[0], prev_output, stop_event[0])
     )
     tracking_thread_rgb_left.start()
 
     tracking_thread_rgb_right = threading.Thread(
-        target=frame_collector_and_tracking,
-        args=(capture.right, 1, frame_buffer, ostrack[1], 1, pred_bbox, bbox_lock[1], prev_output, stop_event[1])
+        target=img_collector_and_tracking,
+        args=(1, img_buffer, img_rwlock[1], ostrack[1], 1, pred_bbox, bbox_lock[1], prev_output, stop_event[1])
     )
     tracking_thread_rgb_right.start()
+
+    bbox_sender_thread_left = threading.Thread(
+        target=bbox_sender,
+        args=(0, pred_bbox, bbox_lock[0], stop_event[0])
+    )
+    bbox_sender_thread_left.start()
+
+    bbox_sender_thread_right = threading.Thread(
+        target=bbox_sender,
+        args=(1, pred_bbox, bbox_lock[1], stop_event[1])
+    )
+    bbox_sender_thread_right.start()
+
+    point3d_sender_thread = threading.Thread(
+        target=point3d_sender,
+        args=(point3d_buffer, point_3d_rwlock, threading.Event())
+    )
+    point3d_sender_thread.start()
 
 
     # ------ Load stereo calibration parameters ------
@@ -148,14 +211,9 @@ def main():
 
 
     # ------ Visualization ------
-    resolution = capture.left.getEventResolution()
-    visualizer = dv.visualization.EventVisualizer(resolution)
-
     plt.ion()
-
     fig = plt.figure(figsize=(16, 8))
     fig.suptitle('Real-time 3D Tracking and X-Z Plane View', fontsize=16)
-
 
     # --- left subplot: 3D view ---
     ax_3d = fig.add_subplot(1, 2, 1, projection='3d')
@@ -195,14 +253,17 @@ def main():
     right_center = [op_x + op_w / 2, op_y + op_h / 2]
 
     # main loop for tracking and visualization
-    while capture.left.isRunning() and capture.right.isRunning():
-        frame_left = frame_buffer[0]
-        frame_right = frame_buffer[1]
+    while True:
+        with img_rwlock[0].gen_rlock(), img_rwlock[1].gen_rlock():
+            img_left_raw = img_buffer[0]
+            img_right_raw = img_buffer[1]
 
-        if frame_left is None or frame_right is None:
+        if img_left_raw is None or img_right_raw is None:
+            print("Waiting for images from cameras...")
+            time.sleep(0.01)
             continue
 
-        with bbox_lock[0].gen_rlock() and bbox_lock[1].gen_rlock():
+        with bbox_lock[0].gen_rlock(), bbox_lock[1].gen_rlock():
             op_x, op_y, op_w, op_h = pred_bbox[0]
             left_center = [op_x + op_w / 2, op_y + op_h / 2]
             left_pt = [
@@ -217,7 +278,7 @@ def main():
                 (int(op_x + op_w), int(op_y + op_h)),
             ]
 
-        img_left = frame_left.image.copy()
+        img_left = img_left_raw.copy()
         cv.rectangle(
             img_left,
             left_pt[0],
@@ -228,7 +289,7 @@ def main():
         # img_left = cv.resize(img_left, None, fx=3, fy=3, interpolation=cv.INTER_LINEAR)
         cv.imshow("Left-RGB-Tracking", img_left)
 
-        img_right = frame_right.image.copy()
+        img_right = img_right_raw.copy()
         cv.rectangle(
             img_right,
             right_pt[0],
@@ -263,6 +324,9 @@ def main():
             point_3d = R0.T @ (point_3d - t0) * scale_mm  # apply rectification and scale
             point_3d = point_3d.flatten()
 
+            with point_3d_rwlock.gen_wlock():
+                point3d_buffer[0] = point_3d
+
             # update the scatter plot with the new 3D point
             scatter_3d._offsets3d = ([point_3d[0]], [point_3d[1]], [point_3d[2]])
             scatter_xz.set_offsets([point_3d[0], point_3d[2]])
@@ -274,8 +338,6 @@ def main():
         plt.draw()
         plt.pause(0.001)
 
-        time.sleep(0.02)
-
         if not plt.fignum_exists(fig.number):
             print("Plot window closed. Exiting.")
             break
@@ -283,6 +345,7 @@ def main():
         if cv.waitKey(2) & 0xFF == ord('q'):
             print("Camera capture stopped.")
             break
+
 
     cv.destroyAllWindows()
     plt.ioff()

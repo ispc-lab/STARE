@@ -70,7 +70,10 @@ try:
     K2, D2 = calib['K2'], calib['D2']
     R, T = calib['R'], calib['T']  # 3x3, 3x1
     R0, t0 = calib['R0'], calib['t0']  # 3x3, 3x1
-    scale_mm = float(calib['scale_mm'])
+
+    # scale_mm = float(calib['scale_mm'])
+    scale_mm = 1
+
     image_size = calib['image_size']
 
     print("Successfully loaded calibration parameters:")

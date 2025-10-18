@@ -22,12 +22,20 @@ objp = objp * SQUARE_SIZE_MM
 def frame_collector(capture: dv.io.CameraCapture, camera_idx: int, frame_buffer: list):
     print(f"Frame collector for camera [{camera_idx}] started.")
 
+    last_time = time.perf_counter()
+
     while capture.isRunning():
         frame = capture.getNextFrame()
         if frame is not None:
             frame_buffer[camera_idx] = frame
+
+            curr_time = time.perf_counter()
+            elapsed_time = curr_time - last_time
+            last_time = curr_time
+            print(f"[{camera_idx}] RGB FPS:", 1 / elapsed_time)
+
         else:
-            time.sleep(0.0001)
+            time.sleep(0.001)
 
     print(f"Frame collector for camera [{camera_idx}] stopped.")
 
@@ -60,7 +68,6 @@ try:
         print(f"Failed to start camera capture: {e}")
         sys.exit(1)
 
-
     capture.setDavisFrameInterval(datetime.timedelta(milliseconds=10))
     img_size = capture.getFrameResolution()
 
@@ -83,7 +90,7 @@ objpoints = []
 imgpoints = []
 
 num_good_pts = 0
-target_pts = 15
+target_pts = 10
 
 print(f"\n Please move the chessboard to collect {target_pts} valid monocular images ...")
 while num_good_pts < target_pts and capture.isRunning():

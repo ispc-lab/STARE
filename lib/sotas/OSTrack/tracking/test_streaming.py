@@ -8,11 +8,10 @@ import importlib
 prj_path = os.path.join(os.path.dirname(__file__), '..')
 if prj_path not in sys.path:
     sys.path.append(prj_path)
-    
 pytracking_path = os.path.join(os.path.dirname(__file__), '../../../pytracking')
 if pytracking_path not in sys.path:
     sys.path.append(pytracking_path)
-    
+
 # print(sys.path)
 
 # from lib.test.evaluation import get_dataset
@@ -56,9 +55,21 @@ def run_tracker(tracker_name, tracker_param, run_id=None, dataset_name='otb', se
     run_dataset(dataset, trackers, debug, threads, num_gpus=num_gpus)
 
 
-def run_tracker_stream(tracker_name, tracker_param, stream_setting, run_id=None, dataset_name='otb', sequence=None,
-                       debug=0, threads=0, use_aas=False,
-                       visdom_info=None):
+def run_tracker_stream(
+        tracker_name,
+        tracker_param,
+        stream_setting,
+        run_id=None,
+        dataset_name='esot500s',
+        sequence=None,
+        debug=0,
+        threads=0,
+        use_cas=0,
+        visdom_info=None,
+        density_alpha=0.5,
+        density_beta=0.05,
+        density_duration_th=50,
+):
     """Run tracker on sequence or dataset.
     args:
         tracker_name: Name of tracking method.
@@ -78,7 +89,11 @@ def run_tracker_stream(tracker_name, tracker_param, stream_setting, run_id=None,
     if sequence is not None:
         dataset = [dataset[sequence]]
 
-    trackers = [Tracker(tracker_name, tracker_param, dataset_name, run_id, use_aas)]
+    trackers = [Tracker(tracker_name, tracker_param, dataset_name, run_id, use_cas)]
+    trackers[0].density_alpha = density_alpha
+    trackers[0].density_beta = density_beta
+    trackers[0].density_duration_th = density_duration_th * 1e3  # convert to ms
+
     stream_setting = load_stream_setting(stream_setting)  # dict
 
     run_dataset_stream(dataset, trackers, stream_setting, debug, threads, visdom_info=visdom_info)
@@ -95,7 +110,10 @@ def main():
     parser.add_argument('--debug', type=int, default=0, help='Debug level.')
     parser.add_argument('--threads', type=int, default=0, help='Number of threads.')
     parser.add_argument('--num_gpus', type=int, default=1)
-    parser.add_argument('--use_aas', action='store_true')
+    parser.add_argument('--use_cas', type=int, default=0)
+    parser.add_argument('--den_a', type=float, default=0.5)
+    parser.add_argument('--den_b', type=float, default=0.05)
+    parser.add_argument('--den_d', type=float, default=50)
 
     args = parser.parse_args()
     try:
@@ -103,8 +121,20 @@ def main():
     except:
         seq_name = args.sequence
 
-    run_tracker_stream(args.tracker_name, args.tracker_param, args.stream_setting, args.runid, args.dataset_name,
-                       seq_name, args.debug, args.threads, args.use_aas)
+    run_tracker_stream(
+        args.tracker_name,
+        args.tracker_param,
+        args.stream_setting,
+        args.runid,
+        args.dataset_name,
+        seq_name,
+        args.debug,
+        args.threads,
+        args.use_cas,
+        density_alpha=args.den_a,
+        density_beta=args.den_b,
+        density_duration_th=args.den_d,
+    )
 
 
 if __name__ == '__main__':

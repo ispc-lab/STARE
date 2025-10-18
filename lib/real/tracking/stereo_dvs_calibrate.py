@@ -21,7 +21,6 @@ objp = objp * SQUARE_SIZE_MM
 
 def frame_collector(capture: dv.io.CameraCapture, camera_idx: int, frame_buffer: list):
     print(f"Frame collector for camera [{camera_idx}] started.")
-
     while capture.isRunning():
         frame = capture.getNextFrame()
         if frame is not None:
@@ -95,7 +94,9 @@ while num_good_pairs < target_pairs and capture.left.isRunning() and capture.rig
         print("\n's' key pressed, attempting to capture...")
 
         gray_left = cv.cvtColor(frame_left.image, cv.COLOR_BGR2GRAY)
+        # gray_left = frame_left.image
         gray_right = cv.cvtColor(frame_right.image, cv.COLOR_BGR2GRAY)
+        # gray_right = frame_right.image
 
         ret_left, corners_left = cv.findChessboardCorners(gray_left, CHESSBOARD_SIZE, None)
         ret_right, corners_right = cv.findChessboardCorners(gray_right, CHESSBOARD_SIZE, None)
@@ -125,6 +126,12 @@ while num_good_pairs < target_pairs and capture.left.isRunning() and capture.rig
 
         else:
             print("--- CAPTURE FAILED: Could not detect corners in both views. Please reposition and try again. ---")
+
+            if not ret_left:
+                print("   - Left camera view: No corners detected.")
+
+            if not ret_right:
+                print("   - Right camera view: No corners detected.")
 
     elif key == ord('q'):
         print("User quit the capture process.")

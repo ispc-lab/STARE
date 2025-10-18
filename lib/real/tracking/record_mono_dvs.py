@@ -36,14 +36,14 @@ def main():
     resolution = capture.getEventResolution()
     visualizer = dv.visualization.EventVisualizer(resolution)
 
-    output_aedat4_file = os.path.dirname(__file__) + f'/init/aedat4/pingpang_{camera_name}.aedat4'
+    output_aedat4_file = os.path.dirname(__file__) + f'/init/aedat4/pingpong_{camera_name}_tracking_init.aedat4'
     config = dv.io.MonoCameraWriter.EventOnlyConfig(
         cameraName=camera_name,
         resolution=resolution,
     )
     writer = dv.io.MonoCameraWriter(output_aedat4_file, config)
     event_store = dv.EventStore()
-    cnt, cnt_max = 0, 100
+    cnt, cnt_max = 0, 1000
 
     def process_time_window(events: dv.EventStore):
         if events is not None:

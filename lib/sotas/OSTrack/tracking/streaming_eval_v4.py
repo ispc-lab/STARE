@@ -14,6 +14,7 @@ import sys
 import os
 import importlib
 
+
 env_path = os.path.join(os.path.dirname(__file__), '..')
 if env_path not in sys.path:
     sys.path.append(env_path)
@@ -62,7 +63,10 @@ def eval_sequence_stream(sequence, tracker, stream_setting):
     tracker_name = tracker.name
     param = tracker.parameter_name
     gt_anno_t = sequence.ground_truth_t
-    # gt_anno_t = gt_anno_t[::25] # downsample annotation frequency
+
+    # downsample annotation frequency
+    # gt_anno_t = gt_anno_t[::25]
+
     save_dir = os.path.join(tracker.results_dir_rt_final,str(stream_setting.id))
     if tracker.run_id != None:
         save_dir = os.path.join(tracker.results_dir_rt_final,str(stream_setting.id))

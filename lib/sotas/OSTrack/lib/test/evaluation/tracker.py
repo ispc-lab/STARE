@@ -33,7 +33,7 @@ class Tracker:
         display_name: Name to be displayed in the result plots.
     """
 
-    def __init__(self, name: str, parameter_name: str, dataset_name: str, run_id: int = None, use_aas: bool = False, display_name: str = None,
+    def __init__(self, name: str, parameter_name: str, dataset_name: str, run_id: int = None, use_cas: int = 0, display_name: str = None,
                  result_only=False):
         assert run_id is None or isinstance(run_id, int)
 
@@ -41,9 +41,12 @@ class Tracker:
         self.parameter_name = parameter_name
         self.dataset_name = dataset_name
         self.run_id = run_id
-        self.use_aas = use_aas
         self.display_name = display_name
 
+        self.use_cas = use_cas
+        self.density_alpha = 0.5
+        self.density_beta = 0.05
+        self.density_duration_th = 50 * 1e3  # 50 ms
 
         env = env_settings()
         if self.run_id is None:
@@ -53,7 +56,7 @@ class Tracker:
             self.segmentation_dir = '{}/{}/{}'.format(env.segmentation_path, self.name, self.parameter_name)
         else:
             self.results_dir = '{}/{}/{}_{:03d}'.format(env.results_path, self.name, self.parameter_name, self.run_id)
-            self.results_dir_rt = '{}/{}/{}_{:03d}'.format(env.results_path_rt, self.name, self.parameter_name,self.run_id)
+            self.results_dir_rt = '{}/{}/{}_{:03d}'.format(env.results_path_rt, self.name, self.parameter_name, self.run_id)
             self.results_dir_rt_final = '{}/{}/{}_{:03d}'.format(env.results_path_rt_final, self.name, self.parameter_name, self.run_id)
             self.segmentation_dir = '{}/{}/{}_{:03d}'.format(env.segmentation_path, self.name, self.parameter_name, self.run_id)
         if result_only:
@@ -66,6 +69,7 @@ class Tracker:
             self.tracker_class = tracker_module.get_tracker_class()
         else:
             self.tracker_class = None
+
         self.visdom = None
 
     def create_tracker(self, params):
@@ -101,7 +105,7 @@ class Tracker:
         init_info = seq.init_info()
 
         tracker = self.create_tracker(params)
-        if seq.dataset in ['esot500s','esot2s']:
+        if seq.dataset in ['esot500s','esot500hs']:
             output = self._track_evstream(tracker, seq, init_info, stream_setting)
         else:
             output = self._track_sequence(tracker, seq, init_info)
@@ -121,8 +125,11 @@ class Tracker:
         # time[i] is either the processing time for frame i, or an OrderedDict containing processing times for each
         # object in frame i
 
-        output = {'target_bbox': [],
-                  'time': []}
+        output = {
+            'target_bbox': [],
+            'time': []
+        }
+
         if tracker.params.save_all_boxes:
             output['all_boxes'] = []
             output['all_scores'] = []
@@ -143,13 +150,18 @@ class Tracker:
             out = {}
 
         prev_output = OrderedDict(out)
-        init_default = {'target_bbox': init_info.get('init_bbox'),
-                        'time': time.time() - start_time}
+        init_default = {
+            'target_bbox': init_info.get('init_bbox'),
+            'time': time.time() - start_time
+        }
+
         if tracker.params.save_all_boxes:
             init_default['all_boxes'] = out['all_boxes']
             init_default['all_scores'] = out['all_scores']
 
         _store_outputs(out, init_default)
+
+        # last_time = time.perf_counter()
 
         for frame_num, frame_path in enumerate(seq.frames[1:], start=1):
             image = self._read_image(frame_path)
@@ -162,6 +174,12 @@ class Tracker:
             if len(seq.ground_truth_rect) > 1:
                 info['gt_bbox'] = seq.ground_truth_rect[frame_num]
             out = tracker.track(image, info)
+
+            # curr_time = time.perf_counter()
+            # elapsed_time = curr_time - last_time
+            # last_time = curr_time
+            # print(f"Foward Normal FPS:", 1 / elapsed_time)
+
             prev_output = OrderedDict(out)
             _store_outputs(out, {'time': time.time() - start_time})
 
@@ -205,7 +223,7 @@ class Tracker:
             events['timestamp'] = events['timestamp'] - events['timestamp'][0]
 
         timestamps = events['timestamp']
-        #TODO: adjust timestamps to seconds
+        # TODO: adjust timestamps to seconds ?
 
         eval_setting = {}
 
@@ -215,6 +233,11 @@ class Tracker:
         runtime = []
         out_timestamps = []
         t_stream_total = timestamps[-1]
+
+        if seq.dataset == 'esot500hs':
+            height, width = 720, 1280
+        else:
+            height, width = 260, 346
 
 #########################################################################################
         active_state = {
@@ -227,22 +250,46 @@ class Tracker:
             'length': 0,
         }
 
-        cnt = 0
+        cnt_cas = 0
+        cnt_all = 0
 
         def generate_density(bbox, img):
             res = 0
+            if not self.use_cas:
+                return res
+
             l, t, w, h = int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3])
             # print(l, t, w, h)
-            for i in range(h):
-                for j in range(w):
-                    res += int(img[t + i][l + j][0] > 0 | img[t + i][l + j][1] > 0 | img[t + i][l + j][2] > 0)
 
+            if self.use_cas == 1:
+
+                for i in range(h):
+                    for j in range(w):
+                        res += int(img[t + i][l + j][0] > 0 | img[t + i][l + j][1] > 0 | img[t + i][l + j][2] > 0)
+
+                # roi = img[t: t + h, l: l + w]
+                # rR, rG, rB = roi[:, :, 0], roi[:, :, 1], roi[:, :, 2]
+                # mask = (rR > rG) & (rG > rB) & (rB > 0)
+                # res = np.sum(mask)
+
+            elif self.use_cas == 2:
+                roi = img[t: t + h, l: l + w]
+                is_nonzero_pixel = np.any(roi > 0, axis=2)
+                res = np.sum(is_nonzero_pixel)
+
+            else:
+                raise NotImplementedError
+
+            # print(res)
             return res
+
+        if self.use_cas:
+            print(f"ENABLE CAS [mode {self.use_cas}, alpha {self.density_alpha}, beta {self.density_beta}, duration_th {self.density_duration_th / 1e3} ms]")
 #########################################################################################
 
         if not stream_setting.convert_time:
             # Initialize
-            # t_start = perf_counter()*1e6
+            # t_start = perf_counter() * 1e6
             t_left = 0
             idx_start = 0
 
@@ -255,7 +302,7 @@ class Tracker:
                     idx_end = stream_setting.num_events
                     t_template = timestamps[idx_end]
                 elif stream_setting.slicing == 'Last':
-                    t_template = init_info.get('init_timestamp')*1e6
+                    t_template = init_info.get('init_timestamp') * 1e6
                     idx_end = interpolation_search(timestamps,t_template)
                 elif stream_setting.slicing == 'Adaptive':
                     from pytracking.utils.sampling import EventStreamSampler
@@ -279,7 +326,7 @@ class Tracker:
             else:
                 raise NotImplementedError
 
-            event_rep = convert_event_img_aedat(template_events, stream_setting.representation)
+            event_rep = convert_event_img_aedat(template_events, stream_setting.representation, height, width)
             # event_img_pil = transform(event_rep)
             # event_img_array = np.array(event_img_pil)
             # event_img = cv2.cvtColor(event_img_array,cv2.COLOR_RGB2BGR)
@@ -288,7 +335,7 @@ class Tracker:
                     event_img = event_rep
                     self.visualize(event_img, init_info.get('init_bbox'))
                 elif stream_setting.representation in ['Raw']:
-                    event_img = convert_event_img_aedat(template_events_raw,'VoxelGridComplex')
+                    event_img = convert_event_img_aedat(template_events_raw, 'VoxelGridComplex', height, width)
                     self.visualize(event_img, init_info.get('init_bbox'))
 
             torch.cuda.synchronize()
@@ -330,7 +377,11 @@ class Tracker:
             while 1:
                 t_algo_total = sum(runtime) + t_template
                 if t_algo_total > t_stream_total:
+                    if self.use_cas:
+                        print("sparsity:", cnt_cas, " / ", cnt_all, " = ", cnt_cas / cnt_all)
                     break
+
+                cnt_all = cnt_all + 1
 
                 t_right = out_timestamps[-1] # Current world-time
                 idx_end = interpolation_search(timestamps, t_right)
@@ -363,7 +414,8 @@ class Tracker:
                     # convert format for egt
                     event_rep = sampling_search_egt(events_search)
                 else:
-                    event_rep = convert_event_img_aedat(events_search, stream_setting.representation)
+                    event_rep = convert_event_img_aedat(events_search, stream_setting.representation, height, width)
+
                 info = {} # changed
 
                 ##################################################################################################
@@ -373,11 +425,14 @@ class Tracker:
                     info['previous_output'] = active_state['out']
 
                 density_tmp = generate_density(active_state['bbox'], event_rep)
-                if density_tmp < active_state['density'] * 0.5 and active_state['length'] <= 50 * 1e3:
+                if density_tmp < active_state['density'] * self.density_alpha and active_state['length'] <= self.density_duration_th:
                     active_state['is_last_activated'] = False
-                elif density_tmp < active_state['density'] * 0.05 and active_state['length'] > 50 * 1e3:
+                elif density_tmp < active_state['density'] * self.density_beta and active_state['length'] > self.density_duration_th:
                     active_state['is_last_activated'] = False
                 else:
+                    active_state['is_last_activated'] = True
+
+                if not self.use_cas:
                     active_state['is_last_activated'] = True
                 ##################################################################################################
 
@@ -387,6 +442,8 @@ class Tracker:
                 # cv2.imwrite('debug/test2.jpg',event_img)
                 # event_img.save('debug/test.jpg')
                 t1 = perf_counter() * 1e6
+
+                # if active_state['is_last_activated']:
                 out = tracker.track(event_rep, info)
 
                 prev_output = OrderedDict(out)
@@ -396,7 +453,7 @@ class Tracker:
                 # t_algo = out.get('time',t_algo)
                 t_algo = out.get('time') * 1e6 if out.get('time') else t_algo
                 if stream_setting.sim:
-                    sim_runtime = stream_setting.sim_runtime.get(self.name+'_'+self.parameter_name,stream_setting.sim_runtime_rt)
+                    sim_runtime = stream_setting.sim_runtime.get(self.name + '_' + self.parameter_name, stream_setting.sim_runtime_rt)
                     sim_disturb = sim_runtime * stream_setting.sim_disturb
                     t_algo = np.random.normal(loc=sim_runtime, scale=sim_disturb, size=1)[0]
                 runtime.append(t_algo)
@@ -405,9 +462,6 @@ class Tracker:
                 out_timestamps.append(out_timestamps[-1] + t_algo)
 
                 ################################################################################
-                if not self.use_aas:
-                    active_state['is_last_activated'] = True
-
                 # pred_bbox = out['target_bbox']
                 # active_state['bbox'] = out['target_bbox']
                 # active_state['density'] = generate_density(out['target_bbox'], event_rep)
@@ -421,9 +475,10 @@ class Tracker:
                 else:
                     pred_bbox = active_state['bbox']
                     active_state['length'] += t_algo
-                    cnt = cnt + 1
-                # print('target_bbox:', pred_bbox)
+                    cnt_cas = cnt_cas + 1
+                    # print("sparsity:", cnt_cas, " / ", cnt_all, " = ", cnt_cas / cnt_all)
 
+                # print('target_bbox:', pred_bbox)
                 pred_bboxes.append(pred_bbox)  # box [x1, y1, w, h]
                 ################################################################################
 
@@ -439,36 +494,36 @@ class Tracker:
                 if stream_setting.representation in ['VoxelGridComplex']:
                     event_img = event_rep
                 elif stream_setting.representation =='Raw':
-                    event_img = convert_event_img_aedat(events_search, 'VoxelGridComplex')
+                    event_img = convert_event_img_aedat(events_search, 'VoxelGridComplex', height, width)
 
                 if self.visdom is not None:
                     tracker.visdom_draw_tracking(event_img, bboxes, segmentation)
                 elif tracker.params.visualization:
                     self.visualize(event_img, bboxes, segmentation)
                     
-            output={
-                        'results_raw': pred_bboxes,
-                        'out_timestamps': out_timestamps,
-                        'in_timestamps': in_timestamps,
-                        'runtime': runtime,
-                        'stream_setting':stream_setting.id,
-                    }
+            output = {
+                'results_raw': pred_bboxes,
+                'out_timestamps': out_timestamps,
+                'in_timestamps': in_timestamps,
+                'runtime': runtime,
+                'stream_setting':stream_setting.id,
+            }
 
         else:
             # TODO: under-construction
             # Absolute wall time, including conversion time
-            t_start = perf_counter()*1e6
+            t_start = perf_counter() * 1e6
             t_left = 0
             t_right = stream_setting.window_size
-            t1 = perf_counter()*1e6
-            # idx_start = interpolation_search(timestamps,t_left)
+            t1 = perf_counter() * 1e6
+            # idx_start = interpolation_search(timestamps, t_left)
             idx_start = 0
-            idx_end = interpolation_search(timestamps,t_right) # merely zero
-            event_rep = convert_event_img_aedat(events[idx_start:idx_end],'VoxelGridComplex')
+            idx_end = interpolation_search(timestamps, t_right) # merely zero
+            event_rep = convert_event_img_aedat(events[idx_start:idx_end], 'VoxelGridComplex', height, width)
             # event_img = transform(event_rep)
             event_img_pil = transform(event_rep)
             event_img_array = np.array(event_img_pil)
-            event_img = cv2.cvtColor(event_img_array,cv2.COLOR_RGB2BGR)
+            event_img = cv2.cvtColor(event_img_array, cv2.COLOR_RGB2BGR)
             if tracker.params.visualization and self.visdom is None:
                 self.visualize(event_img, init_info.get('init_bbox'))
 
@@ -497,7 +552,7 @@ class Tracker:
                 t_left = t_elapsed - stream_setting.window_size
                 idx_start = interpolation_search(timestamps,t_left)
                 idx_end = interpolation_search(timestamps,t_right)
-                event_rep = convert_event_img_aedat(events[idx_start:idx_end],'VoxelGridComplex')
+                event_rep = convert_event_img_aedat(events[idx_start:idx_end], 'VoxelGridComplex', height, width)
                 info = {} # changed
                 info['previous_output'] = prev_output
                 event_img_pil = transform(event_rep)
@@ -524,12 +579,13 @@ class Tracker:
                     tracker.visdom_draw_tracking(event_img, bboxes, segmentation)
                 elif tracker.params.visualization:
                     self.visualize(event_img, bboxes, segmentation)
-            output={
-                        'results_raw': pred_bboxes,
-                        'out_timestamps': out_timestamps,
-                        'in_timestamps': in_timestamps,
-                        'runtime': runtime,
-                    }
+
+            output = {
+                'results_raw': pred_bboxes,
+                'out_timestamps': out_timestamps,
+                'in_timestamps': in_timestamps,
+                'runtime': runtime,
+            }
 
         return output
 
@@ -734,8 +790,10 @@ class Tracker:
         if isinstance(image_file, str):
             im = cv.imread(image_file)
             return cv.cvtColor(im, cv.COLOR_BGR2RGB)
+
         elif isinstance(image_file, list) and len(image_file) == 2:
             return decode_img(image_file[0], image_file[1])
+
         else:
             raise ValueError("type of image_file should be str or list")
 

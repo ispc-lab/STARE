@@ -4,10 +4,8 @@ import time
 import datetime
 import threading
 
-import numpy as np
 import dv_processing as dv
 import cv2 as cv
-import matplotlib.pyplot as plt
 
 from collections import OrderedDict
 from readerwriterlock import rwlock
@@ -133,29 +131,15 @@ def main():
         tracker.create_tracker(params),
     ]
 
-    # ---------- slow init ----------------------------------
-    # init_info = [
-    #     {'init_bbox': [175, 117, 33, 35],},
-    #     {'init_bbox': [110, 136, 52, 56],},
-    # ]
-    #
-    # template = [
-    #     tracker._read_image(os.path.dirname(__file__) + '/init/template/left_1.jpg'),
-    #     tracker._read_image(os.path.dirname(__file__) + '/init/template/right_1.jpg'),
-    # ]
-    # -------------------------------------------------------
-
-    # ---------- fast init ----------------------------------
     init_info = [
-        {'init_bbox': [171, 88, 19, 20], },
-        {'init_bbox': [120, 133, 29, 31], },
+        {'init_bbox': [175, 117, 33, 35],},
+        {'init_bbox': [110, 136, 52, 56],},
     ]
 
     template = [
-        tracker._read_image(os.path.dirname(__file__) + '/init/template/left_fast_1.jpg'),
-        tracker._read_image(os.path.dirname(__file__) + '/init/template/right_fast_1.jpg'),
+        tracker._read_image(os.path.dirname(__file__) + '/init/template/left_1.jpg'),
+        tracker._read_image(os.path.dirname(__file__) + '/init/template/right_1.jpg'),
     ]
-    # -------------------------------------------------------
 
     outs = [ostrack[i].initialize(template[i], init_info[i]) for i in range(2)]
     outs = [out if out is not None else {} for out in outs]
@@ -178,172 +162,59 @@ def main():
     )
     tracking_thread_right.start()
 
-
-    # ------ Load stereo calibration parameters ------
-    try:
-        save_path = os.path.dirname(__file__) + '/stereo_calib_rect.npz'
-        # save_path = './stereo_calib_rect.npz'
-        calib = np.load(save_path)
-        K1, D1 = calib['K1'], calib['D1']
-        K2, D2 = calib['K2'], calib['D2']
-        R, T = calib['R'], calib['T']  # 3x3, 3x1
-        R0, t0 = calib['R0'], calib['t0']  # 3x3, 3x1
-        scale_mm = float(calib['scale_mm'])
-
-        print("Successfully loaded calibration parameters:")
-
-    except FileNotFoundError:
-        print("Error: Rectified Calibration file not found. Please run rectify_calibration_result.py first.")
-        sys.exit(1)
-
-
     # ------ Visualization ------
     resolution = capture.left.getEventResolution()
     visualizer = dv.visualization.EventVisualizer(resolution)
 
-    plt.ion()
-
-    fig = plt.figure(figsize=(16, 8))
-    fig.suptitle('Real-time 3D Tracking and X-Z Plane View', fontsize=16)
-
-
-    # --- left subplot: 3D view ---
-    ax_3d = fig.add_subplot(1, 2, 1, projection='3d')
-    scatter_3d = ax_3d.scatter([], [], [], c='red', s=150, label='Current Position')
-
-    ax_3d.set_xlabel('X (mm)')
-    ax_3d.set_ylabel('Y (mm)')
-    ax_3d.set_zlabel('Z (mm)')
-    ax_3d.set_title('3D View')
-
-    ax_3d.set_xlim(-1000, 1000)
-    ax_3d.set_ylim(-1000, 1000)
-    ax_3d.set_zlim(-1000, 1000)
-    ax_3d.legend()
-
-    # --- right subplot: 2D X-Z plane view (front-end view) ---
-    ax_2d = fig.add_subplot(1, 2, 2)
-    scatter_xz = ax_2d.scatter([], [], c='blue', s=150, label='Current X-Z Position')
-
-    ax_2d.set_xlabel('X (mm)')
-    ax_2d.set_ylabel('Z (mm)')
-    ax_2d.set_title('Top-Down View (X-Z Plane)')
-
-    ax_2d.set_xlim(-1500, 1500)
-    ax_2d.set_ylim(-1500, 1500)
-
-    ax_2d.set_aspect('equal', adjustable='box')
-    ax_2d.grid(True)
-    ax_2d.legend()
-
-    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-
-    # Initialize the centers of the bounding boxes
-    op_x, op_y, op_w, op_h = init_info[0]['init_bbox']
-    left_center = [op_x + op_w / 2, op_y + op_h / 2]
-    op_x, op_y, op_w, op_h = init_info[1]['init_bbox']
-    right_center = [op_x + op_w / 2, op_y + op_h / 2]
-
-    # main loop for tracking and visualization
     while capture.left.isRunning() and capture.right.isRunning():
 
-        with buffer_lock[0].gen_rlock() and buffer_lock[1].gen_rlock():
+        with buffer_lock[0].gen_rlock():
             latest_ts = events_buffer[0].getHighestTime()
             cutoff_ts = int(latest_ts - SAMPLING_WINDOW_MS * 1e3)
             events_left = events_buffer[0].sliceTime(cutoff_ts)
 
-            latest_ts = events_buffer[1].getHighestTime()
-            cutoff_ts = int(latest_ts - SAMPLING_WINDOW_MS * 1e3)
-            events_right = events_buffer[1].sliceTime(cutoff_ts)
-
-        if events_left is not None and events_right is not None:
-            with bbox_lock[0].gen_rlock() and bbox_lock[1].gen_rlock():
+        if events_left is not None:
+            with bbox_lock[0].gen_rlock():
                 op_x, op_y, op_w, op_h = pred_bbox[0]
-                left_center = [op_x + op_w / 2, op_y + op_h / 2]
-                left_pt = [
-                    (int(op_x), int(op_y)),
-                    (int(op_x + op_w), int(op_y + op_h)),
-                ]
-
-                op_x, op_y, op_w, op_h = pred_bbox[1]
-                right_center = [op_x + op_w / 2, op_y + op_h / 2]
-                right_pt = [
-                    (int(op_x), int(op_y)),
-                    (int(op_x + op_w), int(op_y + op_h)),
-                ]
 
             left_event_frame = visualizer.generateImage(events_left)
             cv.rectangle(
                 left_event_frame,
-                left_pt[0],
-                left_pt[1],
+                (int(op_x), int(op_y)),
+                (int(op_x + op_w), int(op_y + op_h)),
                 (0, 0, 255),
                 2,
             )
-            # left_event_frame = cv.resize(left_event_frame, None, fx=3, fy=3, interpolation=cv.INTER_LINEAR)
             cv.imshow("Left-STARE-Tracking", left_event_frame)
+
+
+        with buffer_lock[1].gen_rlock():
+            latest_ts = events_buffer[1].getHighestTime()
+            cutoff_ts = int(latest_ts - SAMPLING_WINDOW_MS * 1e3)
+            events_right = events_buffer[1].sliceTime(cutoff_ts)
+
+        if events_right is not None:
+            with bbox_lock[1].gen_rlock():
+                op_x, op_y, op_w, op_h = pred_bbox[1]
 
             right_event_frame = visualizer.generateImage(events_right)
             cv.rectangle(
                 right_event_frame,
-                right_pt[0],
-                right_pt[1],
+                (int(op_x), int(op_y)),
+                (int(op_x + op_w), int(op_y + op_h)),
                 (0, 0, 255),
                 2,
             )
-            # right_event_frame = cv.resize(right_event_frame, None, fx=3, fy=3, interpolation=cv.INTER_LINEAR)
             cv.imshow("Right-STARE-Tracking", right_event_frame)
 
-        if left_center is not None and right_center is not None:
-            print("Left Feature Center:", left_center)
-            print("Right Feature Center:", right_center)
-
-            # get the centroids of the detected features, [x, y] format
-            pt_left = np.array(left_center).reshape(1, 1, 2).astype(np.float32)
-            pt_right = np.array(right_center).reshape(1, 1, 2).astype(np.float32)
-
-            # remove distortion using the calibration parameters
-            pt_left_undistorted = cv.undistortPoints(pt_left, K1, D1)
-            pt_right_undistorted = cv.undistortPoints(pt_right, K2, D2)
-
-            # prject the undistorted points to the image plane
-            P1 = np.hstack([np.eye(3), np.zeros((3, 1))])  # P1 = I * [R|T]
-            P2 = np.hstack([R, T.reshape(3, 1)])
-
-            # perform triangulation to get the 3D point
-            point_4d = cv.triangulatePoints(P1, P2, pt_left_undistorted.T, pt_right_undistorted.T)
-            point_3d = point_4d[:3] / point_4d[3]  # convert to 3D coordinates
-
-            # convert to millimeters and apply rectification
-            point_3d = R0.T @ (point_3d - t0) * scale_mm  # apply rectification and scale
-            point_3d = point_3d.flatten()
-
-            # update the scatter plot with the new 3D point
-            scatter_3d._offsets3d = ([point_3d[0]], [point_3d[1]], [point_3d[2]])
-            scatter_xz.set_offsets([point_3d[0], point_3d[2]])
-
-            print("Matching features detected, 3D Coordinates (mm): ")
-            print(f"X={point_3d[0]:.2f}, Y={point_3d[1]:.2f}, Z={point_3d[2]:.2f}")
-
-
-        plt.draw()
-        plt.pause(0.001)
 
         time.sleep(0.02)
-
-        if not plt.fignum_exists(fig.number):
-            print("Plot window closed. Exiting.")
-            break
 
         if cv.waitKey(2) & 0xFF == ord('q'):
             print("Camera capture stopped.")
             break
 
     cv.destroyAllWindows()
-    plt.ioff()
-    plt.show()
-
-    print("Program exited.")
 
 
 if __name__ == '__main__':

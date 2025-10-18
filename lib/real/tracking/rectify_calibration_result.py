@@ -187,6 +187,7 @@ if cnt >= ref_pt_num:
     # ---------- rectify the unit distance ----------
     measured_dx = np.linalg.norm(Px_old - O_old)  # distance in old coordinate system
     scale_mm = 225.0 / measured_dx  # mm
+    # scale_mm = 49 * 10.0 / measured_dx  # mm
 
     # print("Rotation matrix R0:", R0)
     # print("Translation vector t0:", t0)
@@ -195,6 +196,7 @@ if cnt >= ref_pt_num:
     # check if the Z distance is approximately 125 mm
     measured_dz = np.linalg.norm(Pz_old - O_old) * scale_mm
     print(f"[Check]  Z distance = {measured_dz:.2f} mm (Target 125 mm)")
+    # print(f"[Check]  Z distance = {measured_dz:.2f} mm (Target 66 * 10.0 mm)")
 
     save_path = os.path.join(os.path.dirname(__file__), 'stereo_calib_rect.npz')
     np.savez(

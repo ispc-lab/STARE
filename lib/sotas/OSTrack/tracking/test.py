@@ -52,8 +52,6 @@ def main():
     except:
         seq_name = args.sequence
 
-    # args.dataset_name = ['esot_500_20','esot_250_20','esot_20_20','esot_500_8','esot_250_8','esot_20_8','esot_500_2','esot_250_2','esot_20_2']
-
     run_tracker(args.tracker_name, args.tracker_param, args.runid, args.dataset_name, seq_name, args.debug,
                 args.threads, num_gpus=args.num_gpus)
 

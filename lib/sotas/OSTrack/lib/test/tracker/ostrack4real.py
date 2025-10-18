@@ -8,7 +8,6 @@ import torch
 from lib.test.tracker.vis_utils import gen_visualization
 from lib.test.utils.hann import hann2d
 from lib.train.data.processing_utils import sample_target
-
 # for debug
 import cv2
 import os
@@ -32,6 +31,10 @@ class OSTrack(BaseTracker):
         self.feat_sz = self.cfg.TEST.SEARCH_SIZE // self.cfg.MODEL.BACKBONE.STRIDE
         # motion constrain
         self.output_window = hann2d(torch.tensor([self.feat_sz, self.feat_sz]).long(), centered=True).cuda()
+
+        self.last_active_time = 0
+        self.is_active = False
+        # self.is_active = True
 
         # for debug
         self.debug = params.debug
@@ -73,10 +76,37 @@ class OSTrack(BaseTracker):
             return {"all_boxes": all_boxes_save}
 
     def track(self, image, info: dict = None):
+
+        ###############################################
+        if not self.is_active:
+            self.state = [0, 150, 15, 15]  # reset state if not active
+
+            density = 0
+            l, t, w, h = 0, 150, 15, 15
+            for i in range(h):
+                for j in range(w):
+                    density += int((image[t + i][l + j][0] > 0) or (image[t + i][l + j][1] > 0) or (image[t + i][l + j][2] > 0))
+
+            if density > 60:
+                self.is_active = True
+                self.last_active_time = time.perf_counter()
+
+        else:
+            curr_time = time.perf_counter()
+            if curr_time - self.last_active_time > 5:
+                self.is_active = False
+        ###############################################
+
         H, W, _ = image.shape
         self.frame_id += 1
         x_patch_arr, resize_factor, x_amask_arr = sample_target(image, self.state, self.params.search_factor,
                                                                 output_sz=self.params.search_size)  # (x1, y1, w, h)
+
+        # state_fake = [0, 0, W, W]  # for debug, use the whole image as search region
+        # search_factor_fake = 1
+        # x_patch_arr, resize_factor, x_amask_arr = sample_target(image, state_fake, search_factor_fake,
+        #                                                         output_sz=self.params.search_size)
+
         search = self.preprocessor.process(x_patch_arr, x_amask_arr)
 
         with torch.no_grad():
@@ -123,6 +153,11 @@ class OSTrack(BaseTracker):
                     if self.step:
                         self.step = False
                         break
+
+        ###############################################
+        if not self.is_active:
+            self.state = [0, 150, 15, 15]
+        ###############################################
 
         if self.save_all_boxes:
             '''save all predictions'''
