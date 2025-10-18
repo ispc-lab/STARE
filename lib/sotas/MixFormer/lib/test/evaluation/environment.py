@@ -32,10 +32,10 @@ class EnvSettings:
         self.tn_packed_results_path = ''
         self.fe240_dir = ''
         self.visEvent_dir = ''
-        self.esot500_dir = os.environ.get('ESOT500_DIR', '')
-        self.esot500h_dir = os.environ.get('ESOT500H_DIR', '')
         self.eventsot_dir = ''
 
+        self.esot500_dir = os.path.join(os.environ.get('ESOT500_DIR', ''), 'ESOT500-L')
+        self.esot500h_dir = os.path.join(os.environ.get('ESOT500_DIR', ''), 'ESOT500-H')
 
 def create_default_local_file():
     comment = {'results_path': 'Where to store tracking results',
