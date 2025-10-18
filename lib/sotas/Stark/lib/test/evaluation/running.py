@@ -8,6 +8,7 @@ from lib.test.evaluation import Sequence, Tracker
 import torch
 import pickle
 
+
 def _save_tracker_output(seq: Sequence, tracker: Tracker, output: dict, stream_setting=None):
     """Saves the output of the tracker."""
 
@@ -15,7 +16,7 @@ def _save_tracker_output(seq: Sequence, tracker: Tracker, output: dict, stream_s
         print("create tracking result dir:", tracker.results_dir)
         os.makedirs(tracker.results_dir)
     
-    if seq.dataset in ['esot500s', 'esot2s']:
+    if seq.dataset in ['esot500s', 'esot500hs']:
         save_dir = os.path.join(tracker.results_dir_rt, str(stream_setting.id))
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
@@ -109,7 +110,7 @@ def _save_tracker_output(seq: Sequence, tracker: Tracker, output: dict, stream_s
                 save_time(timings_file, data)
 
 
-def run_sequence(seq: Sequence, tracker: Tracker, debug=False, num_gpu=8):
+def run_sequence(seq: Sequence, tracker: Tracker, debug=False, num_gpu=1):
     """Runs a tracker on a sequence."""
     '''2021.1.2 Add multiple gpu support'''
     try:
@@ -162,11 +163,20 @@ def run_sequence(seq: Sequence, tracker: Tracker, debug=False, num_gpu=8):
     if not debug:
         _save_tracker_output(seq, tracker, output)
 
+
 def run_sequence_stream(seq: Sequence, tracker: Tracker, stream_setting, debug=False, visdom_info=None):
     """Runs a tracker on a sequence."""
 
+    try:
+        worker_name = multiprocessing.current_process().name
+        worker_id = int(worker_name[worker_name.find('-') + 1:]) - 1
+        gpu_id = worker_id % 1
+        torch.cuda.set_device(gpu_id)
+    except:
+        pass
+
     def _results_exist():
-        if seq.dataset in ['esot500s','esot2s']:
+        if seq.dataset in ['esot500s','esot500hs']:
             bbox_file = '{}/{}.txt'.format(tracker.results_dir_rt, seq.name)
             return os.path.isfile(bbox_file)
         elif seq.object_ids is None:
@@ -218,7 +228,8 @@ def run_sequence_stream(seq: Sequence, tracker: Tracker, stream_setting, debug=F
     if not debug:
         _save_tracker_output(seq, tracker, output, stream_setting)
 
-def run_dataset(dataset, trackers, debug=False, threads=0, num_gpus=8):
+
+def run_dataset(dataset, trackers, debug=False, threads=0, num_gpus=1):
     """Runs a list of trackers on a dataset.
     args:
         dataset: List of Sequence instances, forming a dataset.
@@ -246,6 +257,7 @@ def run_dataset(dataset, trackers, debug=False, threads=0, num_gpus=8):
         with multiprocessing.Pool(processes=threads) as pool:
             pool.starmap(run_sequence, param_list)
     print('Done')
+
 
 def run_dataset_stream(dataset, trackers, stream_setting, debug=False, threads=0, visdom_info=None,):
     """Runs a list of trackers on a dataset.

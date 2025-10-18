@@ -10,7 +10,7 @@ from pathlib import Path
 import numpy as np
 
 
-def trackerlist(name: str, parameter_name: str, dataset_name: str, run_ids = None, display_name: str = None,
+def trackerlist(name: str, parameter_name: str, dataset_name: str, run_ids=None, display_name: str = None,
                 result_only=False):
     """Generate list of trackers.
     args:
@@ -23,10 +23,12 @@ def trackerlist(name: str, parameter_name: str, dataset_name: str, run_ids = Non
         run_ids = [run_ids]
     return [Tracker(name, parameter_name, dataset_name, run_id, display_name, result_only) for run_id in run_ids]
 
-def load_sampling_func(func:str):
+
+def load_sampling_func(func: str):
     expr_module = importlib.import_module('pytracking.utils.sampling')
-    func  = getattr(expr_module, func)
+    func = getattr(expr_module, func)
     return func
+
 
 class Tracker:
     """Wraps the tracker for evaluation and running purposes.
@@ -55,9 +57,13 @@ class Tracker:
             self.segmentation_dir = '{}/{}/{}'.format(env.segmentation_path, self.name, self.parameter_name)
         else:
             self.results_dir = '{}/{}/{}_{:03d}'.format(env.results_path, self.name, self.parameter_name, self.run_id)
-            self.results_dir_rt = '{}/{}/{}_{:03d}'.format(env.results_path_rt, self.name, self.parameter_name, self.run_id)
-            self.results_dir_rt_final = '{}/{}/{}_{:03d}'.format(env.results_path_rt_final, self.name, self.parameter_name, self.run_id)
-            self.segmentation_dir = '{}/{}/{}_{:03d}'.format(env.segmentation_path, self.name, self.parameter_name, self.run_id)
+            self.results_dir_rt = '{}/{}/{}_{:03d}'.format(env.results_path_rt, self.name, self.parameter_name,
+                                                           self.run_id)
+            self.results_dir_rt_final = '{}/{}/{}_{:03d}'.format(env.results_path_rt_final, self.name,
+                                                                 self.parameter_name, self.run_id)
+            self.segmentation_dir = '{}/{}/{}_{:03d}'.format(env.segmentation_path, self.name, self.parameter_name,
+                                                             self.run_id)
+
         if result_only:
             self.results_dir = '{}/{}'.format(env.results_path, self.name)
 
@@ -68,6 +74,7 @@ class Tracker:
             self.tracker_class = tracker_module.get_tracker_class()
         else:
             self.tracker_class = None
+
         self.visdom = None
 
     def create_tracker(self, params):
@@ -84,11 +91,14 @@ class Tracker:
             multiobj_mode: Which mode to use for multiple objects.
         """
         params = self.get_parameters()
-        visualization_ = visualization
 
         debug_ = debug
         if debug is None:
             debug_ = getattr(params, 'debug', 0)
+
+        params.debug = debug_
+
+        visualization_ = visualization
         if visualization is None:
             if debug is None:
                 visualization_ = getattr(params, 'visualization', False)
@@ -104,11 +114,11 @@ class Tracker:
 
         tracker = self.create_tracker(params)
 
-
-        if seq.dataset in ['esot500s','esot2s']:
+        if seq.dataset in ['esot500s', 'esot500hs']:
             output = self._track_evstream(tracker, seq, init_info, stream_setting)
         else:
             output = self._track_sequence(tracker, seq, init_info)
+
         return output
 
     def _track_sequence(self, tracker, seq, init_info):
@@ -139,9 +149,10 @@ class Tracker:
                     output[key].append(val)
 
         # Initialize
-        image = self._read_image(seq.frames[0])# NOTE: For temporary test
+        image = self._read_image(seq.frames[0])  # NOTE: For temporary test
 
         start_time = time.time()
+
         out = tracker.initialize(image, init_info)
         if out is None:
             out = {}
@@ -149,6 +160,7 @@ class Tracker:
         prev_output = OrderedDict(out)
         init_default = {'target_bbox': init_info.get('init_bbox'),
                         'time': time.time() - start_time}
+
         if tracker.params.save_all_boxes:
             init_default['all_boxes'] = out['all_boxes']
             init_default['all_scores'] = out['all_scores']
@@ -172,6 +184,7 @@ class Tracker:
                 output.pop(key)
 
         return output
+
     def _track_evstream(self, tracker, seq, init_info, stream_setting, **kwargs):
         """
         Core Function
@@ -201,21 +214,26 @@ class Tracker:
 
         aeFile = seq.events
         with AedatFile(aeFile) as f:
-            print('Processing:',aeFile)
+            print('Processing:', aeFile)
             events = np.hstack([packet for packet in f['events'].numpy()])
-            events['timestamp'] = events['timestamp'] -events['timestamp'][0]
+            events['timestamp'] = events['timestamp'] - events['timestamp'][0]
 
         timestamps = events['timestamp']
-        #TODO: adjust timestamps to seconds
+        # TODO: adjust timestamps to seconds
 
         eval_setting = {}
 
-        #init
+        # init
         pred_bboxes = []
         in_timestamps = []
         runtime = []
         out_timestamps = []
-        t_stream_total = timestamps[-1] 
+        t_stream_total = timestamps[-1]
+
+        if seq.dataset == 'esot500hs':
+            height, width = 720, 1280
+        else:
+            height, width = 260, 346
 
         if not stream_setting.convert_time:
             # Initialize
@@ -227,13 +245,13 @@ class Tracker:
             if stream_setting.template_ == 'default':
                 if stream_setting.slicing == 'FxTime':
                     t_template = stream_setting.window_size
-                    idx_end = interpolation_search(timestamps,t_template)
+                    idx_end = interpolation_search(timestamps, t_template)
                 elif stream_setting.slicing == 'FxNum':
                     idx_end = stream_setting.num_events
                     t_template = timestamps[idx_end]
                 elif stream_setting.slicing == 'Last':
-                    t_template = init_info.get('init_timestamp')*1e6
-                    idx_end = interpolation_search(timestamps,t_template)
+                    t_template = init_info.get('init_timestamp') * 1e6
+                    idx_end = interpolation_search(timestamps, t_template)
                 elif stream_setting.slicing == 'Adaptive':
                     from pytracking.utils.sampling import EventStreamSampler
                     stream_sampler = EventStreamSampler()
@@ -242,17 +260,17 @@ class Tracker:
                     # idx_end = interpolation_search(timestamps,t_template)
                 template_events = events[idx_start:idx_end]
             elif stream_setting.template_ == 'seperate':
-                    t_template = stream_setting.window_size_template
-                    idx_end = interpolation_search(timestamps,t_template)
-                    template_events = events[idx_start:idx_end]
+                t_template = stream_setting.window_size_template
+                idx_end = interpolation_search(timestamps, t_template)
+                template_events = events[idx_start:idx_end]
             elif stream_setting.template_ == 'egt':
-                    from pytracking.utils.sampling import sampling_template_egt, sampling_search_egt
-                    t_template = init_info.get('init_timestamp')*1e6
-                    # t_template = init_info.get('timestamp_end')
-                    template_events = sampling_template_egt(events, init_info)
+                from pytracking.utils.sampling import sampling_template_egt, sampling_search_egt
+                t_template = init_info.get('init_timestamp') * 1e6
+                # t_template = init_info.get('timestamp_end')
+                template_events = sampling_template_egt(events, init_info)
             else:
                 raise NotImplementedError
-            event_rep = convert_event_img_aedat(template_events,stream_setting.representation)
+            event_rep = convert_event_img_aedat(template_events, stream_setting.representation, height, width)
             # event_img_pil = transform(event_rep)
             # event_img_array = np.array(event_img_pil)
             # event_img = cv2.cvtColor(event_img_array,cv2.COLOR_RGB2BGR)
@@ -261,7 +279,7 @@ class Tracker:
                     event_img = event_rep
                     self.visualize(event_img, init_info.get('init_bbox'))
             torch.cuda.synchronize()
-            t1 = t_start = perf_counter()*1e6
+            t1 = t_start = perf_counter() * 1e6
             out = tracker.initialize(event_rep, init_info)
             if out is None:
                 out = {}
@@ -269,39 +287,41 @@ class Tracker:
             pred_bbox = init_info.get('init_bbox')
             pred_bboxes.append(pred_bbox)
             torch.cuda.synchronize()
-            t2 = perf_counter()*1e6
-            t_algo=t2-t1
+            t2 = perf_counter() * 1e6
+            t_algo = t2 - t1
             t_algo = out.get('time') * 1e6 if out.get('time') else t_algo
             # t_algo = out.get('time',t_algo)
             if stream_setting.sim:
-                sim_runtime = stream_setting.sim_runtime.get(self.name+'_'+self.parameter_name,stream_setting.sim_runtime_rt)
+                sim_runtime = stream_setting.sim_runtime.get(self.name + '_' + self.parameter_name,
+                                                             stream_setting.sim_runtime_rt)
                 sim_disturb = sim_runtime * stream_setting.sim_disturb
                 t_algo = np.random.normal(loc=sim_runtime, scale=sim_disturb, size=1)[0]
             if stream_setting.init_time == False:
-                sim_runtime = stream_setting.sim_runtime.get(self.name+'_'+self.parameter_name,stream_setting.sim_runtime_rt)
+                sim_runtime = stream_setting.sim_runtime.get(self.name + '_' + self.parameter_name,
+                                                             stream_setting.sim_runtime_rt)
                 sim_disturb = sim_runtime * stream_setting.sim_disturb
                 t_algo = np.random.normal(loc=sim_runtime, scale=sim_disturb, size=1)[0]
             # print(t_algo/1e6)
             runtime.append(t_algo)
             in_timestamps.append(t_template)
-            out_timestamps.append(t_algo+t_template)
+            out_timestamps.append(t_algo + t_template)
             # =================== Tracking =====================
             while 1:
                 t_algo_total = sum(runtime) + t_template
-                if t_algo_total>t_stream_total:
+                if t_algo_total > t_stream_total:
                     break
-                t_right = out_timestamps[-1] # Current world-time
-                idx_end = interpolation_search(timestamps,t_right)
+                t_right = out_timestamps[-1]  # Current world-time
+                idx_end = interpolation_search(timestamps, t_right)
                 if stream_setting.slicing == 'FxTime':
                     t_left = t_right - stream_setting.window_size
                     t_left = t_left if t_left >= timestamps[0] else timestamps[0]
-                    idx_start = interpolation_search(timestamps,t_left)
+                    idx_start = interpolation_search(timestamps, t_left)
                 elif stream_setting.slicing == 'FxNum':
                     idx_start = idx_end - stream_setting.num_events
                     idx_start = max(idx_start, 0)
-                elif stream_setting.slicing in ['Last','egt']:
+                elif stream_setting.slicing in ['Last', 'egt']:
                     t_left = in_timestamps[-1]
-                    idx_start = interpolation_search(timestamps,t_left)
+                    idx_start = interpolation_search(timestamps, t_left)
                 elif stream_setting.slicing == 'Adaptive':
                     idx_start, t_left = stream_sampler.sample(events[:idx_end], pred_bboxes, stream_setting)
                     # sampling = load_sampling_func(stream_setting.adaptive_)
@@ -311,8 +331,8 @@ class Tracker:
                 if slicing_ and slicing_ in ['egt']:
                     # convert format for egt
                     events_search = sampling_search_egt(events_search)
-                event_rep = convert_event_img_aedat(events_search,stream_setting.representation)
-                info = {} # changed
+                event_rep = convert_event_img_aedat(events_search, stream_setting.representation, height, width)
+                info = {}  # changed
                 info['previous_output'] = prev_output
 
                 # event_img_pil = transform(event_rep)
@@ -320,26 +340,27 @@ class Tracker:
                 # event_img = cv2.cvtColor(event_img_array,cv2.COLOR_RGB2BGR)
                 # cv2.imwrite('debug/test2.jpg',event_img)
                 # event_img.save('debug/test.jpg')
-                t1 = perf_counter()*1e6
+                t1 = perf_counter() * 1e6
                 out = tracker.track(event_rep, info)
 
                 prev_output = OrderedDict(out)
                 torch.cuda.synchronize()
-                t2 = perf_counter()*1e6
-                t_algo=t2-t1
+                t2 = perf_counter() * 1e6
+                t_algo = t2 - t1
                 # t_algo = out.get('time',t_algo)
                 t_algo = out.get('time') * 1e6 if out.get('time') else t_algo
                 if stream_setting.sim:
-                    sim_runtime = stream_setting.sim_runtime.get(self.name+'_'+self.parameter_name,stream_setting.sim_runtime_rt)
+                    sim_runtime = stream_setting.sim_runtime.get(self.name + '_' + self.parameter_name,
+                                                                 stream_setting.sim_runtime_rt)
                     sim_disturb = sim_runtime * stream_setting.sim_disturb
                     t_algo = np.random.normal(loc=sim_runtime, scale=sim_disturb, size=1)[0]
                 runtime.append(t_algo)
                 # print(t_algo/1e6)
                 in_timestamps.append(out_timestamps[-1])
-                out_timestamps.append(out_timestamps[-1]+t_algo)
+                out_timestamps.append(out_timestamps[-1] + t_algo)
                 pred_bbox = out['target_bbox']
                 # print('target_bbox:', pred_bbox)
-                pred_bboxes.append(pred_bbox) # box [x1, y1, w, h]
+                pred_bboxes.append(pred_bbox)  # box [x1, y1, w, h]
 
                 bboxes = [out['target_bbox']]
                 if 'clf_target_bbox' in out:
@@ -350,34 +371,34 @@ class Tracker:
                     bboxes.append(out['segm_search_area'])
                 segmentation = None
                 if stream_setting.representation in ['VoxelGridComplex']:
-                    event_img = event_rep                
-                # if self.visdom is not None:
+                    event_img = event_rep
+                    # if self.visdom is not None:
                 #     tracker.visdom_draw_tracking(event_img, bboxes, segmentation)
                 # elif tracker.params.visualization:
                 #     self.visualize(event_img, bboxes, segmentation)
-                    
-            output={
-                        'results_raw': pred_bboxes,
-                        'out_timestamps': out_timestamps,
-                        'in_timestamps': in_timestamps,
-                        'runtime': runtime,
-                        'stream_setting':stream_setting.id,
-                    }
+
+            output = {
+                'results_raw': pred_bboxes,
+                'out_timestamps': out_timestamps,
+                'in_timestamps': in_timestamps,
+                'runtime': runtime,
+                'stream_setting': stream_setting.id,
+            }
         else:
             # TODO: under-construction
             # Absolute wall time, including conversion time
-            t_start = perf_counter()*1e6
+            t_start = perf_counter() * 1e6
             t_left = 0
             t_right = stream_setting.window_size
-            t1 = perf_counter()*1e6
+            t1 = perf_counter() * 1e6
             # idx_start = interpolation_search(timestamps,t_left)
             idx_start = 0
-            idx_end = interpolation_search(timestamps,t_right) # merely zero
-            event_rep = convert_event_img_aedat(events[idx_start:idx_end],'VoxelGridComplex')
+            idx_end = interpolation_search(timestamps, t_right)  # merely zero
+            event_rep = convert_event_img_aedat(events[idx_start:idx_end], 'VoxelGridComplex', height, width)
             # event_img = transform(event_rep)
             event_img_pil = transform(event_rep)
             event_img_array = np.array(event_img_pil)
-            event_img = cv2.cvtColor(event_img_array,cv2.COLOR_RGB2BGR)
+            event_img = cv2.cvtColor(event_img_array, cv2.COLOR_RGB2BGR)
             if tracker.params.visualization and self.visdom is None:
                 self.visualize(event_img, init_info.get('init_bbox'))
 
@@ -386,46 +407,46 @@ class Tracker:
                 out = {}
             prev_output = OrderedDict(out)
             torch.cuda.synchronize()
-            t2 = perf_counter()*1e6
-            t_elapsed=t2-t_start
+            t2 = perf_counter() * 1e6
+            t_elapsed = t2 - t_start
             pred_bbox = init_info.get('init_bbox')
             pred_bboxes.append(pred_bbox)
             # input_fidx.append(fidx)
             in_timestamps.append(stream_setting.window_size)
-            out_timestamps.append(t_elapsed+stream_setting.window_size)
-            runtime.append(t2-t1)
+            out_timestamps.append(t_elapsed + stream_setting.window_size)
+            runtime.append(t2 - t1)
             while 1:
                 if stream_setting.convert_time:
-                    t1 = perf_counter()*1e6
-                    t_elapsed=t1-t_start
+                    t1 = perf_counter() * 1e6
+                    t_elapsed = t1 - t_start
                 else:
                     t_elapsed = sum(runtime)
-                if t_elapsed>t_stream_total:
+                if t_elapsed > t_stream_total:
                     break
                 t_right = t_elapsed
                 t_left = t_elapsed - stream_setting.window_size
-                idx_start = interpolation_search(timestamps,t_left)
-                idx_end = interpolation_search(timestamps,t_right)
-                event_rep = convert_event_img_aedat(events[idx_start:idx_end],'VoxelGridComplex')
-                info = {} # changed
+                idx_start = interpolation_search(timestamps, t_left)
+                idx_end = interpolation_search(timestamps, t_right)
+                event_rep = convert_event_img_aedat(events[idx_start:idx_end], 'VoxelGridComplex', height, width)
+                info = {}  # changed
                 info['previous_output'] = prev_output
                 event_img_pil = transform(event_rep)
                 event_img_array = np.array(event_img_pil)
-                event_img = cv2.cvtColor(event_img_array,cv2.COLOR_RGB2BGR)
+                event_img = cv2.cvtColor(event_img_array, cv2.COLOR_RGB2BGR)
                 if not stream_setting.convert_time:
-                    t1 = perf_counter()*1e6
+                    t1 = perf_counter() * 1e6
                 out = tracker.track(event_img, info)
                 prev_output = OrderedDict(out)
                 torch.cuda.synchronize()
-                t2 = perf_counter()*1e6
-                t_elapsed=t2-t_start
+                t2 = perf_counter() * 1e6
+                t_elapsed = t2 - t_start
                 in_timestamps.append(t_right)
                 out_timestamps.append(t_elapsed)
-                runtime.append(t2-t1)
+                runtime.append(t2 - t1)
                 pred_bbox = out['target_bbox']
                 pred_bboxes.append(pred_bbox)
                 # input_fidx.append(fidx)
-                if t_elapsed>t_stream_total:
+                if t_elapsed > t_stream_total:
                     break
                 bboxes = out['target_bbox']
                 segmentation = None
@@ -433,14 +454,14 @@ class Tracker:
                     tracker.visdom_draw_tracking(event_img, bboxes, segmentation)
                 elif tracker.params.visualization:
                     self.visualize(event_img, bboxes, segmentation)
-            output={
-                        'results_raw': pred_bboxes,
-                        'out_timestamps': out_timestamps,
-                        'in_timestamps': in_timestamps,
-                        'runtime': runtime,
-                    }
+            output = {
+                'results_raw': pred_bboxes,
+                'out_timestamps': out_timestamps,
+                'in_timestamps': in_timestamps,
+                'runtime': runtime,
+            }
         return output
-    
+
     # def run_video(self, videofilepath, optional_box=None, debug=None, visdom_info=None, save_results=False):
     #     """Run the tracker with the vieofile.
     #     args:
@@ -560,7 +581,7 @@ class Tracker:
     #         tracked_bb = np.array(output_boxes).astype(int)
     #         bbox_file = '{}.txt'.format(base_results_path)
     #         np.savetxt(bbox_file, tracked_bb, delimiter='\t', fmt='%d')
-    
+
     def run_video(self, videofilepath, optional_box=None, debug=None, visdom_info=None, save_results=False):
         """Run the tracker with the vieofile.
         args:
@@ -598,6 +619,7 @@ class Tracker:
         # cv.namedWindow(display_name, cv.WINDOW_NORMAL | cv.WINDOW_KEEPRATIO)
         # cv.resizeWindow(display_name, 960, 720)
         success, frame = cap.read()
+
         # cv.imshow(display_name, frame)
 
         def _build_init_info(box):
@@ -681,7 +703,6 @@ class Tracker:
             bbox_file = '{}.txt'.format(base_results_path)
             np.savetxt(bbox_file, tracked_bb, delimiter='\t', fmt='%d')
         print('Done!')
-
 
     def get_parameters(self):
         """Get parameters."""
