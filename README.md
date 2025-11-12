@@ -159,36 +159,38 @@ The software versions of the base experimental environment used for testing are:
 **1.** Download
 - Please refer to [Demo](#demo) if you wanna quickstart.
 
-- Download **ESOT500** from our [[Hugging Face]](https://huggingface.co/datasets/NoRealBlank/ESOT500/tree/main) datasets repository. The compressed dataset file is about 13.4 GB in size, and downloading it at a speed of 3 MB/s is expected to take approximately 1.5 hours.
+- Download **ESOT500** from our [[Hugging Face]](https://huggingface.co/datasets/sii-geai-lab/ESOT500) datasets repository. The compressed dataset files are about _13.4 GB & 25.7 GB_ in size, and downloading them at a speed of 3 MB/s is expected to take approximately 3.7 hours.
 
     ##### ESOT500 Structure
     ```
     |-- ESOT500    
-        |-- aedat4
-        |   |-- sequence_name1.aedat4
-        |   |-- sequence_name2.aedat4
-        |   :   :
-        |
-        |-- anno_t
-        |   |-- sequence_name1.txt
-        |   |-- sequence_name2.txt
-        |   :   :
-        |
-        |-- [{FPS}_w{window}ms] # For frame-based latency-free evaluation, need a pre-slice preprocessing.
-        :   :
-        |
-        |-- test.txt
-        |-- train.txt
-        |-- test_additional.txt
-        |-- train_additional.txt
-        |-- test_challenging.txt
+        |-- ESOT500-L
+            |-- aedat4
+            |   |-- sequence_name1.aedat4
+            |   |-- sequence_name2.aedat4
+            |   :   :
+            |
+            |-- anno_t
+            |   |-- sequence_name1.txt
+            |   |-- sequence_name2.txt
+            |   :   :
+            |
+            |-- [{FPS}_w{window}ms] # For frame-based latency-free evaluation, need a pre-slice preprocessing.
+            :   :
+            |
+            |-- test.txt
+            |-- train.txt
+            |-- [more splits].txt
+            :   :
+        |-- ESOT500-H 
+        :   :   # Similar as ESOT500-L
     ```
 
 - The aedat4 directory contains the raw event data (event stream and corresponding RGB frames), the [DV](https://inivation.gitlab.io/dv/dv-docs/docs/getting-started.html) and [dv-python](https://gitlab.com/inivation/dv/dv-python) is recommended for visualization and processing in python respectively.
 
-- You can find the metadata file at `data/esot500_metadata.json`, or download it from our dataset page in [[Hugging face]](https://huggingface.co/datasets/NoRealBlank/ESOT500).
+- You can find the metadata file at `data/esot500_metadata.json`, or download it from our dataset page in [[Hugging face]](https://huggingface.co/datasets/sii-geai-lab/ESOT500).
 
-- We also provide some checkpoint files of trackers in [[Hugging face]](https://huggingface.co/datasets/NoRealBlank/ESOT500) to download.
+- We also provide some checkpoint files of trackers in [[Hugging face]](https://huggingface.co/datasets/sii-geai-lab/ESOT500/blob/main/warped/STARE_trackers_more.zip) to download.
 
 **2.** Preparation for Frame-Based Latency-Free Evaluation
 
