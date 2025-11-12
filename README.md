@@ -183,7 +183,7 @@ The software versions of the base experimental environment used for testing are:
             |-- [more splits].txt
             :   :
         |-- ESOT500-H 
-        :   :   # Similar as ESOT500-L
+            :   :   # Similar as ESOT500-L
     ```
 
 - The aedat4 directory contains the raw event data (event stream and corresponding RGB frames), the [DV](https://inivation.gitlab.io/dv/dv-docs/docs/getting-started.html) and [dv-python](https://gitlab.com/inivation/dv/dv-python) is recommended for visualization and processing in python respectively.
